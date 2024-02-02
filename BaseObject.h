@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 
 class BaseObject {
-protected:
+public:
     VertexArrayObject VAO;
     VertexBufferObject VBO;
     ElementBufferObject EBO;
@@ -35,6 +35,8 @@ public:
     void bind();
 
     void draw();
+
+    glm::vec3 getPosition();
 };
 
 #endif

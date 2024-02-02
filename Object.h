@@ -2,6 +2,7 @@
 #define TRINITYENGINE_OBJECT_H
 
 #include "BaseObject.h"
+#include "Light.h"
 
 class Object : public BaseObject {
 private:
@@ -9,6 +10,8 @@ private:
 
 public:
     Object(GLfloat *vertices, std::size_t vertexCount, GLuint * indices, std::size_t indexCount, Shader &shader);
+
+    void setLight(Light& light);
 };
 
 

@@ -10,7 +10,7 @@ void BaseObject::bind() {
     VAO.bind();
     VBO.bind(vertices, vertexCount * vertexSize * sizeof(GLfloat));
     VAOlinkVBO();
-    EBO.bind(indices, indexCount * sizeof(GLuint));
+    EBO.bind(indices, indexCount * 3 * sizeof(GLuint));
 
     //Unbind VBO AND VAO
     VAO.unbind();
@@ -45,4 +45,8 @@ void BaseObject::rotate(glm::vec3 angles) {
 
 void BaseObject::move(glm::vec3 direction) {
     position += direction;
+}
+
+glm::vec3 BaseObject::getPosition() {
+    return position;
 }

@@ -35,22 +35,38 @@ int main() {
     glfwMakeContextCurrent(window);
     gladLoadGL();
     glViewport(0, 0, width, height);
+    glfwSetCursorPos(window, width/2, height/2);
 
     GLfloat vertices[] = {
-            -1.0f, 0, -1.0f, 0, 0, 0, 1.0f, 0, 0,
-            -1.0f, 0, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1, 0,
-            1.0f, 0, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1, 0,
-            1.0f, 0, 1.0f, 1.0f, 1.0f, 1.0f, 0, 0, 0,
-            0, 2.0f, 0, 1.0f, 1.0f, 1.0f, 0, 0.5f, 1.0f
+            -1.0f, 0, -1.0f,        0, 0,             0, -1.0f, 0,
+            -1.0f, 0, 1.0f,        1, 0,            0, -1.0f, 0,
+            1.0f, 0, -1.0f,      0, 1,           0, -1.0f, 0,
+            1.0f, 0, 1.0f,       1, 1,           0, -1.0f, 0,
+
+            -1.0f, 0, -1.0f,     0, 0,           -1.0f, 2.0f, 0,
+            -1.0f, 0, 1.0f,      1, 0,           -1.0f, 2.0f, 0,
+            0, 2.0f, 0,          0.5f, 1.0f,     -1.0f, 2.0f, 0,
+
+            -1.0f, 0, -1.0f,     0, 0,           0, 2.0f, -1.0f,
+            1.0f, 0, -1.0f,      1, 0,           0, 2.0f, -1.0f,
+            0, 2.0f, 0,          0.5f, 1.0f,    0, 2.0f, -1.0f,
+
+            1.0f, 0, 1.0f,        0, 0,          0, 2.0f, 1.0f,
+            -1.0f, 0, 1.0f,       1, 0,          0, 2.0f, 1.0f,
+            0, 2.0f, 0,           0.5f, 1.0f,    0, 2.0f, 1.0f,
+
+            1.0f, 0, 1.0f,      0, 0,          1.0f, 2.0f, 0,
+            1.0f, 0, -1.0f,     1, 0,          1.0f, 2.0f, 0,
+            0, 2.0f, 0,         0.5f, 1.0f,    1.0f, 2.0f, 0,
     };
 
     GLuint indices[] = {
             0, 1, 2,
-            3, 2, 1,
-            0, 1, 4,
-            0, 2, 4,
-            2, 3, 4,
-            1, 3, 4
+            3, 1, 2,
+            4, 5, 6,
+            7, 8, 9,
+            10, 11, 12,
+            13, 14, 15
     };
 
     GLfloat lightVertices[] = {
@@ -72,7 +88,7 @@ int main() {
             0, 4, 6,
             0, 2, 6,
             7, 4, 5,
-            7, 5, 6,
+            7, 4, 6,
             7, 2, 3,
             7, 2, 6,
             7, 1, 3,
@@ -82,28 +98,31 @@ int main() {
     //Create shader program
     Shader shader("default.frag", "default.vert");
     shader.unloadFiles();
-    shader.activate();
 
-    Object object(vertices, sizeof vertices / 9, indices, sizeof indices / 3, shader);
+    Object object(vertices, sizeof vertices / 8 / sizeof vertices[0], indices, sizeof indices / 3 / sizeof indices[0], shader);
     object.bind();
 
     Camera camera(width, height, glm::vec3(-0.5f,0.5f,10));
 
-    //Program scale
-    GLuint scaleId = glGetUniformLocation(shader.getProgramID(), "scale");
-
     //Texture
     Texture texture("Textures/unnamed.jpg");
-    GLuint textureId = glGetUniformLocation(shader.getProgramID(), "tex0");
 
-    object.move(glm::vec3(2));
+    object.move(glm::vec3(-2));
 
     Shader lightShader("light.frag", "light.vert");
     lightShader.unloadFiles();
 
-    Light light(lightVertices, sizeof lightVertices / 3, lightIndices, sizeof lightIndices / 3, lightShader);
+    Light light(lightVertices, sizeof lightVertices / 3 / sizeof(GLfloat), lightIndices, sizeof lightIndices / 3 / sizeof(GLuint), lightShader);
     light.bind();
-    light.move(glm::vec3(-2));
+    light.move(glm::vec3(2));
+    glm::vec4 lightColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+    shader.activate();
+    glUniform4f(glGetUniformLocation(shader.getProgramID(), "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+    object.setLight(light);
+
+    lightShader.activate();
+    glUniform4f(glGetUniformLocation(lightShader.getProgramID(), "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -112,19 +131,21 @@ int main() {
         glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        shader.activate();
         object.rotate(glm::vec3(0.0f, 0.001f, 0.0f));
-        object.bind();
 
         camera.updateMatrix(45, 0.1f, 100.0f);
-        camera.setMatrix(shader, "camMatrix");
-        camera.setMatrix(lightShader, "camMatrix");
         camera.inputs(window);
 
-        shader.activate();
-        glUniform1f(scaleId, 0.5f);
-        glUniform1i(textureId, 0);
+        camera.setMatrix(shader, "camMatrix");
+        glUniform1f(glGetUniformLocation(shader.getProgramID(), "scale"), 1.0f);
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "tex0"), 0);
         texture.bind();
         object.draw();
+
+        lightShader.activate();
+        camera.setMatrix(lightShader, "camMatrix");
+        glUniform1f(glGetUniformLocation(lightShader.getProgramID(), "scale"), 0.5f);
         light.draw();
 
         glfwSwapBuffers(window);

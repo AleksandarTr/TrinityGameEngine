@@ -22,6 +22,6 @@ void VertexArrayObject::unbind() {
 }
 
 void VertexArrayObject::linkVBO(GLuint layout, std::size_t elemCount, GLenum type, std::size_t stride, std::size_t offset) {
-    glVertexAttribPointer(layout, elemCount, GL_FLOAT, GL_FALSE, stride, (void*) offset);
+    glVertexAttribPointer(layout, elemCount, type, GL_FALSE, stride, (void*) offset);
     glEnableVertexAttribArray(layout);
 }
