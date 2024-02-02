@@ -1,5 +1,6 @@
 #include "Object.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 Object::Object(GLfloat *vertices, std::size_t vertexCount, std::size_t vertexSize, GLuint * indices, std::size_t indexCount)
 : vertices(vertices), indices(indices), vertexSize(vertexSize), vertexCount(vertexCount), indexCount(indexCount) {}
@@ -26,15 +27,8 @@ void Object::draw() {
     VAO.unbind();
 }
 
-void Object::rotate(float angle, glm::vec3 normal) {
+void Object::rotate(float angle, glm::vec3 normal, Shader &shader, const char *uniform) {
     glm::mat4 rotationMat(1);
     rotationMat = glm::rotate(rotationMat, angle, normal);
-
-    for(int i = 0; i < vertexCount; i++) {
-        glm::vec4 vertex(vertices[i * vertexSize], vertices[i * vertexSize + 1], vertices[i * vertexSize + 2], 1);
-        vertex = vertex * rotationMat;
-        vertices[i * vertexSize] = vertex.x;
-        vertices[i * vertexSize + 1] = vertex.y;
-        vertices[i * vertexSize + 2] = vertex.z;
-    }
+    glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), uniform), 1, GL_FALSE, glm::value_ptr(rotationMat));
 }

@@ -4,6 +4,7 @@
 #include "VertexArrayObject.h"
 #include "VertexBufferObject.h"
 #include "ElementBufferObject.h"
+#include "Shader.h"
 #include <glm/glm.hpp>
 
 class Object {
@@ -21,7 +22,7 @@ private:
 public:
     Object(GLfloat *vertices, std::size_t verticesCount, std::size_t vertexSize, GLuint * indices, std::size_t indicesCount);
 
-    void rotate(float angle, glm::vec3 normal);
+    void rotate(float angle, glm::vec3 normal, Shader &shader, const char *uniform);
 
     void bind();
 

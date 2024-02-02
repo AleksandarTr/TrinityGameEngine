@@ -60,7 +60,7 @@ int main() {
     shader.activate("default.frag", "default.vert");
     shader.unloadFiles();
 
-    Camera camera(width, height, glm::vec3(0,0,5.0f));
+    Camera camera(width, height, glm::vec3(-0.5f,0.5f,5));
 
     //Program scale
     GLuint scaleId = glGetUniformLocation(shader.getProgramID(), "scale");
@@ -69,18 +69,28 @@ int main() {
     Texture texture("Textures/unnamed.jpg");
     GLuint textureId = glGetUniformLocation(shader.getProgramID(), "tex0");
 
+    glm::mat4 positionMat(1);
+    positionMat = glm::translate(positionMat, glm::vec3(0.5f));
+    glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), "position"), 1, GL_FALSE, glm::value_ptr(positionMat));
+
     glEnable(GL_DEPTH_TEST);
     //auto model = glm::vec4(1.0f);
+
+    float rotation = 0;
 
     //Window loop
     while(!glfwWindowShouldClose(window)) {
         glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        object.rotate(glm::radians(0.1f), glm::vec3(0.0f, 1.0f, 0.0f));
+        rotation += 0.1f;
+        if(rotation >= 360) rotation = 0;
+
+        object.rotate(glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f), shader, "rotation");
         object.bind();
 
-        camera.matrix(45, 0.1f, 100.0f, shader, "camMatrix");
+        camera.updateMatrix(45, 0.1f, 100.0f);
+        camera.setMatrix(shader, "camMatrix");
         camera.inputs(window);
 
         glUniform1f(scaleId, 0.5f);
