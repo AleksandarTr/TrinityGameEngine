@@ -1,15 +1,21 @@
+#include <iostream>
 #include "Camera.h"
 
 Camera::Camera(int width, int height, glm::vec3 position) : width(width), height(height), position(position) {}
 
-void Camera::matrix(float FOVdeg, float nearPlane, float farPlane, Shader &shader, const char *uniform) {
+void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane) {
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 proj = glm::mat4(1.0f);
 
     view = glm::lookAt(position, position + orientation, up);
     proj = glm::perspective(glm::radians(FOVdeg), 1.0f * width / height, nearPlane, farPlane);
 
-    glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), uniform), 1, GL_FALSE, glm::value_ptr(proj * view));
+    cameraMat = proj * view;
+}
+
+void Camera::setMatrix(Shader &shader, const char *uniform) {
+    shader.activate();
+    glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), uniform), 1, GL_FALSE, glm::value_ptr(cameraMat));
 }
 
 void Camera::inputs(GLFWwindow *window) {

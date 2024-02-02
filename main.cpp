@@ -8,6 +8,7 @@
 #include "Object.h"
 #include "Texture.h"
 #include "Camera.h"
+#include "Light.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -52,15 +53,41 @@ int main() {
             1, 3, 4
     };
 
-    Object object(vertices, sizeof vertices / 9, 9, indices, sizeof indices / 3);
-    object.bind();
+    GLfloat lightVertices[] = {
+            -1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f, 1.0f,
+            -1.0f, 1.0f, -1.0f,
+            -1.0f, 1.0f, 1.0f,
+            1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, 1.0f,
+            1.0f, 1.0f, -1.0f,
+            1.0f, 1.0f, 1.0f,
+    };
+
+    GLuint lightIndices[] = {
+            0, 1, 3,
+            0, 2, 3,
+            0, 4, 5,
+            0, 1, 5,
+            0, 4, 6,
+            0, 2, 6,
+            7, 4, 5,
+            7, 5, 6,
+            7, 2, 3,
+            7, 2, 6,
+            7, 1, 3,
+            7, 1, 5
+    };
 
     //Create shader program
-    Shader shader;
-    shader.activate("default.frag", "default.vert");
+    Shader shader("default.frag", "default.vert");
     shader.unloadFiles();
+    shader.activate();
 
-    Camera camera(width, height, glm::vec3(-0.5f,0.5f,5));
+    Object object(vertices, sizeof vertices / 9, indices, sizeof indices / 3, shader);
+    object.bind();
+
+    Camera camera(width, height, glm::vec3(-0.5f,0.5f,10));
 
     //Program scale
     GLuint scaleId = glGetUniformLocation(shader.getProgramID(), "scale");
@@ -69,34 +96,36 @@ int main() {
     Texture texture("Textures/unnamed.jpg");
     GLuint textureId = glGetUniformLocation(shader.getProgramID(), "tex0");
 
-    glm::mat4 positionMat(1);
-    positionMat = glm::translate(positionMat, glm::vec3(0.5f));
-    glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), "position"), 1, GL_FALSE, glm::value_ptr(positionMat));
+    object.move(glm::vec3(2));
+
+    Shader lightShader("light.frag", "light.vert");
+    lightShader.unloadFiles();
+
+    Light light(lightVertices, sizeof lightVertices / 3, lightIndices, sizeof lightIndices / 3, lightShader);
+    light.bind();
+    light.move(glm::vec3(-2));
 
     glEnable(GL_DEPTH_TEST);
-    //auto model = glm::vec4(1.0f);
-
-    float rotation = 0;
 
     //Window loop
     while(!glfwWindowShouldClose(window)) {
         glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        rotation += 0.1f;
-        if(rotation >= 360) rotation = 0;
-
-        object.rotate(glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f), shader, "rotation");
+        object.rotate(glm::vec3(0.0f, 0.001f, 0.0f));
         object.bind();
 
         camera.updateMatrix(45, 0.1f, 100.0f);
         camera.setMatrix(shader, "camMatrix");
+        camera.setMatrix(lightShader, "camMatrix");
         camera.inputs(window);
 
+        shader.activate();
         glUniform1f(scaleId, 0.5f);
         glUniform1i(textureId, 0);
         texture.bind();
         object.draw();
+        light.draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

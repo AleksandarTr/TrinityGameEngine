@@ -1,22 +1,8 @@
 #include "Shader.h"
 
-Shader::Shader() {
+Shader::Shader(std::string fragmentShaderSource, std::string vertexShaderSource) {
     programId = glCreateProgram();
-}
 
-std::string Shader::readFile(std::string location) {
-    std::ifstream reader(location);
-    if(!reader.is_open()) throw std::invalid_argument("Could not open given file");
-
-    std::string result = "";
-    std::string line;
-    while(std::getline(reader, line)) result += line + "\n";
-
-    reader.close();
-    return result;
-}
-
-void Shader::activate(std::string fragmentShaderSource, std::string vertexShaderSource) {
     std::string fragmentShaderStr = readFile(fragmentShaderSource);
     std::string vertexShaderStr = readFile(vertexShaderSource);
     const char* fragmentShader = fragmentShaderStr.c_str();
@@ -34,7 +20,21 @@ void Shader::activate(std::string fragmentShaderSource, std::string vertexShader
     glAttachShader(programId, this->vertexShader);
     glAttachShader(programId, this->fragmentShader);
     glLinkProgram(programId);
+}
 
+std::string Shader::readFile(std::string location) {
+    std::ifstream reader(location);
+    if(!reader.is_open()) throw std::invalid_argument("Could not open given file");
+
+    std::string result = "";
+    std::string line;
+    while(std::getline(reader, line)) result += line + "\n";
+
+    reader.close();
+    return result;
+}
+
+void Shader::activate() {
     glUseProgram(programId);
 }
 

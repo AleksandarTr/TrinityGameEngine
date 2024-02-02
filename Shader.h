@@ -12,11 +12,11 @@ private:
     std::string readFile(std::string location);
 
 public:
-    explicit Shader();
+    Shader(std::string fragmentShaderSource, std::string vertexShaderSource);
 
     GLuint getProgramID();
 
-    void activate(std::string fragmentShaderSource, std::string vertexShaderSource);
+    void activate();
 
     void unloadFiles();
 

@@ -17,10 +17,14 @@ add_executable(TrinityEngine main.cpp glad.c
         ElementBufferObject.h
         Texture.cpp
         Texture.h
+        Camera.cpp
+        Camera.h
+        BaseObject.h
+        BaseObject.cpp
         Object.cpp
         Object.h
-        Camera.cpp
-        Camera.h)
+        Light.cpp
+        Light.h)
 
 add_library(glfw STATIC IMPORTED)
 set_target_properties(glfw PROPERTIES
