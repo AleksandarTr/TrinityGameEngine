@@ -9,9 +9,11 @@ private:
     void VAOlinkVBO() override;
 
 public:
+    enum struct LightingType {PointLight, DirectionalLight, SpotLight};
+
     Object(GLfloat *vertices, std::size_t vertexCount, GLuint * indices, std::size_t indexCount, Shader &shader);
 
-    void setLight(Light& light);
+    void setLight(Light& light, LightingType type);
 };
 
 

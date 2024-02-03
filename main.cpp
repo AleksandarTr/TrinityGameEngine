@@ -38,35 +38,20 @@ int main() {
     glfwSetCursorPos(window, width/2, height/2);
 
     GLfloat vertices[] = {
-            -1.0f, 0, -1.0f,        0, 0,             0, -1.0f, 0,
-            -1.0f, 0, 1.0f,        1, 0,            0, -1.0f, 0,
-            1.0f, 0, -1.0f,      0, 1,           0, -1.0f, 0,
-            1.0f, 0, 1.0f,       1, 1,           0, -1.0f, 0,
-
-            -1.0f, 0, -1.0f,     0, 0,           -1.0f, 2.0f, 0,
-            -1.0f, 0, 1.0f,      1, 0,           -1.0f, 2.0f, 0,
-            0, 2.0f, 0,          0.5f, 1.0f,     -1.0f, 2.0f, 0,
-
-            -1.0f, 0, -1.0f,     0, 0,           0, 2.0f, -1.0f,
-            1.0f, 0, -1.0f,      1, 0,           0, 2.0f, -1.0f,
-            0, 2.0f, 0,          0.5f, 1.0f,    0, 2.0f, -1.0f,
-
-            1.0f, 0, 1.0f,        0, 0,          0, 2.0f, 1.0f,
-            -1.0f, 0, 1.0f,       1, 0,          0, 2.0f, 1.0f,
-            0, 2.0f, 0,           0.5f, 1.0f,    0, 2.0f, 1.0f,
-
-            1.0f, 0, 1.0f,      0, 0,          1.0f, 2.0f, 0,
-            1.0f, 0, -1.0f,     1, 0,          1.0f, 2.0f, 0,
-            0, 2.0f, 0,         0.5f, 1.0f,    1.0f, 2.0f, 0,
+            -1.0f, 0, -1.0f,        0, 0,             -1, -0.732f, -1,
+            -1.0f, 0, 1.0f,        1, 0,            -1, -0.732f, 1,
+            1.0f, 0, -1.0f,      1, 0,           1, -0.732f, -1,
+            1.0f, 0, 1.0f,       0, 0,           1, -0.732f, 1,
+            0, 2.0f, 0,          0.5f, 1.0f,     0, 1.0f, 0
     };
 
     GLuint indices[] = {
             0, 1, 2,
             3, 1, 2,
-            4, 5, 6,
-            7, 8, 9,
-            10, 11, 12,
-            13, 14, 15
+            0, 1, 4,
+            0, 2, 4,
+            3, 1, 4,
+            3, 2, 4
     };
 
     GLfloat lightVertices[] = {
@@ -105,7 +90,8 @@ int main() {
     Camera camera(width, height, glm::vec3(-0.5f,0.5f,10));
 
     //Texture
-    Texture texture("Textures/unnamed.jpg");
+    Texture texture("Textures/unnamed.jpg", 0, GL_RGB);
+    Texture specTex("Textures/spec.jpg", 1, GL_RED);
 
     object.move(glm::vec3(-2));
 
@@ -119,7 +105,7 @@ int main() {
 
     shader.activate();
     glUniform4f(glGetUniformLocation(shader.getProgramID(), "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
-    object.setLight(light);
+    object.setLight(light, Object::LightingType::PointLight);
 
     lightShader.activate();
     glUniform4f(glGetUniformLocation(lightShader.getProgramID(), "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
@@ -135,18 +121,27 @@ int main() {
         object.rotate(glm::vec3(0.0f, 0.001f, 0.0f));
 
         camera.updateMatrix(45, 0.1f, 100.0f);
-        camera.inputs(window);
 
         camera.setMatrix(shader, "camMatrix");
-        glUniform1f(glGetUniformLocation(shader.getProgramID(), "scale"), 1.0f);
+        glm::vec3 camPos = camera.getPosition();
+        glUniform3f(glGetUniformLocation(shader.getProgramID(), "camPos"), camPos.x, camPos.y, camPos.z);
+        glUniform1f(glGetUniformLocation(shader.getProgramID(), "scale"), 3.0f);
         glUniform1i(glGetUniformLocation(shader.getProgramID(), "tex0"), 0);
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "tex1"), 1);
+        glm::vec3 lightDir = object.getPosition() - light.getPosition();
+        glUniform3f(glGetUniformLocation(shader.getProgramID(), "lightDir"), lightDir.x, lightDir.y, lightDir.z);
         texture.bind();
+        specTex.bind();
+        object.setLight(light, Object::LightingType::PointLight);
         object.draw();
 
         lightShader.activate();
         camera.setMatrix(lightShader, "camMatrix");
-        glUniform1f(glGetUniformLocation(lightShader.getProgramID(), "scale"), 0.5f);
+        glUniform1f(glGetUniformLocation(lightShader.getProgramID(), "scale"), 0.1f);
+        //light.move(glm::vec3(0.001));
         light.draw();
+
+        camera.inputs(window);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

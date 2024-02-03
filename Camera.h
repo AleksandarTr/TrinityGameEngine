@@ -31,6 +31,8 @@ public:
     void setMatrix(Shader &shader, const char *uniform);
 
     void inputs(GLFWwindow* window);
+
+    glm::vec3 getPosition();
 };
 
 #endif

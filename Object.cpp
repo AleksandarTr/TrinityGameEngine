@@ -9,7 +9,8 @@ void Object::VAOlinkVBO() {
     VAO.linkVBO(3, 3, GL_FLOAT, vertexSize * sizeof(float), 5 * sizeof(float));
 }
 
-void Object::setLight(Light& light) {
+void Object::setLight(Light& light, LightingType type) {
     glm::vec3 lightSource = light.getPosition();
     glUniform3f(glGetUniformLocation(shader.getProgramID(), "lightPos"), lightSource.x, lightSource.y, lightSource.z);
+    glUniform1i(glGetUniformLocation(shader.getProgramID(), "lightingType"), static_cast<GLint>(type));
 }

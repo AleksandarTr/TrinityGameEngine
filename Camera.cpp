@@ -46,3 +46,7 @@ void Camera::inputs(GLFWwindow *window) {
 
     glfwSetCursorPos(window, width/2, height/2);
 }
+
+glm::vec3 Camera::getPosition() {
+    return position;
+}
