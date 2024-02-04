@@ -15,11 +15,6 @@ void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane) {
     cameraMat = proj * view;
 }
 
-void Camera::setMatrix(Shader &shader, const char *uniform) {
-    shader.activate();
-    glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), uniform), 1, GL_FALSE, glm::value_ptr(cameraMat));
-}
-
 void Camera::inputs(GLFWwindow *window) {
     glm::vec3 direction(0);
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
@@ -52,4 +47,8 @@ void Camera::inputs(GLFWwindow *window) {
     orientation = glm::rotate(orientation, glm::radians(-rotX), up);
 
     glfwSetCursorPos(window, width/2, height/2);
+}
+
+const glm::mat4 &Camera::getCameraMat() const {
+    return cameraMat;
 }

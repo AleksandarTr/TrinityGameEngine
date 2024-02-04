@@ -16,6 +16,10 @@ private:
     glm::vec3 orientation = glm::vec3(0,0,-1.0f);
     glm::vec3 up = glm::vec3(0, 1.0f, 0);
     glm::mat4 cameraMat;
+public:
+    const glm::mat4 &getCameraMat() const;
+
+private:
 
     int width;
     int height;
@@ -27,8 +31,6 @@ public:
     Camera(int width, int height, glm::vec3 position);
 
     void updateMatrix(float FOVdeg, float nearPlane, float farPlane);
-
-    void setMatrix(Shader &shader, const char *uniform);
 
     void inputs(GLFWwindow* window);
 };

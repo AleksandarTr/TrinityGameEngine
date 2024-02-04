@@ -17,6 +17,12 @@ public:
     void bind();
 
     ~Texture();
+
+    static void unbind();
+
+    GLuint getId();
+
+    GLuint getSlot();
 };
 
 #endif

@@ -1,16 +1,35 @@
 #include "Object.h"
 
-Object::Object(GLfloat *vertices, std::size_t vertexCount, GLuint *indices, std::size_t indexCount, Shader &shader) :
-BaseObject(vertices, vertexCount, 8, indices, indexCount, shader) {}
+#include <utility>
 
-void Object::VAOlinkVBO() {
-    VAO.linkVBO(0, 3, GL_FLOAT, vertexSize * sizeof(float), 0);
-    VAO.linkVBO(2, 2, GL_FLOAT, vertexSize * sizeof(float), 3 * sizeof(float));
-    VAO.linkVBO(3, 3, GL_FLOAT, vertexSize * sizeof(float), 5 * sizeof(float));
+Object::Object(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader, std::vector<std::string> diffuseTextures, std::vector<std::string> specularTextures) :
+        Mesh(std::move(vertices), std::move(indices), shader, std::move(diffuseTextures), std::move(specularTextures)) {}
+
+void Object::initializeOtherFields() {
+    //TODO: Change default.frag to support multiple light sources
+
+    for(auto &light : lights) {
+        glm::vec3 lightSource = light->getPosition();
+        glm::vec3 lightDir = light->getDirection();
+        glm::vec3 lightColor = light->getColor();
+
+        glUniform3f(glGetUniformLocation(shader.getProgramID(), "lightPos"), lightSource.x, lightSource.y,lightSource.z);
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "lightingType"),static_cast<GLint>(light->getType()));
+        glUniform3f(glGetUniformLocation(shader.getProgramID(), "lightDir"), lightDir.x, lightDir.y, lightDir.z);
+        glUniform4f(glGetUniformLocation(shader.getProgramID(), "lightColor"), lightColor.x, lightColor.y, lightColor.z,1.0f);
+    }
+    glUniform3f(glGetUniformLocation(shader.getProgramID(), "camPos"), camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
 }
 
-void Object::setLight(Light& light, LightingType type) {
-    glm::vec3 lightSource = light.getPosition();
-    glUniform3f(glGetUniformLocation(shader.getProgramID(), "lightPos"), lightSource.x, lightSource.y, lightSource.z);
-    glUniform1i(glGetUniformLocation(shader.getProgramID(), "lightingType"), static_cast<GLint>(type));
+void Object::addLight(Light &light) {
+    lights.push_back(&light);
+}
+
+void Object::removeLight(int index) {
+    if(index == -1) {
+        lights.pop_back();
+        return;
+    }
+
+    lights.erase(lights.begin() + index);
 }

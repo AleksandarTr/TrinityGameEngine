@@ -1,15 +1,29 @@
 #ifndef TRINITYENGINE_LIGHT_H
 #define TRINITYENGINE_LIGHT_H
 
-#include <glm/glm.hpp>
-#include "BaseObject.h"
+#include "Mesh.h"
 
-class Light : public BaseObject {
+class Light : public Mesh {
 private:
-    void VAOlinkVBO() override;
+    glm::vec3 color;
+    glm::vec3 direction;
+    LightingType type;
 
 public:
-    Light(GLfloat *vertices, std::size_t verticesCount, GLuint * indices, std::size_t indicesCount, Shader &shader);
+    Light(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader, glm::vec3 color, glm::vec3 direction, LightingType type,
+          std::vector<std::string> diffuseTextures = std::vector<std::string>(), std::vector<std::string> specularTextures = std::vector<std::string>());
+
+    const glm::vec3 &getColor() const;
+
+    void setColor(const glm::vec3 color);
+
+    const glm::vec3 &getDirection() const;
+
+    void setDirection(const glm::vec3 direction);
+
+    LightingType getType() const;
+
+    void setType(LightingType type);
 };
 
 #endif

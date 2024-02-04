@@ -2,6 +2,8 @@
 #define TRINITYENGINE_VERTEXBUFFEROBJECT_H
 
 #include <glad/glad.h>
+#include <vector>
+#include "Structs.h"
 
 class VertexBufferObject {
 private:
@@ -10,7 +12,7 @@ private:
 public:
     VertexBufferObject();
 
-    void bind(GLfloat* vertices, std::size_t size);
+    void bind(std::vector<Vertex> vertices);
 
     void unbind();
 

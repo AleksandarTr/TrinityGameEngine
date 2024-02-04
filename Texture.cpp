@@ -19,6 +19,7 @@ Texture::Texture(std::string location, GLuint slot, GLenum format) : slot(slot) 
     glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(bytes);
+    bind();
 }
 
 void Texture::bind() {
@@ -27,4 +28,16 @@ void Texture::bind() {
 
 Texture::~Texture() {
     glDeleteTextures(1, &textureId);
+}
+
+GLuint Texture::getId() {
+    return textureId;
+}
+
+void Texture::unbind() {
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+GLuint Texture::getSlot() {
+    return slot;
 }

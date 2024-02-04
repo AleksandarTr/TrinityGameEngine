@@ -3,6 +3,8 @@
 
 #include <glad/glad.h>
 #include <cstddef>
+#include <vector>
+#include "Structs.h"
 
 class ElementBufferObject {
 private:
@@ -11,7 +13,7 @@ private:
 public:
     ElementBufferObject();
 
-    void bind(GLuint* indices, std::size_t size);
+    void bind(std::vector<Index> indices);
 
     void unbind();
 

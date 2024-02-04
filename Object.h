@@ -1,19 +1,21 @@
 #ifndef TRINITYENGINE_OBJECT_H
 #define TRINITYENGINE_OBJECT_H
 
-#include "BaseObject.h"
 #include "Light.h"
 
-class Object : public BaseObject {
+class Object : public Mesh {
 private:
-    void VAOlinkVBO() override;
+    std::vector<Light*> lights;
 
 public:
-    enum struct LightingType {PointLight, DirectionalLight, SpotLight};
+    Object(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader,
+           std::vector<std::string> diffuseTextures = std::vector<std::string>(), std::vector<std::string> specularTextures = std::vector<std::string>());
 
-    Object(GLfloat *vertices, std::size_t vertexCount, GLuint * indices, std::size_t indexCount, Shader &shader);
+    void addLight(Light& light);
 
-    void setLight(Light& light, LightingType type);
+    void removeLight(int index = -1);
+
+    void initializeOtherFields() override;
 };
 
 

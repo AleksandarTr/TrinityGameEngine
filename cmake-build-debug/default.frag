@@ -1,16 +1,92 @@
 #version 330 core
 out vec4 FragColor;
-in vec2 texCoord;
+in vec3 color;
+in vec3 texCoord;
 in vec3 normal;
 in vec3 pos;
 
-uniform sampler2D tex0;
+uniform sampler2D diffuseTextures[16];
 uniform vec4 lightColor;
 uniform vec3 lightPos;
 uniform vec3 camPos;
-uniform sampler2D tex1;
+uniform sampler2D specularTextures[16];
 uniform vec3 lightDir;
 uniform int lightingType;
+uniform bool useTexture;
+
+vec4 selectDiffuseTexture(int i) {
+    switch(i) {
+        case 0:
+            return texture(diffuseTextures[0], vec2(texCoord.x, texCoord.y));
+        case 1:
+            return texture(diffuseTextures[1], vec2(texCoord.x, texCoord.y));
+        case 2:
+            return texture(diffuseTextures[2], vec2(texCoord.x, texCoord.y));
+        case 3:
+            return texture(diffuseTextures[3], vec2(texCoord.x, texCoord.y));
+        case 4:
+            return texture(diffuseTextures[4], vec2(texCoord.x, texCoord.y));
+        case 5:
+            return texture(diffuseTextures[5], vec2(texCoord.x, texCoord.y));
+        case 6:
+            return texture(diffuseTextures[6], vec2(texCoord.x, texCoord.y));
+        case 7:
+            return texture(diffuseTextures[7], vec2(texCoord.x, texCoord.y));
+        case 8:
+            return texture(diffuseTextures[8], vec2(texCoord.x, texCoord.y));
+        case 9:
+            return texture(diffuseTextures[9], vec2(texCoord.x, texCoord.y));
+        case 10:
+            return texture(diffuseTextures[10], vec2(texCoord.x, texCoord.y));
+        case 11:
+            return texture(diffuseTextures[11], vec2(texCoord.x, texCoord.y));
+        case 12:
+            return texture(diffuseTextures[12], vec2(texCoord.x, texCoord.y));
+        case 13:
+            return texture(diffuseTextures[13], vec2(texCoord.x, texCoord.y));
+        case 14:
+            return texture(diffuseTextures[14], vec2(texCoord.x, texCoord.y));
+        case 15:
+            return texture(diffuseTextures[15], vec2(texCoord.x, texCoord.y));
+    }
+}
+
+vec4 selectSpecularTexture(int i) {
+    switch(i) {
+        case 0:
+            return texture(specularTextures[0], vec2(texCoord.x, texCoord.y));
+        case 1:
+            return texture(specularTextures[1], vec2(texCoord.x, texCoord.y));
+        case 2:
+            return texture(specularTextures[2], vec2(texCoord.x, texCoord.y));
+        case 3:
+            return texture(specularTextures[3], vec2(texCoord.x, texCoord.y));
+        case 4:
+            return texture(specularTextures[4], vec2(texCoord.x, texCoord.y));
+        case 5:
+            return texture(specularTextures[5], vec2(texCoord.x, texCoord.y));
+        case 6:
+            return texture(specularTextures[6], vec2(texCoord.x, texCoord.y));
+        case 7:
+            return texture(specularTextures[7], vec2(texCoord.x, texCoord.y));
+        case 8:
+            return texture(specularTextures[8], vec2(texCoord.x, texCoord.y));
+        case 9:
+            return texture(specularTextures[9], vec2(texCoord.x, texCoord.y));
+        case 10:
+            return texture(specularTextures[10], vec2(texCoord.x, texCoord.y));
+        case 11:
+            return texture(specularTextures[11], vec2(texCoord.x, texCoord.y));
+        case 12:
+            return texture(specularTextures[12], vec2(texCoord.x, texCoord.y));
+        case 13:
+            return texture(specularTextures[13], vec2(texCoord.x, texCoord.y));
+        case 14:
+            return texture(specularTextures[14], vec2(texCoord.x, texCoord.y));
+        case 15:
+            return texture(specularTextures[15], vec2(texCoord.x, texCoord.y));
+    }
+}
 
 vec4 pointLight() {
     vec3 lightVec = lightPos - pos;
@@ -32,7 +108,10 @@ vec4 pointLight() {
     float specAmount = pow(max(dot(viewDir, reflectionDir), 0.0f), 8);
     float spec = specAmount * specAmount;
 
-    return (texture(tex0, texCoord) * min(diffuse + ambient, 1) * dropoff + texture(tex1, texCoord).r * spec * dropoff) * lightColor;
+    if(useTexture)
+        return (selectDiffuseTexture(int(texCoord.z)) * min(diffuse + ambient, 1) * dropoff + selectSpecularTexture(int(texCoord.z)).r * spec * dropoff) * lightColor;
+
+    return (vec4(color, 1) * (diffuse + ambient + spec) * dropoff) * lightColor;
 }
 
 vec4 directionalLight() {
@@ -50,7 +129,10 @@ vec4 directionalLight() {
     float specAmount = pow(max(dot(viewDir, reflectionDir), 0.0f), 8);
     float spec = specAmount * specAmount;
 
-    return (texture(tex0, texCoord) * min(diffuse + ambient, 1) + texture(tex1, texCoord).r * spec) * lightColor;
+    if(useTexture)
+        return (selectDiffuseTexture(int(texCoord.z)) * min(diffuse + ambient, 1) + selectSpecularTexture(int(texCoord.z)).r * spec) * lightColor;
+
+    return vec4(color, 1) * (diffuse + ambient + spec) * lightColor;
 }
 
 vec4 spotLight() {
@@ -78,7 +160,10 @@ vec4 spotLight() {
     float angle = dot(normalize(lightDir), - light);
     float inten = clamp((angle - outerCone) / (innerCone - outerCone), 0, 1.0f);
 
-    return (texture(tex0, texCoord) * min(diffuse + ambient, 1) * dropoff * inten + texture(tex1, texCoord).r * spec * dropoff * inten) * lightColor;
+    if(useTexture)
+        return (selectDiffuseTexture(int(texCoord.z)) * min(diffuse + ambient, 1) * dropoff * inten + selectSpecularTexture(int(texCoord.z)).r * spec * dropoff * inten) * lightColor;
+
+    return (vec4(color, 1) * (diffuse + ambient + spec) * dropoff * inten) * lightColor;
 }
 
 void main() {
@@ -88,11 +173,11 @@ void main() {
             break;
 
             case 1:
-            FragColor = directionalLight();
+            //FragColor = directionalLight();
             break;
 
             case 2:
-            FragColor = spotLight();
+            //FragColor = spotLight();
             break;
     }
 }
