@@ -24,7 +24,9 @@ add_executable(TrinityEngine main.cpp glad.c
         Object.cpp
         Object.h
         Light.cpp
-        Light.h)
+        Light.h
+        MoveableObject.cpp
+        MoveableObject.h)
 
 add_library(glfw STATIC IMPORTED)
 set_target_properties(glfw PROPERTIES

@@ -111,14 +111,17 @@ int main() {
     glUniform4f(glGetUniformLocation(lightShader.getProgramID(), "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 
     glEnable(GL_DEPTH_TEST);
+    double prevTime = glfwGetTime();
 
     //Window loop
     while(!glfwWindowShouldClose(window)) {
+        double currentTIme = glfwGetTime();
+        double timeDelta = currentTIme - prevTime;
         glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.activate();
-        object.rotate(glm::vec3(0.0f, 0.001f, 0.0f));
+        object.setAngularAcceleration(glm::vec3(0.0f, 0.5f, 0.0f));
 
         camera.updateMatrix(45, 0.1f, 100.0f);
 
@@ -133,6 +136,7 @@ int main() {
         texture.bind();
         specTex.bind();
         object.setLight(light, Object::LightingType::PointLight);
+        object.update(timeDelta);
         object.draw();
 
         lightShader.activate();
@@ -142,7 +146,9 @@ int main() {
         light.draw();
 
         camera.inputs(window);
+        camera.update(timeDelta);
 
+        prevTime = currentTIme;
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

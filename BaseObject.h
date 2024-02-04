@@ -5,9 +5,10 @@
 #include "VertexBufferObject.h"
 #include "ElementBufferObject.h"
 #include "Shader.h"
+#include "MoveableObject.h"
 #include <glm/glm.hpp>
 
-class BaseObject {
+class BaseObject : public MoveableObject {
 public:
     VertexArrayObject VAO;
     VertexBufferObject VBO;
@@ -20,23 +21,14 @@ public:
     GLuint *indices;
     std::size_t indexCount;
 
-    glm::vec3 position = glm::vec3(0);
-    glm::vec3 rotation = glm::vec3(0);
-
 public:
     BaseObject(GLfloat *vertices, std::size_t vertexCount, std::size_t vertexSize, GLuint * indices, std::size_t indexCount, Shader &shader);
 
     virtual void VAOlinkVBO() = 0;
 
-    void rotate(glm::vec3 angles);
-
-    void move(glm::vec3 direction);
-
     void bind();
 
     void draw();
-
-    glm::vec3 getPosition();
 };
 
 #endif

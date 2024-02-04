@@ -9,10 +9,10 @@
 #include<glm/gtx/rotate_vector.hpp>
 #include<glm/gtx/vector_angle.hpp>
 #include "Shader.h"
+#include "MoveableObject.h"
 
-class Camera {
+class Camera : public MoveableObject {
 private:
-    glm::vec3 position;
     glm::vec3 orientation = glm::vec3(0,0,-1.0f);
     glm::vec3 up = glm::vec3(0, 1.0f, 0);
     glm::mat4 cameraMat;
@@ -20,8 +20,8 @@ private:
     int width;
     int height;
 
-    float speed = 0.001f;
     float sensitivity = 500.0f;
+    float speed = 10.0f;
 
 public:
     Camera(int width, int height, glm::vec3 position);
@@ -31,8 +31,6 @@ public:
     void setMatrix(Shader &shader, const char *uniform);
 
     void inputs(GLFWwindow* window);
-
-    glm::vec3 getPosition();
 };
 
 #endif

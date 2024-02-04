@@ -25,28 +25,16 @@ void BaseObject::draw() {
     glm::vec3 zAxis(0, 0, 1.0f);
 
     glm::mat4 rotationMat(1);
-    rotationMat = glm::rotate(rotationMat, rotation.x, xAxis);
-    rotationMat = glm::rotate(rotationMat, rotation.y, yAxis);
-    rotationMat = glm::rotate(rotationMat, rotation.z, zAxis);
+    rotationMat = glm::rotate(rotationMat, getRotation().x, xAxis);
+    rotationMat = glm::rotate(rotationMat, getRotation().y, yAxis);
+    rotationMat = glm::rotate(rotationMat, getRotation().z, zAxis);
     glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), "rotation"), 1, GL_FALSE, glm::value_ptr(rotationMat));
 
     glm::mat4 translationMat(1);
-    translationMat = glm::translate(translationMat, position);
+    translationMat = glm::translate(translationMat, getPosition());
     glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), "position"), 1, GL_FALSE, glm::value_ptr(translationMat));
 
     VAO.bind();
     glDrawElements(GL_TRIANGLES, indexCount * 3, GL_UNSIGNED_INT, 0);
     VAO.unbind();
-}
-
-void BaseObject::rotate(glm::vec3 angles) {
-    rotation += angles;
-}
-
-void BaseObject::move(glm::vec3 direction) {
-    position += direction;
-}
-
-glm::vec3 BaseObject::getPosition() {
-    return position;
 }
