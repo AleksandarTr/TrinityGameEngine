@@ -6,17 +6,25 @@ Object::Object(std::vector<Vertex> vertices, std::vector<Index> indices, Shader 
         Mesh(std::move(vertices), std::move(indices), shader, std::move(diffuseTextures), std::move(specularTextures)) {}
 
 void Object::initializeOtherFields() {
-    //TODO: Change default.frag to support multiple light sources
+    for(int i = 0; i < lights.size(); i++) {
+        glm::vec3 lightSource = lights[i]->getPosition();
+        glm::vec3 lightDir = lights[i]->getDirection();
+        glm::vec3 lightColor = lights[i]->getColor();
 
-    for(auto &light : lights) {
-        glm::vec3 lightSource = light->getPosition();
-        glm::vec3 lightDir = light->getDirection();
-        glm::vec3 lightColor = light->getColor();
+        char l1[20];
+        char l2[20];
+        char l3[20];
+        char l4[20];
+        sprintf(l1, "lightPos[%d]", i);
+        sprintf(l2, "lightingType[%d]", i);
+        sprintf(l3, "lightDir[%d]", i);
+        sprintf(l4, "lightColor[%d]", i);
 
-        glUniform3f(glGetUniformLocation(shader.getProgramID(), "lightPos"), lightSource.x, lightSource.y,lightSource.z);
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "lightingType"),static_cast<GLint>(light->getType()));
-        glUniform3f(glGetUniformLocation(shader.getProgramID(), "lightDir"), lightDir.x, lightDir.y, lightDir.z);
-        glUniform4f(glGetUniformLocation(shader.getProgramID(), "lightColor"), lightColor.x, lightColor.y, lightColor.z,1.0f);
+        glUniform3f(glGetUniformLocation(shader.getProgramID(), l1), lightSource.x, lightSource.y,lightSource.z);
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), l2),static_cast<GLint>(lights[i]->getType()));
+        glUniform3f(glGetUniformLocation(shader.getProgramID(), l3), lightDir.x, lightDir.y, lightDir.z);
+        glUniform4f(glGetUniformLocation(shader.getProgramID(), l4), lightColor.x, lightColor.y, lightColor.z,1.0f);
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "lightNum"), lights.size());
     }
     glUniform3f(glGetUniformLocation(shader.getProgramID(), "camPos"), camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
 }

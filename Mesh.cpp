@@ -53,16 +53,15 @@ void Mesh::draw() {
     else {
         glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), true);
         for(int i = 0; i < 16; i++) {
-            std::string uniformName = "diffuseTextures[";
-            uniformName += i;
-            uniformName += "]";
-            glUniform1i(glGetUniformLocation(shader.getProgramID(), uniformName.c_str()), diffuseTextures[i].getSlot());
+            char uniformName[25];
+            sprintf(uniformName, "diffuseTextures[%d]", i);
+            glUniform1i(glGetUniformLocation(shader.getProgramID(), uniformName), diffuseTextures[i].getSlot());
         }
         for(int i = 0; i < 16; i++) {
-            std::string specularName = "specularTextures[";
-            specularName += i;
-            specularName += "]";
-            glUniform1i(glGetUniformLocation(shader.getProgramID(), specularName.c_str()), specularTextures[i].getSlot());
+            char specularName[25];
+            sprintf(specularName, "specularTextures[%d]", i);
+
+            glUniform1i(glGetUniformLocation(shader.getProgramID(), specularName), specularTextures[i].getSlot());
         }
     }
     initializeOtherFields();

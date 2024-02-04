@@ -92,12 +92,18 @@ int main() {
     light.bind();
     light.move(glm::vec3(5));
 
+    Light light2(lightVertices, lightIndices, lightShader, glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
+    light2.bind();
+    light2.move(glm::vec3(-10));
+
     glEnable(GL_DEPTH_TEST);
     double prevTime = glfwGetTime();
     object.setAngularVelocity(glm::vec3(0, 3, 0));
     object.setCamera(camera);
     light.setCamera(camera);
+    light2.setCamera(camera);
     object.addLight(light);
+    object.addLight(light2);
 
     //Window loop
     while(!glfwWindowShouldClose(window)) {
@@ -114,6 +120,7 @@ int main() {
 
         lightShader.activate();
         light.draw();
+        light2.draw();
 
         camera.inputs(window);
         camera.update(timeDelta);
