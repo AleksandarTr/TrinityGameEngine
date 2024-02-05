@@ -30,3 +30,16 @@ LightingType Light::getType() const {
 void Light::setType(LightingType type) {
     Light::type = type;
 }
+
+void Light::initializeOtherFields() {
+    glUniform3f(glGetUniformLocation(shader.getProgramID(), "lightColor"), color.x, color.y, color.z);
+    glUniform1i(glGetUniformLocation(shader.getProgramID(), "useLightColor"), useLightColor);
+}
+
+bool Light::doesUseLightColor() const {
+    return useLightColor;
+}
+
+void Light::setUseLightColor(bool useLightColor) {
+    Light::useLightColor = useLightColor;
+}

@@ -105,6 +105,16 @@ int main() {
     object.addLight(light);
     object.addLight(light2);
 
+    light.setScale(0.2f);
+    light2.setScale(0.25f);
+    object.setScale(3);
+
+    double timer = 0;
+    double blinker = 0;
+    double blinkCnt = 0;
+    bool blink = false;
+    bool isOn = true;
+
     //Window loop
     while(!glfwWindowShouldClose(window)) {
         double currentTIme = glfwGetTime();
@@ -113,6 +123,22 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.activate();
+        if(!blink) timer += timeDelta;
+        if(timer > 2) {
+            timer = 0;
+            blink = true;
+        }
+        if(blink) blinker += timeDelta;
+        if(blinker > 0.1) {
+            blinker = 0;
+            if(isOn) light2.setColor(glm::vec3(0));
+            else light2.setColor(glm::vec3(1));
+            isOn = !isOn;
+            if(++blinkCnt > 10) {
+                blinkCnt = 0;
+                blink = false;
+            }
+        }
 
         camera.updateMatrix(45, 0.1f, 100.0f);
         object.update(timeDelta);

@@ -30,6 +30,7 @@ void Object::initializeOtherFields() {
 }
 
 void Object::addLight(Light &light) {
+    if(lights.size() >= 16) throw std::invalid_argument("More than 16 light sources cannot be linked to a single object.");
     lights.push_back(&light);
 }
 

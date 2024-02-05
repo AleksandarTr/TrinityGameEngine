@@ -9,6 +9,30 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &sha
 : vertices(std::move(vertices)), indices(std::move(indices)), shader(shader) {
 
     textureSlot = textureSlotAllocator;
+
+    while(specularTextures.size() > diffuseTextures.size()) specularTextures.pop_back();
+
+    int i = 0;
+    while(i < diffuseTextures.size()){
+        bool found = false;
+        for(int j = 0; j < this->vertices.size(); j++)
+            if((int) this->vertices[j].texPosition.z == i) {
+                found = true;
+                break;
+            }
+
+        if(!found) {
+            if(i < specularTextures.size()) specularTextures.erase(specularTextures.begin() + i);
+
+            for(auto & vertex : this->vertices)
+                if((int) vertex.texPosition.z > i) vertex.texPosition.z--;
+            diffuseTextures.erase(diffuseTextures.begin() + i);
+        }
+        else i++;
+    }
+
+    if(diffuseTextures.size() > 16) throw std::invalid_argument("More than 16 textures cannot be applied to a single object.");
+
     textureSlotAllocator += diffuseTextures.size() + specularTextures.size();
 
     for(int i = 0; i < diffuseTextures.size(); i++)
@@ -48,7 +72,7 @@ void Mesh::draw() {
     translationMat = glm::translate(translationMat, getPosition());
     glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), "camMatrix"), 1, GL_FALSE, glm::value_ptr(camera->getCameraMat()));
     glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), "position"), 1, GL_FALSE, glm::value_ptr(translationMat));
-    glUniform1f(glGetUniformLocation(shader.getProgramID(), "scale"), 3.0f);
+    glUniform1f(glGetUniformLocation(shader.getProgramID(), "scale"), scale);
     if(diffuseTextures.empty()) glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), false);
     else {
         glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), true);
@@ -79,3 +103,11 @@ void Mesh::setCamera(Camera &camera) {
 }
 
 void Mesh::initializeOtherFields() {}
+
+float Mesh::getScale() const {
+    return scale;
+}
+
+void Mesh::setScale(float scale) {
+    this->scale = scale;
+}

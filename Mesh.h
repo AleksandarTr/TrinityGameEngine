@@ -27,6 +27,7 @@ protected:
     Camera *camera;
     static int textureSlotAllocator;
     int textureSlot;
+    float scale = 1.0f;
 
 public:
     Mesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader,
@@ -39,6 +40,10 @@ public:
     virtual void initializeOtherFields();
 
     void setCamera(Camera& camera);
+
+    float getScale() const;
+
+    void setScale(float scale);
 };
 
 #endif
