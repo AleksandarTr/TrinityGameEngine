@@ -1,9 +1,9 @@
 #ifndef TRINITYENGINE_LIGHT_H
 #define TRINITYENGINE_LIGHT_H
 
-#include "Mesh.h"
+#include "MultiTextureMesh.h"
 
-class Light : public Mesh {
+class Light : public MultiTextureMesh {
 private:
     glm::vec3 color;
     glm::vec3 direction;

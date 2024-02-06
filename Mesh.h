@@ -5,14 +5,14 @@
 #include "VertexBufferObject.h"
 #include "ElementBufferObject.h"
 #include "Shader.h"
-#include "MoveableObject.h"
+#include "Movable.h"
 #include "Structs.h"
 #include "Texture.h"
 #include <glm/glm.hpp>
 #include <vector>
 #include "Camera.h"
 
-class Mesh : public MoveableObject {
+class Mesh : public Movable {
 protected:
     VertexArrayObject VAO;
     VertexBufferObject VBO;
@@ -21,29 +21,29 @@ protected:
 
     std::vector<Vertex> vertices;
     std::vector<Index> indices;
-    std::vector<Texture> diffuseTextures;
-    std::vector<Texture> specularTextures;
 
-    Camera *camera;
     static int textureSlotAllocator;
     int textureSlot;
-    float scale = 1.0f;
+    glm::vec3 scale = glm::vec3(1.0f);
+    glm::mat4 modelTransformation = glm::mat4(1);
+    glm::mat4 rotationMatrix = glm::mat4(1);
 
 public:
-    Mesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader,
-               std::vector<std::string> diffuseTextures = std::vector<std::string>(), std::vector<std::string> specularTextures = std::vector<std::string>());
+    Mesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader);
+
+    void updateTransformation();
 
     void bind();
+
+    virtual void drawTextures() = 0;
 
     void draw();
 
     virtual void initializeOtherFields();
 
-    void setCamera(Camera& camera);
+    glm::vec3 getScale() const;
 
-    float getScale() const;
-
-    void setScale(float scale);
+    void setScale(glm::vec3 scale);
 };
 
 #endif

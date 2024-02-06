@@ -1,5 +1,7 @@
 #include "Shader.h"
 
+GLuint Shader::activeShader = 0;
+
 Shader::Shader(std::string fragmentShaderSource, std::string vertexShaderSource) {
     programId = glCreateProgram();
 
@@ -35,7 +37,15 @@ std::string Shader::readFile(std::string location) {
 }
 
 void Shader::activate() {
-    glUseProgram(programId);
+    if(activeShader != programId) {
+        glUseProgram(programId);
+        activeShader = programId;
+    }
+
+    if(cameraMovedFlag) {
+        cameraMovedFlag = false;
+        glUniformMatrix4fv(glGetUniformLocation(programId, "camMatrix"), 1, GL_FALSE,glm::value_ptr(camera->getCameraMatrix()));
+    }
 }
 
 void Shader::unloadFiles() {
@@ -49,4 +59,8 @@ Shader::~Shader() {
 
 GLuint Shader::getProgramID() {
     return programId;
+}
+
+void Shader::setCamera(Camera &camera) {
+    this->camera = &camera;
 }

@@ -1,18 +1,21 @@
 #include <iostream>
 #include "Camera.h"
+#include "Shader.h"
+#include <algorithm>
 
 Camera::Camera(int width, int height, glm::vec3 position) : width(width), height(height) {
     move(position);
 }
 
-void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane) {
+void Camera::updateMatrix() {
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 proj = glm::mat4(1.0f);
 
     view = glm::lookAt(getPosition(), getPosition() + orientation, up);
-    proj = glm::perspective(glm::radians(FOVdeg), 1.0f * width / height, nearPlane, farPlane);
+    proj = glm::perspective(glm::radians(FOV), 1.0f * width / height, nearPlane, farPlane);
 
     cameraMat = proj * view;
+    for(auto shader : shaders) shader->cameraMovedFlag = true;
 }
 
 void Camera::inputs(GLFWwindow *window) {
@@ -43,12 +46,55 @@ void Camera::inputs(GLFWwindow *window) {
     float rotY = sensitivity * (float) (mouseY - (height / 2)) / height;
     float rotX = sensitivity * (float) (mouseX - (width / 2)) / width;
 
-    orientation = glm::rotate(orientation, glm::radians(-rotY), glm::normalize(glm::cross(orientation, up)));
+    if((orientation.y < 0.9999 || rotY > 0) && (orientation.y > -0.9999 || rotY < 0))
+        orientation = glm::rotate(orientation, glm::radians(-rotY), glm::normalize(glm::cross(orientation, up)));
+
+    if(rotX != 0 || rotY != 0) movedFlag = true;
+
     orientation = glm::rotate(orientation, glm::radians(-rotX), up);
 
     glfwSetCursorPos(window, width/2, height/2);
+    if(movedFlag) {
+        movedFlag = false;
+        updateMatrix();
+    }
 }
 
-const glm::mat4 &Camera::getCameraMat() const {
+void Camera::setFov(float fov) {
+    FOV = fov;
+}
+
+void Camera::setNearPlane(float nearPlane) {
+    this->nearPlane = nearPlane;
+}
+
+void Camera::setFarPlane(float farPlane) {
+    this->farPlane = farPlane;
+}
+
+void Camera::addShader(Shader &shader) {
+    if(std::find(shaders.begin(), shaders.end(), &shader) != shaders.end()) return;
+    shaders.push_back(&shader);
+}
+
+void Camera::removeShader(int index) {
+    if(index == -1) {
+        shaders.pop_back();
+        return;
+    }
+
+    shaders.erase(shaders.begin() + index);
+}
+
+void Camera::removeShader(Shader &shader) {
+    auto position = std::find(shaders.begin(), shaders.end(), &shader);
+    if(position == shaders.end()) return;
+
+    shaders.erase(position);
+}
+
+glm::mat4 Camera::getCameraMatrix() {
     return cameraMat;
 }
+
+

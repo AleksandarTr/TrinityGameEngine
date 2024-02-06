@@ -2,10 +2,10 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "Shader.h"
-#include "Object.h"
 #include "Camera.h"
 #include "Structs.h"
+#include "SingleTextureMeshWithLight.h"
+#include <nlohmann/json.hpp>
 
 int width = 1280;
 int height = 720;
@@ -75,10 +75,10 @@ int main() {
     };
 
     //Create shader program
-    Shader shader("default.frag", "default.vert");
+    Shader shader("singleTex.frag", "singleTex.vert");
     shader.unloadFiles();
 
-    Object object(vertices, indices, shader, {"Textures/unnamed.jpg"}, {"Textures/spec.jpg"});
+    SingleTextureMeshWithLight object(vertices, indices, shader, {"Textures/unnamed.jpg"}, {"Textures/spec.jpg"});
     object.bind();
 
     Camera camera(width, height, glm::vec3(-0.5f,0.5f,10));
@@ -92,22 +92,27 @@ int main() {
     light.bind();
     light.move(glm::vec3(5));
 
-    Light light2(lightVertices, lightIndices, lightShader, glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
+    Light light2(lightVertices, lightIndices, lightShader, glm::vec3(1, 0, 0), glm::vec3(-1), LightingType::PointLight);
     light2.bind();
     light2.move(glm::vec3(-10));
 
     glEnable(GL_DEPTH_TEST);
     double prevTime = glfwGetTime();
     object.setAngularVelocity(glm::vec3(0, 3, 0));
-    object.setCamera(camera);
-    light.setCamera(camera);
-    light2.setCamera(camera);
     object.addLight(light);
     object.addLight(light2);
 
-    light.setScale(0.2f);
-    light2.setScale(0.25f);
-    object.setScale(3);
+    light.setScale(glm::vec3(0.2f));
+    light2.setScale(glm::vec3(0.25f));
+    object.setScale(glm::vec3(1, 10, 1));
+
+    shader.setCamera(camera);
+    lightShader.setCamera(camera);
+    camera.addShader(shader);
+    camera.addShader(lightShader);
+    camera.setFov(45);
+    camera.setNearPlane(0.1f);
+    camera.setFarPlane(100);
 
     double timer = 0;
     double blinker = 0;
@@ -122,7 +127,6 @@ int main() {
         glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.activate();
         if(!blink) timer += timeDelta;
         if(timer > 2) {
             timer = 0;
@@ -132,15 +136,14 @@ int main() {
         if(blinker > 0.1) {
             blinker = 0;
             if(isOn) light2.setColor(glm::vec3(0));
-            else light2.setColor(glm::vec3(1));
+            else light2.setColor(glm::vec3(1, 0, 0));
             isOn = !isOn;
-            if(++blinkCnt > 10) {
+            if(++blinkCnt > 8) {
                 blinkCnt = 0;
                 blink = false;
             }
         }
 
-        camera.updateMatrix(45, 0.1f, 100.0f);
         object.update(timeDelta);
         object.draw();
 

@@ -5,7 +5,7 @@
 Light::Light(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader, glm::vec3 color,
              glm::vec3 direction, LightingType type, std::vector<std::string> diffuseTextures,
              std::vector<std::string> specularTextures) :
-        Mesh(std::move(vertices), std::move(indices), shader, std::move(diffuseTextures), std::move(specularTextures)), color(color), type(type), direction(direction) {}
+        MultiTextureMesh(std::move(vertices), std::move(indices), shader, std::move(diffuseTextures), std::move(specularTextures)), color(color), type(type), direction(direction) {}
 
 const glm::vec3 &Light::getColor() const {
     return color;

@@ -1,11 +1,11 @@
-#include "Object.h"
+#include "SingleTextureMeshWithLight.h"
 
 #include <utility>
 
-Object::Object(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader, std::vector<std::string> diffuseTextures, std::vector<std::string> specularTextures) :
-        Mesh(std::move(vertices), std::move(indices), shader, std::move(diffuseTextures), std::move(specularTextures)) {}
+SingleTextureMeshWithLight::SingleTextureMeshWithLight(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader, std::string diffuseTexture, std::string specularTexture) :
+        SingleTextureMesh(std::move(vertices), std::move(indices), shader, std::move(diffuseTexture), std::move(specularTexture)) {}
 
-void Object::initializeOtherFields() {
+void SingleTextureMeshWithLight::initializeOtherFields() {
     for(int i = 0; i < lights.size(); i++) {
         glm::vec3 lightSource = lights[i]->getPosition();
         glm::vec3 lightDir = lights[i]->getDirection();
@@ -26,15 +26,14 @@ void Object::initializeOtherFields() {
         glUniform4f(glGetUniformLocation(shader.getProgramID(), l4), lightColor.x, lightColor.y, lightColor.z,1.0f);
         glUniform1i(glGetUniformLocation(shader.getProgramID(), "lightNum"), lights.size());
     }
-    glUniform3f(glGetUniformLocation(shader.getProgramID(), "camPos"), camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
 }
 
-void Object::addLight(Light &light) {
+void SingleTextureMeshWithLight::addLight(Light &light) {
     if(lights.size() >= 16) throw std::invalid_argument("More than 16 light sources cannot be linked to a single object.");
     lights.push_back(&light);
 }
 
-void Object::removeLight(int index) {
+void SingleTextureMeshWithLight::removeLight(int index) {
     if(index == -1) {
         lights.pop_back();
         return;

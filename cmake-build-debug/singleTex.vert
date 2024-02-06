@@ -9,15 +9,14 @@ out vec3 texCoord;
 out vec3 normal;
 out vec3 pos;
 
-uniform float scale;
 uniform mat4 camMatrix;
-uniform mat4 position;
+uniform mat4 model;
 uniform mat4 rotation;
 
 void main() {
-   gl_Position = camMatrix * position * rotation * vec4(aPos * scale, 1.0);
-   texCoord = aTex;
-   color = aCol;
-   normal = vec3(rotation * vec4(aNorm, 1.0f));
-   pos = vec3(position * rotation * vec4(aPos * scale, 1.0f));
+    pos = vec3(model * vec4(aPos, 1.0f));
+    gl_Position = camMatrix * vec4(pos, 1.0f);
+    texCoord = aTex;
+    color = aCol;
+    normal = vec3(rotation * vec4(aNorm, 1.0f));
 }

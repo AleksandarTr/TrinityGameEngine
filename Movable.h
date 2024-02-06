@@ -1,9 +1,9 @@
-#ifndef TRINITYENGINE_MOVEABLEOBJECT_H
-#define TRINITYENGINE_MOVEABLEOBJECT_H
+#ifndef TRINITYENGINE_MOVEABLE_H
+#define TRINITYENGINE_MOVEABLE_H
 
 #include <glm/glm.hpp>
 
-class MoveableObject {
+class Movable {
 private:
     glm::vec3 position = glm::vec3(0);
     glm::vec3 rotation = glm::vec3(0);
@@ -13,6 +13,9 @@ private:
 
     glm::vec3 acceleration = glm::vec3(0);
     glm::vec3 angularAcceleration = glm::vec3(0);
+
+protected:
+    bool movedFlag = false;
 
 public:
     glm::vec3 getPosition();
