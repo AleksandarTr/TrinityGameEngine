@@ -5,7 +5,8 @@
 
 class Model {
 private:
-    std::vector<Mesh*> meshes;
+    std::vector<Model*> nodes;
+    Mesh *mesh = nullptr;
 
 public:
     Model();

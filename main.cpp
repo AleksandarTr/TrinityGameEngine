@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "Structs.h"
 #include "SingleTextureMeshWithLight.h"
-#include <nlohmann/json.hpp>
+#include "gltfReader.h"
 
 int width = 1280;
 int height = 720;
@@ -31,6 +31,8 @@ int main() {
     gladLoadGL();
     glViewport(0, 0, width, height);
     glfwSetCursorPos(window, width/2, height/2);
+
+    gltfReader chess("test/ABeautifulGame.gltf");
 
     std::vector<Vertex> vertices {
             {{-1.0f, 0, -1.0f},{1, 1, 1},{0, 0, 0},{-1, -0.732f, -1}},

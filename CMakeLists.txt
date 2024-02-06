@@ -34,7 +34,9 @@ add_executable(TrinityEngine main.cpp glad.c
         MultiTextureMesh.cpp
         MultiTextureMesh.h
         Model.cpp
-        Model.h)
+        Model.h
+        gltfReader.cpp
+        gltfReader.h)
 
 add_library(glfw STATIC IMPORTED)
 set_target_properties(glfw PROPERTIES
