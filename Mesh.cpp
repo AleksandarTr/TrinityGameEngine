@@ -1,6 +1,7 @@
 #include "Mesh.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <utility>
 
 int Mesh::textureSlotAllocator = 0;
@@ -53,14 +54,8 @@ void Mesh::setScale(glm::vec3 scale) {
 }
 
 void Mesh::updateTransformation() {
-    glm::vec3 xAxis(1.0f, 0, 0);
-    glm::vec3 yAxis(0, 1.0f, 0);
-    glm::vec3 zAxis(0, 0, 1.0f);
-
-    glm::mat4 rotationMat(1);
-    rotationMat = glm::rotate(rotationMat, getRotation().x, xAxis);
-    rotationMat = glm::rotate(rotationMat, getRotation().y, yAxis);
-    rotationMat = glm::rotate(rotationMat, getRotation().z, zAxis);
+    glm::vec3 rotation = getRotation();
+    glm::mat4 rotationMat = glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z);
 
     glm::mat4 translationMat(1);
     translationMat = glm::translate(translationMat, getPosition());

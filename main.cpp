@@ -33,6 +33,7 @@ int main() {
     glfwSetCursorPos(window, width/2, height/2);
 
     gltfReader chess("test/ABeautifulGame.gltf");
+    Scene scene = chess.getScene(0);
 
     std::vector<Vertex> vertices {
             {{-1.0f, 0, -1.0f},{1, 1, 1},{0, 0, 0},{-1, -0.732f, -1}},

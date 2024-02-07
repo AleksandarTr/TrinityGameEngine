@@ -246,6 +246,33 @@ gltfReader::gltfReader(std::string uri) {
     return;
 }
 
+int gltfReader::getSceneCount() {
+    return scenes.size();
+}
+
+Scene &gltfReader::getScene(int index) {
+    auto &scene = *new ::Scene();
+    for(int node : scenes[index].nodes) {
+        auto &model = *new Model();
+        insertChildNodes(model, node);
+        scene += model;
+    }
+
+    return scene;
+}
+
+void gltfReader::insertChildNodes(Model &model, int index) {
+    model.move(nodes[index].translation);
+    model.rotate(glm::eulerAngles(nodes[index].rotation));
+    model.applyScaling(nodes[index].scale);
+
+    for(int node : nodes[index].children) {
+        auto &newModel = *new Model();
+        model += newModel;
+        insertChildNodes(newModel, node);
+    }
+}
+
 gltfReader::Buffer::Buffer(std::string &uri, std::size_t size, std::string &name, std::string location) :
 size(size), name(std::move(name)){
     if(uri.substr(0, 5) == "data:") {

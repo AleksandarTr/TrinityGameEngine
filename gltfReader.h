@@ -7,6 +7,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include "Model.h"
 
 class gltfReader {
 private:
@@ -214,10 +215,14 @@ private:
     std::vector<Node> nodes;
     std::vector<Scene> scenes;
 
+    void insertChildNodes(Model& model, int index);
+
 public:
     gltfReader(std::string uri);
 
+    [[nodiscard]] ::Scene& getScene(int index);
 
+    int getSceneCount();
 };
 
 #endif

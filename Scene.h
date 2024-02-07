@@ -1,18 +1,16 @@
-#ifndef TRINITYENGINE_MODEL_H
-#define TRINITYENGINE_MODEL_H
+#ifndef TRINITYENGINE_SCENE_H
+#define TRINITYENGINE_SCENE_H
 
-#include "Mesh.h"
-#include "Scene.h"
+#include <vector>
+#include "Movable.h"
 
-class Model : public Movable {
+class Model;
+
+class Scene : public Movable {
 private:
     std::vector<Model*> models;
-    Mesh *mesh = nullptr;
-    glm::vec3 scale;
 
 public:
-    Model() = default;
-
     void addModel(Model& model);
 
     void removeModel(Model& model);
@@ -26,8 +24,6 @@ public:
     Model& operator[] (int index);
 
     Model& at(int index);
-
-    void applyScaling(glm::vec3 scaling);
 };
 
 #endif
