@@ -12,11 +12,11 @@ class gltfReader {
 private:
     struct Buffer {
         char *data;
-        std::string uri = "";
+        std::string uri;
         std::size_t size;
         std::string name;
 
-        Buffer(std::string uri, std::size_t size, std::string name = "", std::string location = "");
+        Buffer(std::string &uri, std::size_t size, std::string &name, std::string location);
 
         ~Buffer();
     };
@@ -29,7 +29,7 @@ private:
         int target;
         std::string name;
 
-        BufferView(int buffer, int size, int offset = 0, int stride = 0, int target = 0, std::string name = "");
+        BufferView(int buffer, int size, int offset, int stride, int target, std::string &name);
     };
 
     struct Accessor {
@@ -53,7 +53,7 @@ private:
             Indices indices;
             Values values;
 
-            Sparse(int count, Indices indices, Values values);
+            Sparse(int count, Indices &indices, Values &values);
         };
 
         int bufferView;
@@ -67,8 +67,116 @@ private:
         std::string name;
         Sparse sparse;
 
-        Accessor(int componentType, int count, std::string type, int bufferView = -1, int offset = 0, bool normalized = false,
-                 double *max = nullptr, double *min = nullptr, std::string name = "", Sparse sparse = Sparse(0, {0, 0, 0}, {0, 0}));
+        Accessor(int componentType, int count, std::string &type, int bufferView, int offset, bool normalized,
+                 double *max, double *min, std::string &name, Sparse &sparse);
+    };
+
+    struct Mesh {
+        struct Primitive {
+            int indices;
+            int material;
+            int mode;
+            std::vector<std::string> attributes;
+            std::vector<int> attributeValues;
+            std::vector<std::string> targets;
+            std::vector<int> targetValues;
+
+            Primitive(int indices, int material, int mode, std::vector<std::string> &attributes, std::vector<int> &attributeValues, std::vector<std::string> &targets, std::vector<int> &targetValues);
+        };
+
+        std::vector<Primitive> primitives;
+        std::vector<float> weights;
+        std::string name;
+
+        Mesh(std::vector<Primitive> &primitives, std::vector<float> &weights, std::string &name);
+    };
+
+    struct Sampler {
+        int magFilter;
+        int minFilter;
+        int wrapS;
+        int wrapT;
+        std::string name;
+
+        Sampler(int magFilter, int minFilter, int wrapS, int wrapT, std::string &name);
+    };
+
+    struct Texture {
+        int sampler;
+        int source;
+        std::string name;
+
+        Texture(int sampler, int source, std::string &name);
+    };
+
+    struct Image {
+        std::string uri;
+        std::string mimeType;
+        int bufferView;
+        std::string name;
+
+        Image(std::string &uri, std::string &mimeType, int bufferView, std::string &name);
+    };
+
+    struct Material {
+        std::string name;
+        glm::vec4 baseColor;
+        int baseTextureIndex;
+        int baseTexCoord;
+        float metallic;
+        float roughness;
+        int mrTextureIndex;
+        int mrTexCoord;
+        int normalTextureIndex;
+        int normalTexCoord;
+        float normalScale;
+        int occlusionTextureIndex;
+        int occlusionTexCoord;
+        float occlusionStrength;
+        int emissiveTextureIndex;
+        int emissiveTexCoord;
+        glm::vec3 emissiveFactor;
+        std::string alphaMode;
+        float alphaCutoff;
+        bool doubleSided;
+
+        Material(std::string &name, glm::vec4 &baseColor, int baseTextureIndex, int baseTexCoord, float metallic, float roughness,
+                 int mrTextureIndex, int mrTexCoord, int normalTextureIndex, int normalTexCoord, float normalScale,
+                 int occlusionTextureIndex, int occlusionTexCoord, float occlusionStrength, int emissiveTextureIndex,
+                 int emissiveTexCoord, glm::vec3 &emissiveFactor, std::string &alphaMode, float alphaCutoff, bool doubleSided);
+    };
+
+    struct Skin {
+        int inverseBindMatrices;
+        int skeleton;
+        std::vector<int> joints;
+        std::string name;
+
+        Skin(int inverseBindMatrices, int skeleton, std::vector<int> &joints, std::string &name);
+    };
+
+    struct Animation {
+        struct Channel {
+            int sampler;
+            int node;
+            std::string path;
+
+            Channel(int sampler, int node, std::string &path);
+        };
+
+        struct Sampler {
+            int input;
+            std::string interpolation;
+            int output;
+
+            Sampler(int input, std::string &interpolation, int output);
+        };
+
+        std::vector<Channel> channels;
+        std::vector<Sampler> samplers;
+        std::string name;
+
+        Animation(std::vector<Channel> &channels, std::vector<Sampler> &samplers, std::string &name);
     };
 
     struct Node {
@@ -83,25 +191,33 @@ private:
         std::vector<float> weights;
         std::string name;
 
-        Node(int camera, std::vector<int> children, int skin, glm::mat4 matrix, int mesh, glm::quat rotation, glm::vec3 scale, glm::vec3 translation, std::vector<float> weights, std::string name);
+        Node(int camera, std::vector<int> &children, int skin, glm::mat4 &matrix, int mesh, glm::quat &rotation, glm::vec3 &scale, glm::vec3 &translation, std::vector<float> &weights, std::string &name);
     };
 
     struct Scene {
         std::vector<int> nodes;
         std::string name;
 
-        Scene(std::vector<int> nodes, std::string name);
+        Scene(std::vector<int> &nodes, std::string &name);
     };
 
     std::vector<Buffer> buffers;
     std::vector<BufferView> bufferViews;
     std::vector<Accessor> accessors;
-
+    std::vector<Sampler> samplers;
+    std::vector<Texture> textures;
+    std::vector<Image> images;
+    std::vector<Material> materials;
+    std::vector<Mesh> meshes;
+    std::vector<Skin> skins;
+    std::vector<Animation> animations;
     std::vector<Node> nodes;
     std::vector<Scene> scenes;
 
 public:
     gltfReader(std::string uri);
+
+
 };
 
 #endif
