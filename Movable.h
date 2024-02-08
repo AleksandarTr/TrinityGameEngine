@@ -2,11 +2,12 @@
 #define TRINITYENGINE_MOVEABLE_H
 
 #include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 class Movable {
 private:
     glm::vec3 position = glm::vec3(0);
-    glm::vec3 rotation = glm::vec3(0);
+    glm::quat rotation = glm::quat(1, 0, 0, 0);
 
     glm::vec3 velocity = glm::vec3(0);
     glm::vec3 angularVelocity = glm::vec3(0);
@@ -20,9 +21,11 @@ protected:
 public:
     glm::vec3 getPosition();
 
-    glm::vec3 getRotation();
+    glm::quat getRotation();
 
     void rotate(glm::vec3 direction);
+
+    void rotate(glm::quat direction);
 
     void move(glm::vec3 direction);
 

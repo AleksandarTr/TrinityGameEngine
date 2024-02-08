@@ -35,7 +35,15 @@ void Model::operator-=(Model &model) {
 }
 
 void Model::applyScaling(glm::vec3 scaling) {
-    scale.x = scaling.x;
-    scale.y = scaling.y;
-    scale.z = scaling.z;
+    scale.x *= scaling.x;
+    scale.y *= scaling.y;
+    scale.z *= scaling.z;
+}
+
+void Model::applyTransformation(glm::vec3 translation, glm::quat rotation, glm::vec3 scaling) {
+    move(translation);
+    rotate(rotation);
+    applyScaling(scaling);
+
+    for(auto model : models) model->applyTransformation(translation, rotation, scaling);
 }

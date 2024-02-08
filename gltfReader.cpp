@@ -262,13 +262,12 @@ Scene &gltfReader::getScene(int index) {
 }
 
 void gltfReader::insertChildNodes(Model &model, int index) {
-    model.move(nodes[index].translation);
-    model.rotate(glm::eulerAngles(nodes[index].rotation));
-    model.applyScaling(nodes[index].scale);
+    model.applyTransformation(nodes[index].translation, nodes[index].rotation, nodes[index].scale);
 
     for(int node : nodes[index].children) {
         auto &newModel = *new Model();
         model += newModel;
+
         insertChildNodes(newModel, node);
     }
 }

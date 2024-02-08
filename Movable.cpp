@@ -1,7 +1,7 @@
 #include "Movable.h"
 
 void Movable::rotate(glm::vec3 angles) {
-    rotation += angles;
+    rotation = glm::quat(angles) * rotation;
     movedFlag = true;
 }
 
@@ -14,31 +14,22 @@ glm::vec3 Movable::getPosition() {
     return position;
 }
 
-glm::vec3 Movable::getRotation() {
+glm::quat Movable::getRotation() {
     return rotation;
 }
 
 void Movable::update(double timeDelta) {
     if(angularVelocity != glm::vec3(0) || position != glm::vec3(0)) {
-        rotation.x += angularVelocity.x * timeDelta + angularAcceleration.x / 2 * timeDelta * timeDelta;
-        rotation.y += angularVelocity.y * timeDelta + angularAcceleration.y / 2 * timeDelta * timeDelta;
-        rotation.z += angularVelocity.z * timeDelta + angularAcceleration.z / 2 * timeDelta * timeDelta;
-
-        angularVelocity.x += angularAcceleration.x * timeDelta;
-        angularVelocity.y += angularAcceleration.y * timeDelta;
-        angularVelocity.z += angularAcceleration.z * timeDelta;
+        glm::vec3 angles = float(timeDelta) * angularVelocity + float(timeDelta * timeDelta / 2) * angularAcceleration;
+        rotation = glm::quat(angles) * rotation;
+        angularVelocity += float(timeDelta) * angularAcceleration;
 
         movedFlag = true;
     }
 
     if(velocity != glm::vec3(0) || acceleration != glm::vec3(0)) {
-        position.x += velocity.x * timeDelta + acceleration.x / 2 * timeDelta * timeDelta;
-        position.y += velocity.y * timeDelta + acceleration.y / 2 * timeDelta * timeDelta;
-        position.z += velocity.z * timeDelta + acceleration.z / 2 * timeDelta * timeDelta;
-
-        velocity.x += acceleration.x * timeDelta;
-        velocity.y += acceleration.y * timeDelta;
-        velocity.z += acceleration.z * timeDelta;
+        position += float(timeDelta) * velocity + float(timeDelta * timeDelta / 2) * acceleration;
+        velocity += float(timeDelta) * acceleration;
 
         movedFlag = true;
     }
@@ -74,4 +65,8 @@ void Movable::incAngularVelocity(glm::vec3 increment) {
 
 void Movable::incAngularAcceleration(glm::vec3 increment) {
     angularAcceleration += increment;
+}
+
+void Movable::rotate(glm::quat direction) {
+    rotation = direction * rotation;
 }

@@ -28,6 +28,8 @@ public:
     Model& at(int index);
 
     void applyScaling(glm::vec3 scaling);
+
+    void applyTransformation(glm::vec3 translation, glm::quat rotation, glm::vec3 scaling);
 };
 
 #endif
