@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 class VertexArrayObject {
-    GLuint VAO;
+    GLuint VAO = 0;
 
 public:
     VertexArrayObject();

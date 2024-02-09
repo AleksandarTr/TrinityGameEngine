@@ -17,8 +17,8 @@ class Camera : public Movable {
 private:
     glm::vec3 orientation = glm::vec3(0,0,-1.0f);
     glm::vec3 up = glm::vec3(0, 1.0f, 0);
-    glm::mat4 cameraMat;
-    std::vector<Shader*> shaders;
+    glm::mat4 cameraMat = glm::mat4(1);
+    std::vector<Shader*> shaders = std::vector<Shader*>();
 
     int width;
     int height;

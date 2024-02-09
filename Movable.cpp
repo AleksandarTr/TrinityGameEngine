@@ -68,5 +68,5 @@ void Movable::incAngularAcceleration(glm::vec3 increment) {
 }
 
 void Movable::rotate(glm::quat direction) {
-    rotation = direction * rotation;
+    rotation = rotation * direction;
 }

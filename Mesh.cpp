@@ -6,9 +6,8 @@
 
 int Mesh::textureSlotAllocator = 0;
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader)
-: vertices(std::move(vertices)), indices(std::move(indices)), shader(shader) {
-}
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader, GLenum drawMode)
+: vertices(std::move(vertices)), indices(std::move(indices)), shader(shader), drawMode(drawMode) {}
 
 void Mesh::bind() {
     VAO.bind();
@@ -37,7 +36,7 @@ void Mesh::draw() {
     initializeOtherFields();
     drawTextures();
 
-    glDrawElements(GL_TRIANGLES, indices.size() * sizeof(Index) / sizeof(GLfloat), GL_UNSIGNED_INT, 0);
+    glDrawElements(drawMode, indices.size() * sizeof(Index) / sizeof(GLint), GL_UNSIGNED_INT, 0);
     Texture::unbind();
     VAO.unbind();
 }
@@ -49,7 +48,7 @@ glm::vec3 Mesh::getScale() const {
 }
 
 void Mesh::setScale(glm::vec3 scale) {
-    if(scale == glm::vec3(0)) throw std::invalid_argument("Scale cannot be zero");
+    //if(scale == glm::vec3(0)) throw std::invalid_argument("Scale cannot be zero");
     this->scale = scale;
 }
 
@@ -61,4 +60,8 @@ void Mesh::updateTransformation() {
     glm::mat4 scalingMatrix = glm::scale(glm::mat4(1), scale);
 
     modelTransformation = translationMat * rotationMatrix * scalingMatrix;
+}
+
+void Mesh::setTransformMatrix(glm::mat4 transform) {
+    modelTransformation = transform;
 }

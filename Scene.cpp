@@ -1,6 +1,7 @@
 #include "Scene.h"
 #include <algorithm>
 #include <stdexcept>
+#include "Model.h"
 
 Model &Scene::operator[](int index) {
     return *models[index];
@@ -33,4 +34,8 @@ void Scene::operator+=(Model &model) {
 
 void Scene::operator-=(Model &model) {
     removeModel(model);
+}
+
+void Scene::draw() {
+    for(auto model : models) model->draw();
 }

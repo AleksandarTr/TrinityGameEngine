@@ -12,12 +12,12 @@
 class gltfReader {
 private:
     struct Buffer {
-        char *data;
+        char *data = nullptr;
         std::string uri;
         std::size_t size;
         std::string name;
 
-        Buffer(std::string &uri, std::size_t size, std::string &name, std::string location);
+        Buffer(std::string &uri, std::size_t size, std::string &name, std::string &location);
 
         ~Buffer();
     };
@@ -180,6 +180,31 @@ private:
         Animation(std::vector<Channel> &channels, std::vector<Sampler> &samplers, std::string &name);
     };
 
+    struct Camera {
+        struct Orthographic {
+            float xmag;
+            float ymag;
+            float zfar;
+            float znear;
+        };
+
+        struct Perspective {
+            float aspectRatio;
+            float yfov;
+            float zfar;
+            float znear;
+        };
+
+        union {
+            Orthographic orthographic;
+            Perspective perspective;
+        };
+        std::string type;
+        std::string name;
+
+        Camera(std::string &name, std::string &type, float arg1, float arg2, float zfar, float znear);
+    };
+
     struct Node {
         int camera;
         std::vector<int> children;
@@ -212,13 +237,19 @@ private:
     std::vector<Mesh> meshes;
     std::vector<Skin> skins;
     std::vector<Animation> animations;
+    std::vector<Camera> cameras;
     std::vector<Node> nodes;
     std::vector<Scene> scenes;
+    Shader &shader;
 
     void insertChildNodes(Model& model, int index);
 
+    std::vector<::Mesh*> &getMeshes(int index);
+
+    [[nodiscard]] char* readAccessor(int accessor, int &width, int &size);
+
 public:
-    gltfReader(std::string uri);
+    gltfReader(std::string uri, Shader &shader);
 
     [[nodiscard]] ::Scene& getScene(int index);
 

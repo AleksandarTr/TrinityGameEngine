@@ -5,13 +5,14 @@
 #include "Scene.h"
 
 class Model : public Movable {
-private:
-    std::vector<Model*> models;
-    Mesh *mesh = nullptr;
-    glm::vec3 scale;
+public:
+    std::vector<Model*> models = std::vector<Model*>();
+    std::vector<Mesh*> meshes = std::vector<Mesh*>();
+    glm::vec3 scale = glm::vec3(1);
+    glm::mat4 transformationMatrix = glm::mat4(1);
 
 public:
-    Model() = default;
+    Model(std::vector<Mesh*> &meshes);
 
     void addModel(Model& model);
 
@@ -29,7 +30,11 @@ public:
 
     void applyScaling(glm::vec3 scaling);
 
-    void applyTransformation(glm::vec3 translation, glm::quat rotation, glm::vec3 scaling);
+    void applyTransformation(glm::mat4 transform);
+
+    void draw();
+
+    glm::vec3 getScale();
 };
 
 #endif

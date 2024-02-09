@@ -30,10 +30,6 @@ int main() {
     glfwMakeContextCurrent(window);
     gladLoadGL();
     glViewport(0, 0, width, height);
-    glfwSetCursorPos(window, width/2, height/2);
-
-    gltfReader chess("test/ABeautifulGame.gltf");
-    Scene scene = chess.getScene(0);
 
     std::vector<Vertex> vertices {
             {{-1.0f, 0, -1.0f},{1, 1, 1},{0, 0, 0},{-1, -0.732f, -1}},
@@ -44,12 +40,12 @@ int main() {
     };
 
     std::vector<Index> indices {
-            {{0, 1, 2}},
-            {{3, 1, 2}},
-            {{0, 1, 4}},
-            {{0, 2, 4}},
-            {{3, 1, 4}},
-            {{3, 2, 4}}};
+            {.triangle{0, 1, 2}},
+            {.triangle{3, 1, 2}},
+            {.triangle{0, 1, 4}},
+            {.triangle{0, 2, 4}},
+            {.triangle{3, 1, 4}},
+            {.triangle{3, 2, 4}}};
 
     std::vector<Vertex> lightVertices = {
             {{-1.0f, -1.0f, -1.0f}, {1, 1, 1}, {}, {}},
@@ -63,18 +59,18 @@ int main() {
     };
 
     std::vector<Index> lightIndices = {
-            {{0, 1, 3}},
-            {{0, 2, 3}},
-            {{0, 4, 5}},
-            {{0, 1, 5}},
-            {{0, 4, 6}},
-            {{0, 2, 6}},
-            {{7, 4, 5}},
-            {{7, 4, 6}},
-            {{7, 2, 3}},
-            {{7, 2, 6}},
-            {{7, 1, 3}},
-            {{7, 1, 5}}
+            {.triangle{0, 1, 3}},
+            {.triangle{0, 2, 3}},
+            {.triangle{0, 4, 5}},
+            {.triangle{0, 1, 5}},
+            {.triangle{0, 4, 6}},
+            {.triangle{0, 2, 6}},
+            {.triangle{7, 4, 5}},
+            {.triangle{7, 4, 6}},
+            {.triangle{7, 2, 3}},
+            {.triangle{7, 2, 6}},
+            {.triangle{7, 1, 3}},
+            {.triangle{7, 1, 5}}
     };
 
     //Create shader program
@@ -90,6 +86,9 @@ int main() {
 
     Shader lightShader("light.frag", "light.vert");
     lightShader.unloadFiles();
+
+    gltfReader chess("test/ABeautifulGame.gltf", shader);
+    Scene scene = chess.getScene(0);
 
     Light light(lightVertices, lightIndices, lightShader, glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
     light.bind();
@@ -123,6 +122,8 @@ int main() {
     bool blink = false;
     bool isOn = true;
 
+    glfwSetCursorPos(window, width/2, height/2);
+
     //Window loop
     while(!glfwWindowShouldClose(window)) {
         double currentTIme = glfwGetTime();
@@ -148,11 +149,12 @@ int main() {
         }
 
         object.update(timeDelta);
-        object.draw();
+        scene.draw();
+        //object.draw();
 
         lightShader.activate();
-        light.draw();
         light2.draw();
+        light.draw();
 
         camera.inputs(window);
         camera.update(timeDelta);

@@ -1,5 +1,6 @@
 #include "Model.h"
 #include <algorithm>
+#include <glm/gtx/matrix_decompose.hpp>
 
 Model &Model::operator[](int index) {
     return *models[index];
@@ -40,10 +41,22 @@ void Model::applyScaling(glm::vec3 scaling) {
     scale.z *= scaling.z;
 }
 
-void Model::applyTransformation(glm::vec3 translation, glm::quat rotation, glm::vec3 scaling) {
-    move(translation);
-    rotate(rotation);
-    applyScaling(scaling);
+void Model::applyTransformation(glm::mat4 transform) {
+    transformationMatrix = transformationMatrix * transform;
 
-    for(auto model : models) model->applyTransformation(translation, rotation, scaling);
+    for(auto model : models) model->applyTransformation(transform);
+    for(auto mesh : meshes) {
+        mesh->setTransformMatrix(transformationMatrix);
+    }
+}
+
+Model::Model(std::vector<Mesh*> &meshes) : meshes(std::move(meshes)) {}
+
+void Model::draw() {
+    for(auto model : models) model->draw();
+    for(auto mesh : meshes) mesh->draw();
+}
+
+glm::vec3 Model::getScale() {
+    return scale;
 }

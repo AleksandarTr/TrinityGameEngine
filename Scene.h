@@ -3,12 +3,11 @@
 
 #include <vector>
 #include "Movable.h"
-
 class Model;
 
 class Scene : public Movable {
-private:
-    std::vector<Model*> models;
+public:
+    std::vector<Model*> models = std::vector<Model*>();
 
 public:
     void addModel(Model& model);
@@ -24,6 +23,8 @@ public:
     Model& operator[] (int index);
 
     Model& at(int index);
+
+    void draw();
 };
 
 #endif

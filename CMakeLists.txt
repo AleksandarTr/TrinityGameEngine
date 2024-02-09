@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.22)
 project(TrinityEngine)
 
 set(CMAKE_CXX_STANDARD 17)
 set(dir ${CMAKE_CURRENT_SOURCE_DIR})
+set(CMAKE_EXE_LINKER_FLAGS "-static")
 include_directories("include")
 include_directories("src")
 

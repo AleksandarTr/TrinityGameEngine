@@ -8,10 +8,10 @@
 
 class Shader {
 private:
-    GLuint programId, fragmentShader, vertexShader;
+    GLuint programId = 0, fragmentShader = 0, vertexShader = 0;
     static GLuint activeShader;
 
-    Camera *camera;
+    Camera *camera = nullptr;
     bool cameraMovedFlag = false;
     friend void Camera::updateMatrix();
 

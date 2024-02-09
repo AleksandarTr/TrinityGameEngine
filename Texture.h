@@ -4,11 +4,11 @@
 #include <glad/glad.h>
 #include <stb/stb_image.h>
 #include <string>
-#include <gl/gl.h>
+#include <glad/glad.h>
 
 class Texture {
 private:
-    GLuint textureId;
+    GLuint textureId = 0;
     GLuint slot;
 
 public:

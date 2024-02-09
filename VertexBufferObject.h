@@ -7,7 +7,7 @@
 
 class VertexBufferObject {
 private:
-    GLuint VBO;
+    GLuint VBO = 0;
 
 public:
     VertexBufferObject();

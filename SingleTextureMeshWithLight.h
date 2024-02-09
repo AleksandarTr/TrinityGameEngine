@@ -6,7 +6,7 @@
 
 class SingleTextureMeshWithLight : public SingleTextureMesh {
 private:
-    std::vector<Light*> lights;
+    std::vector<Light*> lights = std::vector<Light*>();
 
 public:
     SingleTextureMeshWithLight(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader,

@@ -5,8 +5,8 @@
 
 class MultiTextureMesh : public Mesh {
 private:
-    std::vector<Texture> diffuseTextures;
-    std::vector<Texture> specularTextures;
+    std::vector<Texture> diffuseTextures = std::vector<Texture>();
+    std::vector<Texture> specularTextures = std::vector<Texture>();
 
 public:
     MultiTextureMesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader,

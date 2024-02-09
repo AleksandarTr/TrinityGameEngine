@@ -8,7 +8,7 @@
 
 class ElementBufferObject {
 private:
-    GLuint EBO;
+    GLuint EBO = 0;
 
 public:
     ElementBufferObject();
