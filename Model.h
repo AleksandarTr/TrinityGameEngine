@@ -5,7 +5,7 @@
 #include "Scene.h"
 
 class Model : public Movable {
-public:
+private:
     std::vector<Model*> models = std::vector<Model*>();
     std::vector<Mesh*> meshes = std::vector<Mesh*>();
     glm::vec3 scale = glm::vec3(1);

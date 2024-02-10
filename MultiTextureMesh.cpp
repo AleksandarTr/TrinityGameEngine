@@ -1,7 +1,7 @@
 #include "MultiTextureMesh.h"
 
-MultiTextureMesh::MultiTextureMesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader, std::vector<std::string> diffuseTextures, std::vector<std::string> specularTextures)
-: Mesh(std::move(vertices), std::move(indices), shader, GL_TRIANGLES) {
+MultiTextureMesh::MultiTextureMesh(std::vector<Vertex> &vertices, std::vector<Index> &indices, Shader &shader, std::vector<std::string> diffuseTextures, std::vector<std::string> specularTextures)
+: Mesh(vertices, indices, shader, GL_TRIANGLES) {
     textureSlot = textureSlotAllocator;
 
     while(specularTextures.size() > diffuseTextures.size()) specularTextures.pop_back();

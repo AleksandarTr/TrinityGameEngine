@@ -10,8 +10,10 @@ private:
     Texture* specularTexture = nullptr;
 
 public:
-    SingleTextureMesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader,
+    SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<Index> &indices, Shader &shader,
     std::string diffuseTexture = "", std::string specularTexture = "");
+
+    SingleTextureMesh(const SingleTextureMesh&);
 
     void drawTextures() override;
 

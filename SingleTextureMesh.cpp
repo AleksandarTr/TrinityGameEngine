@@ -1,6 +1,6 @@
 #include "SingleTextureMesh.h"
 
-SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader, std::string diffuseTexture, std::string specularTexture)
+SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<Index> &indices, Shader &shader, std::string diffuseTexture, std::string specularTexture)
 : Mesh(vertices, indices, shader, GL_TRIANGLES) {
     if(!diffuseTexture.empty()) {
         this->diffuseTexture = new Texture(diffuseTexture, textureSlotAllocator++, GL_RGB);
@@ -24,3 +24,6 @@ SingleTextureMesh::~SingleTextureMesh() {
     delete diffuseTexture;
     delete specularTexture;
 }
+
+SingleTextureMesh::SingleTextureMesh(const SingleTextureMesh &mesh) : Mesh(mesh), diffuseTexture(mesh.diffuseTexture),
+specularTexture(mesh.specularTexture) {}

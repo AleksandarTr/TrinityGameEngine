@@ -19,6 +19,8 @@ public:
     GLuint getID();
 
     ~VertexArrayObject();
+
+    VertexArrayObject(const VertexArrayObject&);
 };
 
 #endif

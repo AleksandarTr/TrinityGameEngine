@@ -9,11 +9,12 @@
 class ElementBufferObject {
 private:
     GLuint EBO = 0;
+    bool assigned = false;
 
 public:
     ElementBufferObject();
 
-    void bind(std::vector<Index> indices);
+    void bind(std::vector<Index> &indices);
 
     void unbind();
 

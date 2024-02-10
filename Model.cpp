@@ -50,7 +50,7 @@ void Model::applyTransformation(glm::mat4 transform) {
     }
 }
 
-Model::Model(std::vector<Mesh*> &meshes) : meshes(std::move(meshes)) {}
+Model::Model(std::vector<Mesh*> &meshes) : meshes(meshes) {}
 
 void Model::draw() {
     for(auto model : models) model->draw();

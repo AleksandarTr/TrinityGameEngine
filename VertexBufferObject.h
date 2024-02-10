@@ -8,11 +8,12 @@
 class VertexBufferObject {
 private:
     GLuint VBO = 0;
+    bool assigned = false;
 
 public:
     VertexBufferObject();
 
-    void bind(std::vector<Vertex> vertices);
+    void bind(std::vector<Vertex> &vertices);
 
     void unbind();
 

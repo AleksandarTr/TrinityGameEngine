@@ -6,7 +6,7 @@
 class Model;
 
 class Scene : public Movable {
-public:
+private:
     std::vector<Model*> models = std::vector<Model*>();
 
 public:

@@ -242,9 +242,13 @@ private:
     std::vector<Scene> scenes;
     Shader &shader;
 
+    std::vector<::Mesh*> **meshBuffer = nullptr;
+
     void insertChildNodes(Model& model, int index);
 
     std::vector<::Mesh*> &getMeshes(int index);
+
+    std::vector<::Mesh *> &copyMeshes(int index);
 
     [[nodiscard]] char* readAccessor(int accessor, int &width, int &size);
 

@@ -6,8 +6,8 @@
 
 int Mesh::textureSlotAllocator = 0;
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader, GLenum drawMode)
-: vertices(std::move(vertices)), indices(std::move(indices)), shader(shader), drawMode(drawMode) {}
+Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<Index> &indices, Shader &shader, GLenum drawMode)
+: vertices(vertices), indices(indices), shader(shader), drawMode(drawMode) {}
 
 void Mesh::bind() {
     VAO.bind();
@@ -65,3 +65,6 @@ void Mesh::updateTransformation() {
 void Mesh::setTransformMatrix(glm::mat4 transform) {
     modelTransformation = transform;
 }
+
+Mesh::Mesh(const Mesh &copy) : indices(copy.indices), vertices(copy.vertices), shader(copy.shader), VAO(copy.VAO),
+VBO(copy.VBO), EBO(copy.EBO), textureSlot(copy.textureSlot), drawMode(copy.drawMode){}

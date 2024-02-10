@@ -13,7 +13,7 @@
 #include "Camera.h"
 
 class Mesh : public Movable {
-public:
+protected:
     VertexArrayObject VAO = VertexArrayObject();
     VertexBufferObject VBO = VertexBufferObject();
     ElementBufferObject EBO = ElementBufferObject();
@@ -23,14 +23,16 @@ public:
     std::vector<Index> indices = std::vector<Index>();
     GLenum drawMode = GL_TRIANGLES;
 
-    static int textureSlotAllocator;
     int textureSlot = -1;
     glm::vec3 scale = glm::vec3(1.0f);
     glm::mat4 modelTransformation = glm::mat4(1);
     glm::mat4 rotationMatrix = glm::mat4(1);
+    static int textureSlotAllocator;
 
 public:
-    Mesh(std::vector<Vertex> vertices, std::vector<Index> indices, Shader &shader, GLenum drawMode);
+    Mesh(std::vector<Vertex> &vertices, std::vector<Index> &indices, Shader &shader, GLenum drawMode);
+
+    Mesh(const Mesh&);
 
     void updateTransformation();
 

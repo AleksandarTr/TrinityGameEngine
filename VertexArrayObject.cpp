@@ -25,3 +25,5 @@ void VertexArrayObject::linkVBO(GLuint layout, std::size_t elemCount, GLenum typ
     glVertexAttribPointer(layout, elemCount, type, GL_FALSE, stride, (void*) offset);
     glEnableVertexAttribArray(layout);
 }
+
+VertexArrayObject::VertexArrayObject(const VertexArrayObject &) : VertexArrayObject() {}

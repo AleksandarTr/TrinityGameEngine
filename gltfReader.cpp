@@ -305,7 +305,25 @@ void gltfReader::insertChildNodes(Model &model, int index) {
     }
 }
 
+std::vector<::Mesh *> &gltfReader::copyMeshes(int index) {
+    auto &result = *new std::vector<::Mesh*>();
+
+    for(int i = 0; i < meshBuffer[index]->size(); i++) {
+        auto mesh = new SingleTextureMesh(dynamic_cast<SingleTextureMesh&>(*meshBuffer[index]->at(i)));
+        mesh->bind();
+        result.push_back(mesh);
+    }
+
+    return result;
+}
+
 std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
+    if(meshBuffer == nullptr) {
+        meshBuffer = new std::vector< ::Mesh *>*[meshes.size()];
+        for(int i = 0; i < meshes.size(); i++) meshBuffer[i] = nullptr;
+    }
+    if(meshBuffer[index] != nullptr) return copyMeshes(index);
+
     std::cout << "Mesh " << index << '/' << meshes.size() << std::endl;
     auto &result = *new std::vector<::Mesh*>();
     for(Mesh::Primitive primitive : meshes[index].primitives) {
@@ -416,6 +434,7 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         result.push_back(&mesh);
     }
 
+    meshBuffer[index] = &result;
     return result;
 }
 
