@@ -3,7 +3,7 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <iostream>
 #include "Mesh.h"
-#include "SingleTextureMeshWithLight.h"
+#include "SingleTextureMesh.h"
 
 gltfReader::gltfReader(std::string uri, Shader &shader) : shader(shader) {
     std::ifstream reader(uri);
@@ -411,7 +411,7 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         delete [] texCoordData;
         delete [] indexData;
 
-        ::Mesh& mesh = *new SingleTextureMeshWithLight(vertices, indices, shader);
+        ::Mesh& mesh = *new SingleTextureMesh(vertices, indices, shader);
         mesh.bind();
         result.push_back(&mesh);
     }

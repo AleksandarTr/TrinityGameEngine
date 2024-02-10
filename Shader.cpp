@@ -1,4 +1,6 @@
 #include "Shader.h"
+#include <algorithm>
+#include "Light.h"
 
 GLuint Shader::activeShader = 0;
 
@@ -36,11 +38,36 @@ std::string Shader::readFile(std::string location) {
     return result;
 }
 
+void Shader::loadLights(){
+    for(int i = 0; i < lights.size(); i++) {
+        glm::vec3 lightSource = lights[i]->getPosition();
+        glm::vec3 lightDir = lights[i]->getDirection();
+        glm::vec3 lightColor = lights[i]->getColor();
+
+        char l1[20];
+        char l2[20];
+        char l3[20];
+        char l4[20];
+        sprintf(l1, "lightPos[%d]", i);
+        sprintf(l2, "lightingType[%d]", i);
+        sprintf(l3, "lightDir[%d]", i);
+        sprintf(l4, "lightColor[%d]", i);
+
+        glUniform3f(glGetUniformLocation(programId, l1), lightSource.x, lightSource.y,lightSource.z);
+        glUniform1i(glGetUniformLocation(programId, l2),static_cast<GLint>(lights[i]->getType()));
+        glUniform3f(glGetUniformLocation(programId, l3), lightDir.x, lightDir.y, lightDir.z);
+        glUniform4f(glGetUniformLocation(programId, l4), lightColor.x, lightColor.y, lightColor.z,1.0f);
+        glUniform1i(glGetUniformLocation(programId, "lightNum"), lights.size());
+    }
+}
+
 void Shader::activate() {
     if(activeShader != programId) {
         glUseProgram(programId);
         activeShader = programId;
     }
+
+    if(lightsChanged) loadLights();
 
     if(cameraMovedFlag) {
         cameraMovedFlag = false;
@@ -63,4 +90,32 @@ GLuint Shader::getProgramID() {
 
 void Shader::setCamera(Camera &camera) {
     this->camera = &camera;
+}
+
+void Shader::addLight(Light &light) {
+    if(lights.size() >= 16) throw std::invalid_argument("More than 16 light sources cannot be linked to a single object.");
+    if(std::find(lights.begin(), lights.end(), &light) != lights.end()) return;
+    lights.push_back(&light);
+    lightsChanged = true;
+}
+
+void Shader::removeLight(int index) {
+    if(lights.empty()) return;
+    if(index == -1) {
+        lights.pop_back();
+        lightsChanged = true;
+        return;
+    }
+    if(lights.size() <= index) return;
+
+    lights.erase(lights.begin() + index);
+    lightsChanged = true;
+}
+
+void Shader::removeLight(Light &light) {
+    auto result = std::find(lights.begin(), lights.end(), &light);
+    if(result != lights.end()) {
+        lights.erase(result);
+        lightsChanged = true;
+    }
 }

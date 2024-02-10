@@ -22,8 +22,6 @@ add_executable(TrinityEngine main.cpp glad.c
         Camera.h
         Mesh.h
         Mesh.cpp
-        SingleTextureMeshWithLight.cpp
-        SingleTextureMeshWithLight.h
         Movable.cpp
         Movable.h
         Structs.h

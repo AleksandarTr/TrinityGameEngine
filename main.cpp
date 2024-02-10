@@ -4,8 +4,9 @@
 #include <GLFW/glfw3.h>
 #include "Camera.h"
 #include "Structs.h"
-#include "SingleTextureMeshWithLight.h"
+#include "SingleTextureMesh.h"
 #include "gltfReader.h"
+#include "Light.h"
 
 int width = 1280;
 int height = 720;
@@ -77,7 +78,7 @@ int main() {
     Shader shader("singleTex.frag", "singleTex.vert");
     shader.unloadFiles();
 
-    SingleTextureMeshWithLight object(vertices, indices, shader, {"Textures/unnamed.jpg"}, {"Textures/spec.jpg"});
+    SingleTextureMesh object(vertices, indices, shader, {"Textures/unnamed.jpg"}, {"Textures/spec.jpg"});
     object.bind();
 
     Camera camera(width, height, glm::vec3(-0.5f,0.5f,10));
@@ -101,8 +102,8 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     double prevTime = glfwGetTime();
     object.setAngularVelocity(glm::vec3(0, 3, 0));
-    object.addLight(light);
-    object.addLight(light2);
+    shader.addLight(light);
+    shader.addLight(light2);
 
     light.setScale(glm::vec3(0.2f));
     light2.setScale(glm::vec3(0.25f));
