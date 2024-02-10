@@ -20,7 +20,7 @@ protected:
     Shader &shader;
 
     std::vector<Vertex> vertices = std::vector<Vertex>();
-    std::vector<Index> indices = std::vector<Index>();
+    std::vector<GLuint> indices = std::vector<GLuint>();
     GLenum drawMode = GL_TRIANGLES;
 
     int textureSlot = -1;
@@ -30,7 +30,7 @@ protected:
     static int textureSlotAllocator;
 
 public:
-    Mesh(std::vector<Vertex> &vertices, std::vector<Index> &indices, Shader &shader, GLenum drawMode);
+    Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode);
 
     Mesh(const Mesh&);
 

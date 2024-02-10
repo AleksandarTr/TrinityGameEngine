@@ -40,13 +40,13 @@ int main() {
             {{0, 2.0f, 0},{1, 1, 1},{0.5f, 1.0f, 0},{0, 1.0f, 0}}
     };
 
-    std::vector<Index> indices {
-            {.triangle{0, 1, 2}},
-            {.triangle{3, 1, 2}},
-            {.triangle{0, 1, 4}},
-            {.triangle{0, 2, 4}},
-            {.triangle{3, 1, 4}},
-            {.triangle{3, 2, 4}}};
+    std::vector<GLuint> indices {
+            0, 1, 2,
+            3, 1, 2,
+            0, 1, 4,
+            0, 2, 4,
+            3, 1, 4,
+            3, 2, 4};
 
     std::vector<Vertex> lightVertices = {
             {{-1.0f, -1.0f, -1.0f}, {1, 1, 1}, {}, {}},
@@ -59,20 +59,19 @@ int main() {
             {{1.0f, 1.0f, 1.0f}, {1, 1, 1}, {}, {}}
     };
 
-    std::vector<Index> lightIndices = {
-            {.triangle{0, 1, 3}},
-            {.triangle{0, 2, 3}},
-            {.triangle{0, 4, 5}},
-            {.triangle{0, 1, 5}},
-            {.triangle{0, 4, 6}},
-            {.triangle{0, 2, 6}},
-            {.triangle{7, 4, 5}},
-            {.triangle{7, 4, 6}},
-            {.triangle{7, 2, 3}},
-            {.triangle{7, 2, 6}},
-            {.triangle{7, 1, 3}},
-            {.triangle{7, 1, 5}}
-    };
+    std::vector<GLuint> lightIndices = {
+            0, 1, 3,
+            0, 2, 3,
+            0, 4, 5,
+            0, 1, 5,
+            0, 4, 6,
+            0, 2, 6,
+            7, 4, 5,
+            7, 4, 6,
+            7, 2, 3,
+            7, 2, 6,
+            7, 1, 3,
+            7, 1, 5};
 
     //Create shader program
     Shader shader("singleTex.frag", "singleTex.vert");
@@ -87,6 +86,9 @@ int main() {
 
     Shader lightShader("light.frag", "light.vert");
     lightShader.unloadFiles();
+
+    SingleTextureMesh object2 = object;
+    object2.bind();
 
     gltfReader chess("test/ABeautifulGame.gltf", shader);
     Scene scene = chess.getScene(0);
@@ -152,6 +154,7 @@ int main() {
         object.update(timeDelta);
         scene.draw();
         //object.draw();
+        //object2.draw();
 
         lightShader.activate();
         light2.draw();

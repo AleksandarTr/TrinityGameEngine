@@ -5,6 +5,12 @@
 #include "Mesh.h"
 #include "SingleTextureMesh.h"
 
+bool isBigEndian() {
+    int test = 1;
+
+    return *(char*)&test != 1;
+}
+
 gltfReader::gltfReader(std::string uri, Shader &shader) : shader(shader) {
     std::ifstream reader(uri);
     nlohmann::json data = nlohmann::json::parse(reader);
@@ -324,12 +330,13 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
     }
     if(meshBuffer[index] != nullptr) return copyMeshes(index);
 
+    bool padding = isBigEndian();
     std::cout << "Mesh " << index << '/' << meshes.size() << std::endl;
     auto &result = *new std::vector<::Mesh*>();
     for(Mesh::Primitive primitive : meshes[index].primitives) {
         GLenum drawMode = primitive.mode;
         std::vector<Vertex> vertices;
-        std::vector<Index> indices;
+        std::vector<GLuint> indices;
 
         int ind = 0;
         while(ind < primitive.attributes.size() && primitive.attributes[ind] != "POSITION") ind++;
@@ -369,24 +376,24 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         glm::vec3 texCoord(0);
 
         for(int i = 0; i < accessors[positionAccessor].count; i++) {
-            strncpy(reinterpret_cast<char *>(&position), positionData + i * 12, 12);
+            memcpy(reinterpret_cast<char *>(&position), positionData + i * 12, 12);
 
             if(normalData) {
                 char *normalAdr = (char*) &normal;
-                strncpy(normalAdr, normalData + i * normalSize, normalWidth);
+                memcpy(normalAdr, normalData + i * normalSize, normalWidth);
                 if (normalSize / normalWidth >= 2)
-                    strncpy(normalAdr + 4, normalData + i * normalSize + normalWidth,normalWidth);
+                    memcpy(normalAdr + 4, normalData + i * normalSize + normalWidth,normalWidth);
                 if (normalSize / normalWidth >= 3)
-                    strncpy(normalAdr + 8, normalData + i * normalSize + 2 * normalWidth,normalWidth);
+                    memcpy(normalAdr + 8, normalData + i * normalSize + 2 * normalWidth,normalWidth);
             }
 
             if(texCoordData) {
                 char *texCoordAdr = (char*) &texCoord;
-                strncpy(texCoordAdr, texCoordData + i * texCoordSize, texCoordWidth);
+                memcpy(texCoordAdr, texCoordData + i * texCoordSize, texCoordWidth);
                 if (texCoordSize / texCoordWidth >= 2)
-                    strncpy(texCoordAdr + 4, texCoordData + i * texCoordSize + texCoordWidth,texCoordWidth);
+                    memcpy(texCoordAdr + 4, texCoordData + i * texCoordSize + texCoordWidth,texCoordWidth);
                 if (texCoordSize / texCoordWidth >= 3)
-                    strncpy(texCoordAdr + 8,texCoordData + i * texCoordSize + 2 * texCoordWidth, texCoordWidth);
+                    memcpy(texCoordAdr + 8,texCoordData + i * texCoordSize + 2 * texCoordWidth, texCoordWidth);
             }
             vertices.push_back({position, {0.5, 0.5, 0.5}, texCoord, normal});
             position = glm::vec3(0);
@@ -394,33 +401,10 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
             texCoord = glm::vec3(0);
         }
 
-        if(indexWidth == 4)
-            std::cout << "hey";
-
-        switch(drawMode) {
-            case GL_POINTS:
-                indexSize = indexWidth;
-                break;
-            case GL_LINES:
-            case GL_LINE_LOOP:
-            case GL_LINE_STRIP:
-                indexSize = 2 * indexWidth;
-                break;
-            case GL_TRIANGLES:
-            case GL_TRIANGLE_FAN:
-            case GL_TRIANGLE_STRIP:
-            default:
-                indexSize = 3 * indexWidth;
-                break;
-        }
-
-        Index index = {.triangle{0, 0, 0}};
+        int index = 0;
         char* indexAdr = (char*) &index;
-        if(indexData != nullptr) for(int i = 0; i < accessors[primitive.indices].count * indexWidth; i += indexSize) {
-            strncpy(indexAdr, indexData + i, indexWidth);
-            strncpy(indexAdr + 4, indexData + i + indexWidth, indexWidth);
-            strncpy(indexAdr + 8, indexData + i + 2 * indexWidth, indexWidth);
-
+        if(indexData != nullptr) for(int i = 0; i < accessors[primitive.indices].count * indexWidth; i += indexWidth) {
+            memcpy(indexAdr + (padding ? sizeof(int) - indexWidth : 0), indexData + i, indexWidth);
             indices.push_back(index);
         }
 
@@ -436,16 +420,6 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
 
     meshBuffer[index] = &result;
     return result;
-}
-
-bool isBigEndian() {
-    union test {
-        short a;
-        char b[2];
-    };
-    test a = {.a=1};
-
-    return a.b[1] == 1;
 }
 
 char* gltfReader::readAccessor(int accessor, int &width, int &size) {
@@ -484,13 +458,20 @@ char* gltfReader::readAccessor(int accessor, int &width, int &size) {
     char *destination = new char[size * accessors[accessor].count];
     int pos = bufferViews[bufferView].offset + accessors[accessor].offset;
 
+    const static int sectorSize = 0x4000;
+    char sector[sectorSize];
     char buf[width];
     if(readFile) {
         std::ifstream reader(buffers[buffer].uri, std::ios::binary);
         reader.seekg(pos);
+
         for(int i = 0; i < size * accessors[accessor].count; i += size) {
-            reader.read(destination + i, size);
-            reader.seekg((int) reader.tellg() + stride);
+            if(i % sectorSize < size) {
+                reader.read(sector, sectorSize);
+                pos += sectorSize;
+                reader.seekg(pos);
+            }
+            memcpy(destination + i, sector + i % sectorSize, size);
 
             if(flip) {
                 for(int j = 0; j < size; j += width) {
@@ -502,7 +483,7 @@ char* gltfReader::readAccessor(int accessor, int &width, int &size) {
     }
     else {
         for(int i = 0; i < size * accessors[accessor].count; i += size) {
-            strncpy(destination + i, buffers[buffer].data + pos, size);
+            memcpy(destination + i, buffers[buffer].data + pos, size);
             pos += stride;
 
             for(int j = 0; j < size; j += width) {

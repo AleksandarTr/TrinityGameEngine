@@ -6,7 +6,7 @@
 
 int Mesh::textureSlotAllocator = 0;
 
-Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<Index> &indices, Shader &shader, GLenum drawMode)
+Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode)
 : vertices(vertices), indices(indices), shader(shader), drawMode(drawMode) {}
 
 void Mesh::bind() {
@@ -36,7 +36,7 @@ void Mesh::draw() {
     initializeOtherFields();
     drawTextures();
 
-    glDrawElements(drawMode, indices.size() * sizeof(Index) / sizeof(GLint), GL_UNSIGNED_INT, 0);
+    glDrawElements(drawMode, indices.size(), GL_UNSIGNED_INT, 0);
     Texture::unbind();
     VAO.unbind();
 }

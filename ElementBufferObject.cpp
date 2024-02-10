@@ -4,10 +4,10 @@ ElementBufferObject::ElementBufferObject() {
     glGenBuffers(1, &EBO);
 }
 
-void ElementBufferObject::bind(std::vector<Index> &indices) {
+void ElementBufferObject::bind(std::vector<GLuint> &indices) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     if(!assigned) {
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(Index), indices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
         assigned = true;
     }
 }

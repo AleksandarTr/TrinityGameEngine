@@ -14,7 +14,7 @@ private:
 public:
     ElementBufferObject();
 
-    void bind(std::vector<Index> &indices);
+    void bind(std::vector<GLuint> &indices);
 
     void unbind();
 
