@@ -2,14 +2,19 @@
 #define TRINITYENGINE_MODEL_H
 
 #include "Mesh.h"
-#include "Scene.h"
 
-class Model : public Movable {
+class gltfReader;
+
+class Model : private Movable {
 private:
     std::vector<Model*> models = std::vector<Model*>();
     std::vector<Mesh*> meshes = std::vector<Mesh*>();
-    glm::vec3 scale = glm::vec3(1);
     glm::mat4 transformationMatrix = glm::mat4(1);
+    glm::vec3 localPosition = glm::vec3(0);
+
+    friend class gltfReader;
+
+    void setLocalPosition();
 
 public:
     Model(std::vector<Mesh*> &meshes);
@@ -28,13 +33,21 @@ public:
 
     Model& at(int index);
 
-    void applyScaling(glm::vec3 scaling);
+    void transform(glm::mat4 transform);
 
-    void applyTransformation(glm::mat4 transform);
+    void move(glm::vec3 direction);
+
+    void rotate(glm::quat direction);
+
+    void rotate(glm::vec3 direction);
+
+    void scale(glm::vec3 scaling);
 
     void draw();
 
-    glm::vec3 getScale();
+    using Movable::getScale;
+    using Movable::getRotation;
+    using Movable::getPosition;
 };
 
 #endif

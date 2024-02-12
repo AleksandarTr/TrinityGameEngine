@@ -7,6 +7,7 @@
 #include "SingleTextureMesh.h"
 #include "gltfReader.h"
 #include "Light.h"
+#include "Model.h"
 
 int width = 1280;
 int height = 720;
@@ -91,7 +92,7 @@ int main() {
     object2.bind();
 
     gltfReader chess("test/ABeautifulGame.gltf", shader);
-    Scene scene = chess.getScene(0);
+    Model &scene = chess.getScene(0);
 
     Light light(lightVertices, lightIndices, lightShader, glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
     light.bind();

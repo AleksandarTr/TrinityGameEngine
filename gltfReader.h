@@ -7,7 +7,10 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include "Model.h"
+
+class Model;
+class Shader;
+class Mesh;
 
 class gltfReader {
 private:
@@ -255,7 +258,7 @@ private:
 public:
     gltfReader(std::string uri, Shader &shader);
 
-    [[nodiscard]] ::Scene& getScene(int index);
+    [[nodiscard]] ::Model& getScene(int index);
 
     int getSceneCount();
 };

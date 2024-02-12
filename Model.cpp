@@ -1,6 +1,7 @@
 #include "Model.h"
 #include <algorithm>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 Model &Model::operator[](int index) {
     return *models[index];
@@ -35,18 +36,25 @@ void Model::operator-=(Model &model) {
     removeModel(model);
 }
 
-void Model::applyScaling(glm::vec3 scaling) {
-    scale.x *= scaling.x;
-    scale.y *= scaling.y;
-    scale.z *= scaling.z;
-}
+void Model::transform(glm::mat4 transform) {
+    transformationMatrix *= transform;
 
-void Model::applyTransformation(glm::mat4 transform) {
-    transformationMatrix = transformationMatrix * transform;
+    glm::vec3 position;
+    glm::quat rotation;
+    glm::vec3 scale;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::decompose(transformationMatrix, scale, rotation, position, skew, perspective);
 
-    for(auto model : models) model->applyTransformation(transform);
+    setPosition(position);
+    setRotation(rotation);
+    setScale(scale);
+
+    for(auto model : models) model->transform(transform);
     for(auto mesh : meshes) {
-        mesh->setTransformMatrix(transformationMatrix);
+        mesh->setPosition(position);
+        mesh->setRotation(rotation);
+        mesh->setScale(scale);
     }
 }
 
@@ -57,6 +65,53 @@ void Model::draw() {
     for(auto mesh : meshes) mesh->draw();
 }
 
-glm::vec3 Model::getScale() {
-    return scale;
+void Model::move(glm::vec3 direction) {
+    Movable::move(direction);
+
+    for(auto model : models) model->move(direction);
+    for(auto mesh : meshes) mesh->setPosition(getPosition());
+}
+
+void Model::rotate(glm::vec3 direction) {
+    Movable::rotate(direction);
+    glm::vec3 newPos = glm::eulerAngleXYZ(direction.x, direction.y, direction.z) * glm::vec4(localPosition, 1.0f);
+    Movable::setPosition(getPosition() - localPosition + newPos);
+    localPosition = newPos;
+
+    for(auto model : models) model->rotate(direction);
+    for(auto mesh : meshes) {
+        mesh->setRotation(getRotation());
+        mesh->setPosition(getPosition());
+    }
+}
+
+void Model::rotate(glm::quat direction) {
+    Movable::rotate(direction);
+    glm::vec3 newPos = glm::toMat4(direction) * glm::vec4(localPosition, 1.0f);
+    Movable::setPosition(getPosition() - localPosition + newPos);
+    localPosition = newPos;
+
+    for(auto model : models) model->rotate(direction);
+    for(auto mesh : meshes) {
+        mesh->setRotation(getRotation());
+        mesh->setPosition(getPosition());
+    }
+}
+
+void Model::scale(glm::vec3 scaling) {
+    Movable::scale(scaling);
+    glm::vec3 newPos = localPosition * scaling;
+    Movable::setPosition(getPosition() - localPosition + newPos);
+    localPosition = newPos;
+
+    for(auto model : models) model->scale(scaling);
+    for(auto mesh : meshes) {
+        mesh->setScale(getScale());
+        mesh->setPosition(getPosition());
+    }
+}
+
+void Model::setLocalPosition() {
+    localPosition = getPosition();
+    for(auto model : models) model->setLocalPosition();
 }

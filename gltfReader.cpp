@@ -2,8 +2,8 @@
 #include "gltfReader.h"
 #include <glm/gtx/matrix_decompose.hpp>
 #include <iostream>
-#include "Mesh.h"
 #include "SingleTextureMesh.h"
+#include "Model.h"
 
 bool isBigEndian() {
     int test = 1;
@@ -251,10 +251,7 @@ gltfReader::gltfReader(std::string uri, Shader &shader) : shader(shader) {
                 for(int j = 0; j < 4; j++) matrix[i][j] = node["matrix"][j * 4 + i];
 
         glm::quat rotation = {1, 0, 0, 0};
-        if(node.contains("rotation")) {
-            for(int i = 1; i < 4; i++) rotation[i] = node["rotation"][i-1];
-            rotation[0] = node["rotation"][3];
-        }
+        if(node.contains("rotation")) for(int i = 0; i < 4; i++) rotation[i] = node["rotation"][i];
 
         glm::vec3 scale = {1, 1, 1};
         if(node.contains("scale")) for(int i = 0; i < 3; i++) scale[i] = node["scale"][i];
@@ -282,8 +279,9 @@ int gltfReader::getSceneCount() {
     return scenes.size();
 }
 
-Scene &gltfReader::getScene(int index) {
-    auto &scene = *new ::Scene();
+Model &gltfReader::getScene(int index) {
+    std::vector<::Mesh*> dummy;
+    auto &scene = *new Model(dummy);
     for(int node : scenes[index].nodes) {
         std::vector<::Mesh*> *meshes = nullptr;
         if(nodes[node].mesh != -1) meshes = &getMeshes(nodes[node].mesh);
@@ -297,8 +295,6 @@ Scene &gltfReader::getScene(int index) {
 }
 
 void gltfReader::insertChildNodes(Model &model, int index) {
-    model.applyTransformation(nodes[index].matrix);
-
     for(int node : nodes[index].children) {
         std::vector<::Mesh*> *meshes = nullptr;
         if(nodes[node].mesh != -1) {
@@ -309,6 +305,9 @@ void gltfReader::insertChildNodes(Model &model, int index) {
         model += newModel;
         insertChildNodes(newModel, node);
     }
+
+    model.transform(nodes[index].matrix);
+    model.setLocalPosition();
 }
 
 std::vector<::Mesh *> &gltfReader::copyMeshes(int index) {
@@ -331,7 +330,6 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
     if(meshBuffer[index] != nullptr) return copyMeshes(index);
 
     bool padding = isBigEndian();
-    std::cout << "Mesh " << index << '/' << meshes.size() << std::endl;
     auto &result = *new std::vector<::Mesh*>();
     for(Mesh::Primitive primitive : meshes[index].primitives) {
         GLenum drawMode = primitive.mode;
@@ -401,11 +399,11 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
             texCoord = glm::vec3(0);
         }
 
-        int index = 0;
-        char* indexAdr = (char*) &index;
+        int indexPoint = 0;
+        char* indexAdr = (char*) &indexPoint;
         if(indexData != nullptr) for(int i = 0; i < accessors[primitive.indices].count * indexWidth; i += indexWidth) {
             memcpy(indexAdr + (padding ? sizeof(int) - indexWidth : 0), indexData + i, indexWidth);
-            indices.push_back(index);
+            indices.push_back(indexPoint);
         }
 
         delete [] positionData;

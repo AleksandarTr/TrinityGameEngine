@@ -8,6 +8,7 @@ class Movable {
 private:
     glm::vec3 position = glm::vec3(0);
     glm::quat rotation = glm::quat(1, 0, 0, 0);
+    glm::vec3 scaling = glm::vec3(1);
 
     glm::vec3 velocity = glm::vec3(0);
     glm::vec3 angularVelocity = glm::vec3(0);
@@ -46,6 +47,16 @@ public:
     void incAngularVelocity(glm::vec3 increment);
 
     void incAngularAcceleration(glm::vec3 increment);
+
+    void setPosition(glm::vec3 position);
+
+    void setRotation(glm::quat rotation);
+
+    void setScale(glm::vec3 scale);
+
+    void scale(glm::vec3 scaling);
+
+    glm::vec3 getScale();
 };
 
 #endif

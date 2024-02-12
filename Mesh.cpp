@@ -43,27 +43,12 @@ void Mesh::draw() {
 
 void Mesh::initializeOtherFields() {}
 
-glm::vec3 Mesh::getScale() const {
-    return scale;
-}
-
-void Mesh::setScale(glm::vec3 scale) {
-    //if(scale == glm::vec3(0)) throw std::invalid_argument("Scale cannot be zero");
-    this->scale = scale;
-}
-
 void Mesh::updateTransformation() {
-    glm::quat rotation = getRotation();
-    rotationMatrix = glm::mat4_cast(rotation);
-
+    rotationMatrix = glm::mat4_cast(getRotation());
     glm::mat4 translationMat = glm::translate(glm::mat4(1), getPosition());
-    glm::mat4 scalingMatrix = glm::scale(glm::mat4(1), scale);
+    glm::mat4 scalingMatrix = glm::scale(glm::mat4(1), getScale());
 
     modelTransformation = translationMat * rotationMatrix * scalingMatrix;
-}
-
-void Mesh::setTransformMatrix(glm::mat4 transform) {
-    modelTransformation = transform;
 }
 
 Mesh::Mesh(const Mesh &copy) : indices(copy.indices), vertices(copy.vertices), shader(copy.shader), VAO(copy.VAO),

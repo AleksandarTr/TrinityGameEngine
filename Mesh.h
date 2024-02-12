@@ -24,7 +24,6 @@ protected:
     GLenum drawMode = GL_TRIANGLES;
 
     int textureSlot = -1;
-    glm::vec3 scale = glm::vec3(1.0f);
     glm::mat4 modelTransformation = glm::mat4(1);
     glm::mat4 rotationMatrix = glm::mat4(1);
     static int textureSlotAllocator;
@@ -43,12 +42,6 @@ public:
     void draw();
 
     virtual void initializeOtherFields();
-
-    glm::vec3 getScale() const;
-
-    void setScale(glm::vec3 scale);
-
-    void setTransformMatrix(glm::mat4 transform);
 };
 
 #endif
