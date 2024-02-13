@@ -10,7 +10,7 @@ private:
 
 public:
     MultiTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader,
-    std::vector<std::string> diffuseTextures = std::vector<std::string>(), std::vector<std::string> specularTextures = std::vector<std::string>());
+    std::vector<TextureInfo> diffuseTextures = std::vector<TextureInfo>(), std::vector<TextureInfo> specularTextures = std::vector<TextureInfo>());
 
     void drawTextures() override;
 };

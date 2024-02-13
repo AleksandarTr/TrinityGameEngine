@@ -3,9 +3,8 @@
 #include <utility>
 
 Light::Light(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, glm::vec3 color,
-             glm::vec3 direction, LightingType type, std::vector<std::string> diffuseTextures,
-             std::vector<std::string> specularTextures) :
-        MultiTextureMesh(vertices, indices, shader, std::move(diffuseTextures), std::move(specularTextures)), color(color), type(type), direction(direction) {}
+             glm::vec3 direction, LightingType type, TextureInfo diffuseTextures, TextureInfo specularTextures) :
+        SingleTextureMesh(vertices, indices, shader, GL_TRIANGLES, diffuseTextures, specularTextures), color(color), type(type), direction(direction) {}
 
 const glm::vec3 &Light::getColor() const {
     return color;

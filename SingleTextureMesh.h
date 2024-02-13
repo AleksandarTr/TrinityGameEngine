@@ -11,7 +11,7 @@ private:
 
 public:
     SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode,
-    std::string diffuseTexture = "", std::string specularTexture = "");
+    TextureInfo diffuseTexture = TextureInfo(), TextureInfo specularTexture = TextureInfo());
 
     SingleTextureMesh(const SingleTextureMesh&);
 

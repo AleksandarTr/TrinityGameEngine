@@ -5,6 +5,7 @@
 #include <stb/stb_image.h>
 #include <string>
 #include <glad/glad.h>
+#include "Structs.h"
 
 class Texture {
 private:
@@ -13,7 +14,7 @@ private:
     std::string location;
 
 public:
-    Texture(std::string location, GLuint slot, GLenum format);
+    Texture(TextureInfo info, GLuint slot);
 
     void bind();
 

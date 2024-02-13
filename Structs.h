@@ -2,6 +2,7 @@
 #define TRINITYENGINE_STRUCTS_H
 
 #include <glm/glm.hpp>
+#include <string>
 
 struct Vertex {
     glm::vec3 position = glm::vec3(0);
@@ -11,5 +12,14 @@ struct Vertex {
 };
 
 enum struct LightingType {PointLight, DirectionalLight, SpotLight};
+
+struct TextureInfo {
+    std::string location = "";
+    std::string format = "image/jpeg";
+    int magFilter = GL_NEAREST;
+    int minFilter = GL_NEAREST;
+    int wrapS = GL_REPEAT;
+    int wrapT = GL_REPEAT;
+};
 
 #endif

@@ -421,12 +421,44 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         delete [] indexData;
 
         int diffuseTextureIndex = materials[primitive.material].baseTextureIndex;
-        std::string diffuseTexture;
-        if(diffuseTextureIndex != -1) diffuseTexture = images[textures[diffuseTextureIndex].source].uri;
+        TextureInfo diffuseTexture;
+        if(diffuseTextureIndex != -1) {
+            diffuseTexture.location = images[textures[diffuseTextureIndex].source].uri;
+
+            diffuseTexture.format = images[textures[diffuseTextureIndex].source].mimeType;
+            if(diffuseTexture.format.empty()) {
+                int extension = diffuseTexture.location.length() - 1;
+                for(; extension > 0; extension--)
+                    if(diffuseTexture.location[extension] == '.') break;
+
+                if(diffuseTexture.location.substr(extension + 1) == "jpg") diffuseTexture.format = "image/jpeg";
+                else if(diffuseTexture.location.substr(extension + 1) == "jpeg") diffuseTexture.format = "image/jpeg";
+                else if(diffuseTexture.location.substr(extension + 1) == "jpe") diffuseTexture.format = "image/jpeg";
+                else if(diffuseTexture.location.substr(extension + 1) == "jfif") diffuseTexture.format = "image/jpeg";
+                else if(diffuseTexture.location.substr(extension + 1) == "png") diffuseTexture.format = "image/png";
+            }
+
+            if(textures[diffuseTextureIndex].sampler != -1) {
+                diffuseTexture.magFilter = samplers[textures[diffuseTextureIndex].sampler].magFilter;
+                diffuseTexture.minFilter = samplers[textures[diffuseTextureIndex].sampler].minFilter;
+                diffuseTexture.wrapT = samplers[textures[diffuseTextureIndex].sampler].wrapT;
+                diffuseTexture.wrapS = samplers[textures[diffuseTextureIndex].sampler].wrapS;
+            }
+        }
 
         int specularTextureIndex = materials[primitive.material].mrTextureIndex;
-        std::string specularTexture;
-        if(specularTextureIndex != -1) specularTexture = images[textures[specularTextureIndex].source].uri;
+        TextureInfo specularTexture;
+        if(specularTextureIndex != -1) {
+            specularTexture.location = images[textures[specularTextureIndex].source].uri;
+            specularTexture.format = "";
+
+            if(textures[specularTextureIndex].sampler != -1) {
+                specularTexture.magFilter = samplers[textures[specularTextureIndex].sampler].magFilter;
+                specularTexture.minFilter = samplers[textures[specularTextureIndex].sampler].minFilter;
+                specularTexture.wrapT = samplers[textures[specularTextureIndex].sampler].wrapT;
+                specularTexture.wrapS = samplers[textures[specularTextureIndex].sampler].wrapS;
+            }
+        }
 
         ::Mesh& mesh = *new SingleTextureMesh(vertices, indices, shader, drawMode, diffuseTexture, specularTexture);
         mesh.bind();

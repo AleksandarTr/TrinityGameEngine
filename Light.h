@@ -1,17 +1,18 @@
 #ifndef TRINITYENGINE_LIGHT_H
 #define TRINITYENGINE_LIGHT_H
 
-#include "MultiTextureMesh.h"
+#include "SingleTextureMesh.h"
 
-class Light : public MultiTextureMesh {
+class Light : public SingleTextureMesh {
 private:
     glm::vec3 color;
     glm::vec3 direction;
     LightingType type;
     bool useLightColor = true;
+
 public:
     Light(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, glm::vec3 color, glm::vec3 direction, LightingType type,
-          std::vector<std::string> diffuseTextures = std::vector<std::string>(), std::vector<std::string> specularTextures = std::vector<std::string>());
+          TextureInfo diffuseTextures = TextureInfo(), TextureInfo specularTextures = TextureInfo());
 
     const glm::vec3 &getColor() const;
 

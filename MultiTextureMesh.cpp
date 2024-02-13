@@ -1,9 +1,10 @@
 #include "MultiTextureMesh.h"
 
-MultiTextureMesh::MultiTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, std::vector<std::string> diffuseTextures, std::vector<std::string> specularTextures)
+MultiTextureMesh::MultiTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, std::vector<TextureInfo> diffuseTextures, std::vector<TextureInfo> specularTextures)
 : Mesh(vertices, indices, shader, GL_TRIANGLES) {
     textureSlot = textureSlotAllocator;
 
+    //TODO: Check for already loaded textures
     while(specularTextures.size() > diffuseTextures.size()) specularTextures.pop_back();
 
     int i = 0;
@@ -30,9 +31,9 @@ MultiTextureMesh::MultiTextureMesh(std::vector<Vertex> &vertices, std::vector<GL
     textureSlotAllocator += diffuseTextures.size() + specularTextures.size();
 
     for(int i = 0; i < diffuseTextures.size(); i++)
-        this->diffuseTextures.emplace_back(diffuseTextures[i], textureSlot + i, GL_RGB);
+        this->diffuseTextures.emplace_back(diffuseTextures[i], textureSlot + i);
     for(int i = 0; i < diffuseTextures.size(); i++)
-        this->specularTextures.emplace_back(specularTextures[i], textureSlot + diffuseTextures.size() + i, GL_RED);
+        this->specularTextures.emplace_back(specularTextures[i], textureSlot + diffuseTextures.size() + i);
 }
 
 void MultiTextureMesh::drawTextures() {

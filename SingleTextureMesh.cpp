@@ -1,22 +1,22 @@
 #include "SingleTextureMesh.h"
 #include <algorithm>
 
-SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode, std::string diffuseTexture, std::string specularTexture)
+SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode, TextureInfo diffuseTexture, TextureInfo specularTexture)
 : Mesh(vertices, indices, shader, drawMode) {
-    if(!diffuseTexture.empty()) {
+    if(!diffuseTexture.location.empty()) {
 
         auto itr = loadedTextures.begin();
         for(; itr != loadedTextures.end(); itr++)
-            if((*itr)->getLocation() == diffuseTexture) break;
+            if((*itr)->getLocation() == diffuseTexture.location) break;
         if(itr != loadedTextures.end()) this->diffuseTexture = *itr;
-        else this->diffuseTexture = new Texture(diffuseTexture, textureSlotAllocator++, GL_RGB);
+        else this->diffuseTexture = new Texture(diffuseTexture, textureSlotAllocator++);
 
-        if(!specularTexture.empty()) {
+        if(!specularTexture.location.empty()) {
             itr = loadedTextures.begin();
             for (; itr != loadedTextures.end(); itr++)
-                if ((*itr)->getLocation() == specularTexture) break;
+                if ((*itr)->getLocation() == specularTexture.location) break;
             if (itr != loadedTextures.end()) this->specularTexture = *itr;
-            else this->specularTexture = new Texture(specularTexture, textureSlotAllocator++, GL_RED);
+            else this->specularTexture = new Texture(specularTexture, textureSlotAllocator++);
         }
     }
 }
