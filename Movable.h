@@ -24,11 +24,11 @@ public:
 
     glm::quat getRotation();
 
-    void rotate(glm::vec3 direction);
+    virtual void rotate(glm::vec3 direction);
 
-    void rotate(glm::quat direction);
+    virtual void rotate(glm::quat direction);
 
-    void move(glm::vec3 direction);
+    virtual void move(glm::vec3 direction);
 
     void update(double timeDelta);
 
@@ -54,7 +54,7 @@ public:
 
     void setScale(glm::vec3 scale);
 
-    void scale(glm::vec3 scaling);
+    virtual void scale(glm::vec3 scaling);
 
     glm::vec3 getScale();
 };

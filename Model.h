@@ -5,11 +5,13 @@
 
 class gltfReader;
 
-class Model : private Movable {
+class Model : public Movable {
 private:
     std::vector<Model*> models = std::vector<Model*>();
     std::vector<Mesh*> meshes = std::vector<Mesh*>();
     glm::mat4 transformationMatrix = glm::mat4(1);
+
+    //TODO: Make transformations on each depth of the model tree, eg. scene[0] should rotate around its own axis
     glm::vec3 localPosition = glm::vec3(0);
 
     friend class gltfReader;
@@ -35,19 +37,15 @@ public:
 
     void transform(glm::mat4 transform);
 
-    void move(glm::vec3 direction);
+    void move(glm::vec3 direction) override;
 
-    void rotate(glm::quat direction);
+    void rotate(glm::quat direction) override;
 
-    void rotate(glm::vec3 direction);
+    void rotate(glm::vec3 direction) override;
 
-    void scale(glm::vec3 scaling);
+    void scale(glm::vec3 scaling) override;
 
     void draw();
-
-    using Movable::getScale;
-    using Movable::getRotation;
-    using Movable::getPosition;
 };
 
 #endif

@@ -23,10 +23,12 @@ protected:
     std::vector<GLuint> indices = std::vector<GLuint>();
     GLenum drawMode = GL_TRIANGLES;
 
-    int textureSlot = -1;
     glm::mat4 modelTransformation = glm::mat4(1);
     glm::mat4 rotationMatrix = glm::mat4(1);
+
+    int textureSlot = -1;
     static int textureSlotAllocator;
+    static std::vector<Texture*> loadedTextures;
 
 public:
     Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode);

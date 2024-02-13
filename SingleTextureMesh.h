@@ -10,7 +10,7 @@ private:
     Texture* specularTexture = nullptr;
 
 public:
-    SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader,
+    SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode,
     std::string diffuseTexture = "", std::string specularTexture = "");
 
     SingleTextureMesh(const SingleTextureMesh&);

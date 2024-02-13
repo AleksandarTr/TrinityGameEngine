@@ -1,10 +1,10 @@
 #include "Mesh.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <utility>
+#include <iostream>
 
 int Mesh::textureSlotAllocator = 0;
+std::vector<Texture*> Mesh::loadedTextures = std::vector<Texture*>();
 
 Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode)
 : vertices(vertices), indices(indices), shader(shader), drawMode(drawMode) {}

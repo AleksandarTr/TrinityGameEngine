@@ -21,14 +21,14 @@ glm::quat Movable::getRotation() {
 void Movable::update(double timeDelta) {
     if(angularVelocity != glm::vec3(0) || position != glm::vec3(0)) {
         glm::vec3 angles = float(timeDelta) * angularVelocity + float(timeDelta * timeDelta / 2) * angularAcceleration;
-        rotation = glm::quat(angles) * rotation;
+        rotate(angles);
         angularVelocity += float(timeDelta) * angularAcceleration;
 
         movedFlag = true;
     }
 
     if(velocity != glm::vec3(0) || acceleration != glm::vec3(0)) {
-        position += float(timeDelta) * velocity + float(timeDelta * timeDelta / 2) * acceleration;
+        move(float(timeDelta) * velocity + float(timeDelta * timeDelta / 2) * acceleration);
         velocity += float(timeDelta) * acceleration;
 
         movedFlag = true;

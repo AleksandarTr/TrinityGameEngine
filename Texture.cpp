@@ -1,6 +1,6 @@
 #include "Texture.h"
 
-Texture::Texture(std::string location, GLuint slot, GLenum format) : slot(slot) {
+Texture::Texture(std::string location, GLuint slot, GLenum format) : slot(slot), location(location) {
     int imgW, imgH, colChNum;
     stbi_set_flip_vertically_on_load(true);
     unsigned  char* bytes = stbi_load(location.c_str(), &imgW, &imgH, &colChNum, 0);
@@ -40,4 +40,8 @@ void Texture::unbind() {
 
 GLuint Texture::getSlot() {
     return slot;
+}
+
+std::string Texture::getLocation() {
+    return location;
 }

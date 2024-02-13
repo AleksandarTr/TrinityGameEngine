@@ -127,11 +127,12 @@ gltfReader::gltfReader(std::string uri, Shader &shader) : shader(shader) {
     }
 
     for(auto &image : data["images"]) {
-        std::string uri = image.value("uri", "");
+        std::string imageUri = image.value("uri", "");
+        if(!imageUri.empty()) imageUri = uri + '/' + imageUri;
         std::string mimeType = image.value("mimeType", "");
         int bufferView = image.value("bufferView", -1);
         std::string name = image.value("name", "");
-        images.emplace_back(uri, mimeType, bufferView, name);
+        images.emplace_back(imageUri, mimeType, bufferView, name);
     }
 
     for(auto &material : data["materials"]) {
@@ -291,6 +292,7 @@ Model &gltfReader::getScene(int index) {
         scene += model;
     }
 
+    delete [] meshBuffer;
     return scene;
 }
 
@@ -332,6 +334,8 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
     bool padding = isBigEndian();
     auto &result = *new std::vector<::Mesh*>();
     for(Mesh::Primitive primitive : meshes[index].primitives) {
+        glm::vec3 color = materials[primitive.material].baseColor;
+
         GLenum drawMode = primitive.mode;
         std::vector<Vertex> vertices;
         std::vector<GLuint> indices;
@@ -374,7 +378,8 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         glm::vec3 texCoord(0);
 
         for(int i = 0; i < accessors[positionAccessor].count; i++) {
-            memcpy(reinterpret_cast<char *>(&position), positionData + i * 12, 12);
+            char *positionAdr = (char*) &position;
+            memcpy(positionAdr, positionData + i * 12, 12);
 
             if(normalData) {
                 char *normalAdr = (char*) &normal;
@@ -393,7 +398,10 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
                 if (texCoordSize / texCoordWidth >= 3)
                     memcpy(texCoordAdr + 8,texCoordData + i * texCoordSize + 2 * texCoordWidth, texCoordWidth);
             }
-            vertices.push_back({position, {0.5, 0.5, 0.5}, texCoord, normal});
+
+            texCoord.y = -texCoord.y;
+
+            vertices.push_back({position, color, texCoord, normal});
             position = glm::vec3(0);
             normal = glm::vec3(0);
             texCoord = glm::vec3(0);
@@ -401,8 +409,9 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
 
         int indexPoint = 0;
         char* indexAdr = (char*) &indexPoint;
+        int pad = padding ? sizeof(int) - indexWidth : 0;
         if(indexData != nullptr) for(int i = 0; i < accessors[primitive.indices].count * indexWidth; i += indexWidth) {
-            memcpy(indexAdr + (padding ? sizeof(int) - indexWidth : 0), indexData + i, indexWidth);
+            memcpy(indexAdr + pad, indexData + i, indexWidth);
             indices.push_back(indexPoint);
         }
 
@@ -411,7 +420,15 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         delete [] texCoordData;
         delete [] indexData;
 
-        ::Mesh& mesh = *new SingleTextureMesh(vertices, indices, shader);
+        int diffuseTextureIndex = materials[primitive.material].baseTextureIndex;
+        std::string diffuseTexture;
+        if(diffuseTextureIndex != -1) diffuseTexture = images[textures[diffuseTextureIndex].source].uri;
+
+        int specularTextureIndex = materials[primitive.material].mrTextureIndex;
+        std::string specularTexture;
+        if(specularTextureIndex != -1) specularTexture = images[textures[specularTextureIndex].source].uri;
+
+        ::Mesh& mesh = *new SingleTextureMesh(vertices, indices, shader, drawMode, diffuseTexture, specularTexture);
         mesh.bind();
         result.push_back(&mesh);
     }
@@ -421,11 +438,7 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
 }
 
 char* gltfReader::readAccessor(int accessor, int &width, int &size) {
-    int bufferView = accessors[accessor].bufferView;
-    int buffer = bufferViews[bufferView].buffer;
-    bool readFile = buffers[buffer].data == nullptr;
-    bool flip = isBigEndian();
-
+    //TODO: Implement sparse accessors
     switch(accessors[accessor].componentType) {
         case GL_BYTE:
         case GL_UNSIGNED_BYTE:
@@ -450,14 +463,24 @@ char* gltfReader::readAccessor(int accessor, int &width, int &size) {
     else if(accessors[accessor].type == "MAT3") size *= 9;
     else if(accessors[accessor].type == "MAT4") size *= 16;
 
+    char *destination = new char[size * accessors[accessor].count];
+    int bufferView = accessors[accessor].bufferView;
+    if(bufferView == -1) {
+        for(int i = 0; i < size * accessors[accessor].count; i++) destination[i] = 0;
+        return destination;
+    }
+
+    int buffer = bufferViews[bufferView].buffer;
+    bool readFile = buffers[buffer].data == nullptr;
+    bool flip = isBigEndian();
+
     int stride = bufferViews[bufferView].stride - size;
     if(stride < 0) stride = 0;
-
-    char *destination = new char[size * accessors[accessor].count];
     int pos = bufferViews[bufferView].offset + accessors[accessor].offset;
 
-    const static int sectorSize = 0x4000;
-    char sector[sectorSize];
+    int sectorSize = 0x4000;
+    sectorSize -= sectorSize % size;
+    char *sector = new char[sectorSize];
     char buf[width];
     if(readFile) {
         std::ifstream reader(buffers[buffer].uri, std::ios::binary);
@@ -491,6 +514,7 @@ char* gltfReader::readAccessor(int accessor, int &width, int &size) {
         }
     }
 
+    delete sector;
     return destination;
 }
 

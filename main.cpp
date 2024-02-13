@@ -78,7 +78,7 @@ int main() {
     Shader shader("singleTex.frag", "singleTex.vert");
     shader.unloadFiles();
 
-    SingleTextureMesh object(vertices, indices, shader, {"Textures/unnamed.jpg"}, {"Textures/spec.jpg"});
+    SingleTextureMesh object(vertices, indices, shader, GL_TRIANGLES, {"Textures/unnamed.jpg"}, {"Textures/spec.jpg"});
     object.bind();
 
     Camera camera(width, height, glm::vec3(-0.5f,0.5f,10));
@@ -93,6 +93,7 @@ int main() {
 
     gltfReader chess("test/ABeautifulGame.gltf", shader);
     Model &scene = chess.getScene(0);
+    //scene.setAngularVelocity(glm::vec3(0, 2, 0));
 
     Light light(lightVertices, lightIndices, lightShader, glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
     light.bind();
@@ -111,6 +112,7 @@ int main() {
     light.setScale(glm::vec3(0.2f));
     light2.setScale(glm::vec3(0.25f));
     object.setScale(glm::vec3(1, 10, 1));
+    scene.scale(glm::vec3(10));
 
     shader.setCamera(camera);
     lightShader.setCamera(camera);
@@ -153,9 +155,8 @@ int main() {
         }
 
         object.update(timeDelta);
+        scene.update(timeDelta);
         scene.draw();
-        //object.draw();
-        //object2.draw();
 
         lightShader.activate();
         light2.draw();

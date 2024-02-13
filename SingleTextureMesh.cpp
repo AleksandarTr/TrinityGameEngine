@@ -1,10 +1,23 @@
 #include "SingleTextureMesh.h"
+#include <algorithm>
 
-SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, std::string diffuseTexture, std::string specularTexture)
-: Mesh(vertices, indices, shader, GL_TRIANGLES) {
+SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode, std::string diffuseTexture, std::string specularTexture)
+: Mesh(vertices, indices, shader, drawMode) {
     if(!diffuseTexture.empty()) {
-        this->diffuseTexture = new Texture(diffuseTexture, textureSlotAllocator++, GL_RGB);
-        if(!specularTexture.empty()) this->specularTexture = new Texture(specularTexture, textureSlotAllocator++, GL_RED);
+
+        auto itr = loadedTextures.begin();
+        for(; itr != loadedTextures.end(); itr++)
+            if((*itr)->getLocation() == diffuseTexture) break;
+        if(itr != loadedTextures.end()) this->diffuseTexture = *itr;
+        else this->diffuseTexture = new Texture(diffuseTexture, textureSlotAllocator++, GL_RGB);
+
+        if(!specularTexture.empty()) {
+            itr = loadedTextures.begin();
+            for (; itr != loadedTextures.end(); itr++)
+                if ((*itr)->getLocation() == specularTexture) break;
+            if (itr != loadedTextures.end()) this->specularTexture = *itr;
+            else this->specularTexture = new Texture(specularTexture, textureSlotAllocator++, GL_RED);
+        }
     }
 }
 
@@ -13,10 +26,12 @@ void SingleTextureMesh::drawTextures() {
     else {
         glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), true);
         glUniform1i(glGetUniformLocation(shader.getProgramID(), "diffuseTexture"), diffuseTexture->getSlot());
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "specularTexture"), specularTexture->getSlot());
-
         diffuseTexture->bind();
-        specularTexture->bind();
+
+        if(specularTexture) {
+            glUniform1i(glGetUniformLocation(shader.getProgramID(), "specularTexture"), specularTexture->getSlot());
+            specularTexture->bind();
+        }
     }
 }
 

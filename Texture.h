@@ -10,6 +10,7 @@ class Texture {
 private:
     GLuint textureId = 0;
     GLuint slot;
+    std::string location;
 
 public:
     Texture(std::string location, GLuint slot, GLenum format);
@@ -23,6 +24,8 @@ public:
     GLuint getId();
 
     GLuint getSlot();
+
+    std::string getLocation();
 };
 
 #endif
