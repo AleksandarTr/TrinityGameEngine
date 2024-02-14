@@ -4,9 +4,14 @@ in vec3 color;
 in vec3 texCoord;
 in vec3 normal;
 in vec3 pos;
+in mat3 TBN;
 
 uniform sampler2D diffuseTexture;
+uniform bool useTexture;
 uniform sampler2D specularTexture;
+uniform bool applySpecularTexture;
+uniform sampler2D normalTexture;
+uniform bool applyNormalTexture;
 
 uniform vec4 lightColor[16];
 uniform vec3 lightPos[16];
@@ -14,8 +19,9 @@ uniform vec3 lightDir[16];
 uniform int lightingType[16];
 uniform int lightNum;
 
-uniform bool useTexture;
 uniform vec3 camPos;
+
+vec3 normalCalc;
 
 vec4 lighting[2] = {vec4(0, 0, 0, 0), vec4(0, 0, 0, 0)};
 int lightInd = 0;
@@ -46,7 +52,7 @@ float calcSpec(vec3 lightVec, vec3 norm) {
 
 void pointLight() {
     vec3 lightVec = normalize(lightPos[lightInd] - pos);
-    vec3 norm = normalize(normal);
+    vec3 norm = normalize(normalCalc);
     float diffuse = calcDiffuse(lightVec, norm);
     float ambient = calcAmbient();
     float dropoff = calcDropoff(lightVec);
@@ -61,7 +67,7 @@ void pointLight() {
 
 void directionalLight() {
     vec3 lightVec = normalize(lightPos[lightInd]);
-    vec3 norm = normalize(normal);
+    vec3 norm = normalize(normalCalc);
     float diffuse = calcDiffuse(lightVec, norm);
     float ambient = calcAmbient();
     float spec = calcSpec(lightVec, norm);
@@ -77,7 +83,7 @@ void spotLight() {
     float outerCone = 0.99f;
     float innerCone = 0.999f;
     vec3 lightVec = normalize(lightPos[lightInd] - pos);
-    vec3 norm = normalize(normal);
+    vec3 norm = normalize(normalCalc);
     float diffuse = calcDiffuse(lightVec, norm);
     float ambient = calcAmbient();
     float dropoff = calcDropoff(lightVec);
@@ -94,6 +100,8 @@ void spotLight() {
 }
 
 void main() {
+    normalCalc = applyNormalTexture ? TBN * (texture(normalTexture, vec2(texCoord)).rgb * 2.0 - 1.0) : normal;
+
     vec4 resLight1 = vec4(0, 0, 0, 0);
     vec4 resLight2 = vec4(0, 0, 0, 0);
     for(int i = 0; i < lightNum; i++) {
@@ -126,6 +134,6 @@ void main() {
     resLight2.z = min(resLight2.z, maxSpec);
     resLight2.w = min(resLight2.w, maxSpec);
 
-    if(useTexture) FragColor = texture(diffuseTexture, vec2(texCoord)) * resLight1 + texture(specularTexture, vec2(texCoord)).r * resLight2;
+    if(useTexture) FragColor = texture(diffuseTexture, vec2(texCoord)) * resLight1 + (applySpecularTexture ? texture(specularTexture, vec2(texCoord)).r * resLight2 : vec4(0, 0, 0, 0));
     else FragColor = vec4(color, 1) * resLight1;
 }

@@ -9,6 +9,8 @@ struct Vertex {
     glm::vec3 color = glm::vec3(0);
     glm::vec3 texPosition = glm::vec3(0);
     glm::vec3 lightNormal = glm::vec3(0);
+    glm::vec3 tangent = glm::vec3(1);
+    glm::vec3 bitangent = glm::vec3(1);
 };
 
 enum struct LightingType {PointLight, DirectionalLight, SpotLight};

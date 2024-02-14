@@ -16,6 +16,8 @@ void Mesh::bind() {
     VAO.linkVBO(1, 3, GL_FLOAT, sizeof(Vertex), sizeof(Vertex::position));
     VAO.linkVBO(2, 3, GL_FLOAT, sizeof(Vertex), sizeof(Vertex::position) + sizeof(Vertex::color));
     VAO.linkVBO(3, 3, GL_FLOAT, sizeof(Vertex), sizeof(Vertex::position) + sizeof(Vertex::color) + sizeof(Vertex::texPosition));
+    VAO.linkVBO(4, 3, GL_FLOAT, sizeof(Vertex), sizeof(Vertex::position) + sizeof(Vertex::color) + sizeof(Vertex::texPosition) + sizeof(Vertex::lightNormal));
+    VAO.linkVBO(5, 3, GL_FLOAT, sizeof(Vertex), sizeof(Vertex::position) + sizeof(Vertex::color) + sizeof(Vertex::texPosition) + sizeof(Vertex::lightNormal) + sizeof(Vertex::tangent));
     EBO.bind(indices);
 
     VAO.unbind();

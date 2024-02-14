@@ -8,10 +8,13 @@ class SingleTextureMesh : public Mesh {
 private:
     Texture* diffuseTexture = nullptr;
     Texture* specularTexture = nullptr;
+    Texture* normalTexture = nullptr;
+
+    Texture* loadTexture(TextureInfo texture);
 
 public:
     SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode,
-    TextureInfo diffuseTexture = TextureInfo(), TextureInfo specularTexture = TextureInfo());
+    TextureInfo diffuseTexture = TextureInfo(), TextureInfo specularTexture = TextureInfo(), TextureInfo normalTexture = TextureInfo());
 
     SingleTextureMesh(const SingleTextureMesh&);
 

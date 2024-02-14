@@ -194,6 +194,16 @@ gltfReader::gltfReader(std::string uri, Shader &shader) : shader(shader) {
                                occlusionStrength, emissiveTextureIndex, emissiveTexCoord, emissiveFactor, alphaMode, alphaCutoff, doubleSided);
     }
 
+    for(auto &skin : data["skins"]) {
+        int inverseBindMatrices = skin.value("inverseBindMatrices", -1);
+        int skeleton = skin.value("skeleton", -1);
+        std::string name = skin.value("name", "");
+
+        std::vector<int> joints;
+        for(auto &joint : skin["joints"]) joints.push_back(joint);
+        skins.emplace_back(inverseBindMatrices, skeleton, joints, name);
+    }
+
     for(auto &animation : data["animations"]) {
         std::string name = animation.value("name", "");
 
@@ -415,6 +425,26 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
             indices.push_back(indexPoint);
         }
 
+        if(indices.size() % 3 == 0) for(int i = 0; i < indices.size(); i += 3) {
+                Vertex &v0 = vertices[indices[i]];
+                Vertex &v1 = vertices[indices[i+1]];
+                Vertex &v2 = vertices[indices[i+2]];
+
+                glm::vec3 e0 = v1.position - v0.position;
+                glm::vec3 e1 = v2.position - v0.position;
+                glm::vec2 deltaTC0 = v1.texPosition - v0.texPosition;
+                glm::vec2 deltaTC1 = v2.texPosition - v0.texPosition;
+
+                glm::vec3 tan = deltaTC1.y * e0 - deltaTC0.y * e1;
+                v0.tangent = tan;
+                v1.tangent = tan;
+                v2.tangent = tan;
+
+                v0.bitangent = glm::cross(v0.lightNormal, tan);
+                v1.bitangent = glm::cross(v1.lightNormal, tan);
+                v2.bitangent = glm::cross(v2.lightNormal, tan);
+            }
+
         delete [] positionData;
         delete [] normalData;
         delete [] texCoordData;
@@ -422,45 +452,18 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
 
         int diffuseTextureIndex = materials[primitive.material].baseTextureIndex;
         TextureInfo diffuseTexture;
-        if(diffuseTextureIndex != -1) {
-            diffuseTexture.location = images[textures[diffuseTextureIndex].source].uri;
-
-            diffuseTexture.format = images[textures[diffuseTextureIndex].source].mimeType;
-            if(diffuseTexture.format.empty()) {
-                int extension = diffuseTexture.location.length() - 1;
-                for(; extension > 0; extension--)
-                    if(diffuseTexture.location[extension] == '.') break;
-
-                if(diffuseTexture.location.substr(extension + 1) == "jpg") diffuseTexture.format = "image/jpeg";
-                else if(diffuseTexture.location.substr(extension + 1) == "jpeg") diffuseTexture.format = "image/jpeg";
-                else if(diffuseTexture.location.substr(extension + 1) == "jpe") diffuseTexture.format = "image/jpeg";
-                else if(diffuseTexture.location.substr(extension + 1) == "jfif") diffuseTexture.format = "image/jpeg";
-                else if(diffuseTexture.location.substr(extension + 1) == "png") diffuseTexture.format = "image/png";
-            }
-
-            if(textures[diffuseTextureIndex].sampler != -1) {
-                diffuseTexture.magFilter = samplers[textures[diffuseTextureIndex].sampler].magFilter;
-                diffuseTexture.minFilter = samplers[textures[diffuseTextureIndex].sampler].minFilter;
-                diffuseTexture.wrapT = samplers[textures[diffuseTextureIndex].sampler].wrapT;
-                diffuseTexture.wrapS = samplers[textures[diffuseTextureIndex].sampler].wrapS;
-            }
-        }
+        if(diffuseTextureIndex != -1) diffuseTexture = loadTexture(diffuseTextureIndex);
 
         int specularTextureIndex = materials[primitive.material].mrTextureIndex;
         TextureInfo specularTexture;
-        if(specularTextureIndex != -1) {
-            specularTexture.location = images[textures[specularTextureIndex].source].uri;
-            specularTexture.format = "";
+        if(specularTextureIndex != -1) specularTexture = loadTexture(specularTextureIndex);
 
-            if(textures[specularTextureIndex].sampler != -1) {
-                specularTexture.magFilter = samplers[textures[specularTextureIndex].sampler].magFilter;
-                specularTexture.minFilter = samplers[textures[specularTextureIndex].sampler].minFilter;
-                specularTexture.wrapT = samplers[textures[specularTextureIndex].sampler].wrapT;
-                specularTexture.wrapS = samplers[textures[specularTextureIndex].sampler].wrapS;
-            }
-        }
+        int normalTextureIndex = materials[primitive.material].normalTextureIndex;
+        TextureInfo normalTexture;
+        if(normalTextureIndex != -1) normalTexture = loadTexture(normalTextureIndex);
 
-        ::Mesh& mesh = *new SingleTextureMesh(vertices, indices, shader, drawMode, diffuseTexture, specularTexture);
+
+        ::Mesh& mesh = *new SingleTextureMesh(vertices, indices, shader, drawMode, diffuseTexture, specularTexture, normalTexture);
         mesh.bind();
         result.push_back(&mesh);
     }
@@ -548,6 +551,35 @@ char* gltfReader::readAccessor(int accessor, int &width, int &size) {
 
     delete sector;
     return destination;
+}
+
+TextureInfo gltfReader::loadTexture(int textureId) {
+    TextureInfo texture;
+    if(textureId != -1) {
+        texture.location = images[textures[textureId].source].uri;
+
+        texture.format = images[textures[textureId].source].mimeType;
+        if(texture.format.empty()) {
+            int extension = texture.location.length() - 1;
+            for(; extension > 0; extension--)
+                if(texture.location[extension] == '.') break;
+
+            if(texture.location.substr(extension + 1) == "jpg") texture.format = "image/jpeg";
+            else if(texture.location.substr(extension + 1) == "jpeg") texture.format = "image/jpeg";
+            else if(texture.location.substr(extension + 1) == "jpe") texture.format = "image/jpeg";
+            else if(texture.location.substr(extension + 1) == "jfif") texture.format = "image/jpeg";
+            else if(texture.location.substr(extension + 1) == "png") texture.format = "image/png";
+        }
+
+        if(textures[textureId].sampler != -1) {
+            texture.magFilter = samplers[textures[textureId].sampler].magFilter;
+            texture.minFilter = samplers[textures[textureId].sampler].minFilter;
+            texture.wrapT = samplers[textures[textureId].sampler].wrapT;
+            texture.wrapS = samplers[textures[textureId].sampler].wrapS;
+        }
+    }
+
+    return texture;
 }
 
 gltfReader::Buffer::Buffer(std::string &uri, std::size_t size, std::string &name, std::string &location) :

@@ -7,6 +7,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include "Structs.h"
 
 class Model;
 class Shader;
@@ -254,6 +255,8 @@ private:
     std::vector<::Mesh *> &copyMeshes(int index);
 
     [[nodiscard]] char* readAccessor(int accessor, int &width, int &size);
+
+    TextureInfo loadTexture(int textureId);
 
 public:
     gltfReader(std::string uri, Shader &shader);
