@@ -3,16 +3,14 @@
 
 #include "SingleTextureMesh.h"
 
-class Light : public SingleTextureMesh {
+class Light : public Movable {
 private:
     glm::vec3 color;
     glm::vec3 direction;
     LightingType type;
-    bool useLightColor = true;
 
 public:
-    Light(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, glm::vec3 color, glm::vec3 direction, LightingType type,
-          TextureInfo diffuseTextures = TextureInfo(), TextureInfo specularTextures = TextureInfo());
+    Light(glm::vec3 color, glm::vec3 direction, LightingType type);
 
     const glm::vec3 &getColor() const;
 
@@ -25,12 +23,6 @@ public:
     LightingType getType() const;
 
     void setType(LightingType type);
-
-    void initializeOtherFields() override;
-
-    bool doesUseLightColor() const;
-
-    void setUseLightColor(bool useLightColor);
 };
 
 #endif

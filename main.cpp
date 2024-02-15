@@ -33,53 +33,13 @@ int main() {
     gladLoadGL();
     glViewport(0, 0, width, height);
 
-    std::vector<Vertex> vertices {
-            {{-1.0f, 0, -1.0f},{1, 1, 1},{0, 0, 0},{-1, -0.732f, -1}},
-            {{-1.0f, 0, 1.0f},{1, 1, 1},{1, 0, 0},{-1, -0.732f, 1}},
-            {{1.0f, 0, -1.0f},{1, 1, 1},{1, 0, 0},{1, -0.732f, -1}},
-            {{1.0f, 0, 1.0f},{1, 1, 1},{0, 0, 0},{1, -0.732f, 1}},
-            {{0, 2.0f, 0},{1, 1, 1},{0.5f, 1.0f, 0},{0, 1.0f, 0}}
-    };
-
-    std::vector<GLuint> indices {
-            0, 1, 2,
-            3, 1, 2,
-            0, 1, 4,
-            0, 2, 4,
-            3, 1, 4,
-            3, 2, 4};
-
-    std::vector<Vertex> lightVertices = {
-            {{-1.0f, -1.0f, -1.0f}, {1, 1, 1}, {}, {}},
-            {{-1.0f, -1.0f, 1.0f}, {1, 1, 1}, {}, {}},
-            {{-1.0f, 1.0f, -1.0f}, {1, 1, 1}, {}, {}},
-            {{-1.0f, 1.0f, 1.0f}, {1, 1, 1}, {}, {}},
-            {{1.0f, -1.0f, -1.0f}, {1, 1, 1}, {}, {}},
-            {{1.0f, -1.0f, 1.0f}, {1, 1, 1}, {}, {}},
-            {{1.0f, 1.0f, -1.0f}, {1, 1, 1}, {}, {}},
-            {{1.0f, 1.0f, 1.0f}, {1, 1, 1}, {}, {}}
-    };
-
-    std::vector<GLuint> lightIndices = {
-            0, 1, 3,
-            0, 2, 3,
-            0, 4, 5,
-            0, 1, 5,
-            0, 4, 6,
-            0, 2, 6,
-            7, 4, 5,
-            7, 4, 6,
-            7, 2, 3,
-            7, 2, 6,
-            7, 1, 3,
-            7, 1, 5};
-
     //Create shader program
     Shader shader("singleTex.frag", "singleTex.vert");
     shader.unloadFiles();
 
-    SingleTextureMesh object(vertices, indices, shader, GL_TRIANGLES, {"Textures/unnamed.jpg"}, {"Textures/spec.jpg"});
-    object.bind();
+    gltfReader objectReader("Textures/pyramid.gltf", shader);
+    Model &objectScene = objectReader.getScene(0);
+    Model &object = objectScene[0];
 
     Camera camera(width, height, glm::vec3(-0.5f,0.5f,10));
 
@@ -88,19 +48,16 @@ int main() {
     Shader lightShader("light.frag", "light.vert");
     lightShader.unloadFiles();
 
-    SingleTextureMesh object2 = object;
-    object2.bind();
+    Model object2 = object;
 
     gltfReader chess("test/ABeautifulGame.gltf", shader);
     Model &scene = chess.getScene(0);
-    //scene.setAngularVelocity(glm::vec3(0, 2, 0));
+    scene.setAngularVelocity(glm::vec3(0, 2, 0));
 
-    Light light(lightVertices, lightIndices, lightShader, glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
-    light.bind();
+    Light light(glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
     light.move(glm::vec3(5));
 
-    Light light2(lightVertices, lightIndices, lightShader, glm::vec3(1, 0, 0), glm::vec3(-1), LightingType::PointLight);
-    light2.bind();
+    Light light2(glm::vec3(1, 0, 0), glm::vec3(-1), LightingType::PointLight);
     light2.move(glm::vec3(-10));
 
     glEnable(GL_DEPTH_TEST);
@@ -157,10 +114,7 @@ int main() {
         object.update(timeDelta);
         scene.update(timeDelta);
         scene.draw();
-
-        lightShader.activate();
-        light2.draw();
-        light.draw();
+        object.draw();
 
         camera.inputs(window);
         camera.update(timeDelta);

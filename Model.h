@@ -21,6 +21,8 @@ private:
 public:
     Model(std::vector<Mesh*> &meshes);
 
+    Model(const Model&);
+
     void addModel(Model& model);
 
     void removeModel(Model& model);

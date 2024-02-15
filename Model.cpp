@@ -1,4 +1,5 @@
 #include "Model.h"
+#include "SingleTextureMesh.h"
 #include <algorithm>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -114,4 +115,17 @@ void Model::scale(glm::vec3 scaling) {
 void Model::setLocalPosition() {
     localPosition = getPosition();
     for(auto model : models) model->setLocalPosition();
+}
+
+Model::Model(const Model &copy) {
+    for(Model* model : copy.models) {
+        Model &modelCopy = *new Model(*model);
+        addModel(modelCopy);
+    }
+
+    for(Mesh* mesh : copy.meshes) {
+        Mesh *meshCopy = new SingleTextureMesh(*dynamic_cast<SingleTextureMesh*>(mesh));
+        meshes.push_back(meshCopy);
+        meshCopy->bind();
+    }
 }

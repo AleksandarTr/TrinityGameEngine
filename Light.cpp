@@ -2,9 +2,7 @@
 
 #include <utility>
 
-Light::Light(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, glm::vec3 color,
-             glm::vec3 direction, LightingType type, TextureInfo diffuseTextures, TextureInfo specularTextures) :
-        SingleTextureMesh(vertices, indices, shader, GL_TRIANGLES, diffuseTextures, specularTextures), color(color), type(type), direction(direction) {}
+Light::Light(glm::vec3 color, glm::vec3 direction, LightingType type) : color(color), type(type), direction(direction) {}
 
 const glm::vec3 &Light::getColor() const {
     return color;
@@ -28,17 +26,4 @@ LightingType Light::getType() const {
 
 void Light::setType(LightingType type) {
     Light::type = type;
-}
-
-void Light::initializeOtherFields() {
-    glUniform3f(glGetUniformLocation(shader.getProgramID(), "lightColor"), color.x, color.y, color.z);
-    glUniform1i(glGetUniformLocation(shader.getProgramID(), "useLightColor"), useLightColor);
-}
-
-bool Light::doesUseLightColor() const {
-    return useLightColor;
-}
-
-void Light::setUseLightColor(bool useLightColor) {
-    Light::useLightColor = useLightColor;
 }
