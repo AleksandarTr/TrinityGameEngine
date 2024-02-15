@@ -10,6 +10,9 @@ private:
     Texture* specularTexture = nullptr;
     Texture* normalTexture = nullptr;
 
+    float metallic = 0;
+    float roughness = 0;
+
     Texture* loadTexture(TextureInfo texture);
 
 public:
@@ -21,6 +24,10 @@ public:
     void drawTextures() override;
 
     ~SingleTextureMesh();
+
+    void setMetallic(float value);
+
+    void setRoughness(float value);
 };
 
 #endif

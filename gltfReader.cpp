@@ -450,21 +450,28 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         delete [] texCoordData;
         delete [] indexData;
 
-        int diffuseTextureIndex = materials[primitive.material].baseTextureIndex;
         TextureInfo diffuseTexture;
-        if(diffuseTextureIndex != -1) diffuseTexture = loadTexture(diffuseTextureIndex);
-
-        int specularTextureIndex = materials[primitive.material].mrTextureIndex;
         TextureInfo specularTexture;
-        if(specularTextureIndex != -1) specularTexture = loadTexture(specularTextureIndex);
-
-        int normalTextureIndex = materials[primitive.material].normalTextureIndex;
         TextureInfo normalTexture;
-        if(normalTextureIndex != -1) normalTexture = loadTexture(normalTextureIndex);
+
+        if(primitive.material != -1) {
+            int diffuseTextureIndex = materials[primitive.material].baseTextureIndex;
+            if (diffuseTextureIndex != -1) diffuseTexture = loadTexture(diffuseTextureIndex);
+
+            int specularTextureIndex = materials[primitive.material].mrTextureIndex;
+            if (specularTextureIndex != -1) specularTexture = loadTexture(specularTextureIndex);
+
+            int normalTextureIndex = materials[primitive.material].normalTextureIndex;
+            if (normalTextureIndex != -1) normalTexture = loadTexture(normalTextureIndex);
+        }
 
 
-        ::Mesh& mesh = *new SingleTextureMesh(vertices, indices, shader, drawMode, diffuseTexture, specularTexture, normalTexture);
+        ::SingleTextureMesh& mesh = *new SingleTextureMesh(vertices, indices, shader, drawMode, diffuseTexture, specularTexture, normalTexture);
         mesh.bind();
+        if(primitive.material != -1) {
+            mesh.setMetallic(materials[primitive.material].metallic);
+            mesh.setRoughness(materials[primitive.material].roughness);
+        }
         result.push_back(&mesh);
     }
 

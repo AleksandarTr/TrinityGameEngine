@@ -23,7 +23,11 @@ void SingleTextureMesh::drawTextures() {
             glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), true);
             specularTexture->bind();
         }
-        else glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), false);
+        else {
+            glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), false);
+            glUniform1f(glGetUniformLocation(shader.getProgramID(), "metallic"), metallic);
+            glUniform1f(glGetUniformLocation(shader.getProgramID(), "roughness"), roughness);
+        }
 
         if(normalTexture) {
             glUniform1i(glGetUniformLocation(shader.getProgramID(), "normalTexture"), normalTexture->getSlot());
@@ -48,4 +52,12 @@ Texture *SingleTextureMesh::loadTexture(TextureInfo texture) {
         if ((*itr)->getLocation() == texture.location) break;
     if (itr != loadedTextures.end()) return *itr;
     else return new Texture(texture, textureSlotAllocator++);
+}
+
+void SingleTextureMesh::setMetallic(float value) {
+    metallic = value;
+}
+
+void SingleTextureMesh::setRoughness(float value) {
+    roughness = value;
 }

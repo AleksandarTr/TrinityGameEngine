@@ -45,14 +45,11 @@ int main() {
 
     object.move(glm::vec3(-2));
 
-    Shader lightShader("light.frag", "light.vert");
-    lightShader.unloadFiles();
-
     Model object2 = object;
 
     gltfReader chess("test/ABeautifulGame.gltf", shader);
     Model &scene = chess.getScene(0);
-    scene.setAngularVelocity(glm::vec3(0, 2, 0));
+    //scene.setAngularVelocity(glm::vec3(0, 2, 0));
 
     Light light(glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
     light.move(glm::vec3(5));
@@ -72,9 +69,7 @@ int main() {
     scene.scale(glm::vec3(10));
 
     shader.setCamera(camera);
-    lightShader.setCamera(camera);
     camera.addShader(shader);
-    camera.addShader(lightShader);
     camera.setFov(45);
     camera.setNearPlane(0.1f);
     camera.setFarPlane(100);
