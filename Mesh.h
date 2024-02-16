@@ -44,6 +44,8 @@ public:
     void draw();
 
     virtual void initializeOtherFields();
+
+    static int getTextureSlot();
 };
 
 #endif

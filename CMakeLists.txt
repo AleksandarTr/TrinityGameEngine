@@ -36,6 +36,8 @@ add_executable(TrinityEngine main.cpp glad.c
         Model.h
         gltfReader.cpp
         gltfReader.h
+        Text.cpp
+        Text.h
 )
 
 add_library(glfw STATIC IMPORTED)

@@ -55,3 +55,7 @@ void Mesh::updateTransformation() {
 
 Mesh::Mesh(const Mesh &copy) : indices(copy.indices), vertices(copy.vertices), shader(copy.shader), VAO(copy.VAO),
 VBO(copy.VBO), EBO(copy.EBO), textureSlot(copy.textureSlot), drawMode(copy.drawMode){}
+
+int Mesh::getTextureSlot() {
+    return textureSlotAllocator++;
+}

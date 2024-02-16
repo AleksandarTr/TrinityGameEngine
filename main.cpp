@@ -8,6 +8,7 @@
 #include "gltfReader.h"
 #include "Light.h"
 #include "Model.h"
+#include "Text.h"
 
 int width = 1280;
 int height = 720;
@@ -82,6 +83,12 @@ int main() {
 
     glfwSetCursorPos(window, width/2, height/2);
 
+    Shader textShader("text.frag", "text.vert");
+    textShader.unloadFiles();
+
+    Text text("Textures/arial.tff", textShader);
+    text.generateMessage("Hello world!", 5, 5, glm::vec3(1));
+
     //Window loop
     while(!glfwWindowShouldClose(window)) {
         double currentTIme = glfwGetTime();
@@ -110,6 +117,8 @@ int main() {
         scene.update(timeDelta);
         scene.draw();
         object.draw();
+
+        text.draw();
 
         camera.inputs(window);
         camera.update(timeDelta);
