@@ -4,6 +4,8 @@ Texture::Texture(TextureInfo info, GLuint slot) : slot(slot), location(info.loca
     int imgW, imgH, colChNum;
     stbi_set_flip_vertically_on_load(true);
     unsigned  char* bytes = stbi_load(location.c_str(), &imgW, &imgH, &colChNum, 0);
+    width = imgW;
+    height = imgH;
 
     glGenTextures(1, &textureId);
     glActiveTexture(GL_TEXTURE0 + slot);
@@ -49,4 +51,12 @@ GLuint Texture::getSlot() {
 
 std::string Texture::getLocation() {
     return location;
+}
+
+int Texture::getHeight() {
+    return height;
+}
+
+int Texture::getWidth() {
+    return width;
 }

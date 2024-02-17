@@ -20,3 +20,8 @@ void VertexBufferObject::unbind() {
 VertexBufferObject::~VertexBufferObject() {
     glDeleteBuffers(1, &VBO);
 }
+
+void VertexBufferObject::update(std::vector<Vertex> &vertices) {
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
+}

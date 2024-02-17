@@ -12,6 +12,7 @@ private:
     GLuint textureId = 0;
     GLuint slot;
     std::string location;
+    int width, height;
 
 public:
     Texture(TextureInfo info, GLuint slot);
@@ -27,6 +28,10 @@ public:
     GLuint getSlot();
 
     std::string getLocation();
+
+    int getHeight();
+
+    int getWidth();
 };
 
 #endif

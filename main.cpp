@@ -50,7 +50,7 @@ int main() {
 
     gltfReader chess("test/ABeautifulGame.gltf", shader);
     Model &scene = chess.getScene(0);
-    //scene.setAngularVelocity(glm::vec3(0, 2, 0));
+    scene.setAngularVelocity(glm::vec3(0, 2, 0));
 
     Light light(glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
     light.move(glm::vec3(5));
@@ -86,8 +86,11 @@ int main() {
     Shader textShader("text.frag", "text.vert");
     textShader.unloadFiles();
 
-    Text text("Textures/arial.tff", textShader);
-    text.generateMessage("Hello world!", 5, 5, glm::vec3(1));
+    Text text("Textures/arial", textShader, width, height);
+    text.generateMessage("999", 5, 5, glm::vec3(1));
+
+    float fpsTimer = 0;
+    int fps = 0;
 
     //Window loop
     while(!glfwWindowShouldClose(window)) {
@@ -111,6 +114,15 @@ int main() {
                 blinkCnt = 0;
                 blink = false;
             }
+        }
+
+        fpsTimer += timeDelta;
+        fps++;
+        if(fpsTimer > 1) {
+            fpsTimer = 0;
+            fps %= 1000;
+            text.setMessage(std::to_string(fps), glm::vec3(1));
+            fps = 0;
         }
 
         object.update(timeDelta);

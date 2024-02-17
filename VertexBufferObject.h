@@ -17,6 +17,8 @@ public:
 
     void unbind();
 
+    void update(std::vector<Vertex> &vertices);
+
     ~VertexBufferObject();
 };
 
