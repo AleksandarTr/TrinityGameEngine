@@ -19,3 +19,8 @@ void ElementBufferObject::unbind() {
 ElementBufferObject::~ElementBufferObject() {
     glDeleteBuffers(1, &EBO);
 }
+
+void ElementBufferObject::update(std::vector<GLuint> &indices) {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(GLuint), indices.data());
+}

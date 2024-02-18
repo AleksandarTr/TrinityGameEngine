@@ -46,6 +46,8 @@ public:
     virtual void initializeOtherFields();
 
     static int getTextureSlot();
+
+    void updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indices = nullptr);
 };
 
 #endif

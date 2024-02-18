@@ -19,6 +19,8 @@ public:
     void unbind();
 
     ~ElementBufferObject();
+
+    void update(std::vector<GLuint> &indices);
 };
 
 #endif

@@ -58,7 +58,6 @@ int main() {
     Light light2(glm::vec3(1, 0, 0), glm::vec3(-1), LightingType::PointLight);
     light2.move(glm::vec3(-10));
 
-    glEnable(GL_DEPTH_TEST);
     double prevTime = glfwGetTime();
     object.setAngularVelocity(glm::vec3(0, 3, 0));
     shader.addLight(light);
@@ -87,10 +86,19 @@ int main() {
     textShader.unloadFiles();
 
     Text text("Textures/arial", textShader, width, height);
-    text.generateMessage("999", 5, 5, glm::vec3(1));
+    text.generateMessage("   ", 5, 5, glm::vec3(0, 1, 1));
+
+    Text text3D("Textures/arial", shader, width, height, false);
+    text3D.generateMessage("Hello world!", 5, 5, glm::vec3(1, 0, 0));
+    text3D.getMesh().scale(glm::vec3(5));
+    text3D.getMesh().setAngularVelocity(glm::vec3(0, 5, 0));
 
     float fpsTimer = 0;
     int fps = 0;
+
+    glEnable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
 
     //Window loop
     while(!glfwWindowShouldClose(window)) {
@@ -121,14 +129,16 @@ int main() {
         if(fpsTimer > 1) {
             fpsTimer = 0;
             fps %= 1000;
-            text.setMessage(std::to_string(fps), glm::vec3(1));
+            text.setMessage(std::to_string(fps), glm::vec3(0, 1, 1));
             fps = 0;
         }
 
         object.update(timeDelta);
         scene.update(timeDelta);
+        text3D.getMesh().update(timeDelta);
         scene.draw();
         object.draw();
+        text3D.draw();
 
         text.draw();
 

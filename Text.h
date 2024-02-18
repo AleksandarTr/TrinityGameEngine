@@ -22,7 +22,7 @@ private:
     ElementBufferObject EBO = ElementBufferObject();
     Shader& shader;
 
-    Texture *fontTexture;
+    Texture *fontTexture = nullptr;
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
     std::vector<charInfo> chars;
@@ -31,10 +31,18 @@ private:
     float windowWidth, windowHeight;
     int maxHeight = 0, maxWidth = 0;
 
+    TextureInfo info = TextureInfo();
+    Mesh *mesh = nullptr;
+    bool fixed;
+
+    void generateVertices(int length, int x, int y, int charHeight, int charWidth);
+
 public:
-    Text(std::string font, Shader &shader, int windowWidth, int windowHeight);
+    Text(std::string font, Shader &shader, int windowWidth, int windowHeight, bool fixed = true);
 
     void setLength(int length, int x, int y, int charHeight, int charWidth);
+
+    void resetLength(int length, int x, int y, int charHeight, int charWidth);
 
     void setMessage(std::string message, glm::vec3 color);
 
@@ -43,6 +51,8 @@ public:
     void draw();
 
     void readCharInfo(std::string file);
+
+    Mesh& getMesh();
 };
 
 #endif

@@ -12,6 +12,7 @@ uniform sampler2D specularTexture;
 uniform bool applySpecularTexture;
 uniform sampler2D normalTexture;
 uniform bool applyNormalTexture;
+uniform bool applyColor;
 uniform float metallic;
 uniform float roughness;
 
@@ -144,7 +145,7 @@ void main() {
 
     specularVector = applySpecularTexture ? texture(specularTexture, vec2(texCoord)).rgba : vec4(roughness, metallic, 1.0f, 1.0f);
 
-    vec4 resLight1 = vec4(0, 0, 0, 0);
+    vec4 resLight1 = vec4(0, 0, 0, 1);
     vec4 resLight2 = vec4(0, 0, 0, 0);
     for(int i = 0; i < lightNum; i++) {
         lightInd = i;
@@ -174,7 +175,8 @@ void main() {
     resLight2.x = min(resLight2.x, maxSpec);
     resLight2.y = min(resLight2.y, maxSpec);
     resLight2.z = min(resLight2.z, maxSpec);
-    resLight2.w = min(resLight2.w, maxSpec);
+    resLight2.w = min(resLight2.w, 0);
 
     FragColor = diffuseVector * resLight1 + resLight2;
+    if(applyColor && useTexture) FragColor *= vec4(color, 1);
 }

@@ -59,3 +59,13 @@ VBO(copy.VBO), EBO(copy.EBO), textureSlot(copy.textureSlot), drawMode(copy.drawM
 int Mesh::getTextureSlot() {
     return textureSlotAllocator++;
 }
+
+void Mesh::updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indices) {
+    VAO.bind();
+    VBO.update(*vertices);
+    if(indices) EBO.update(*indices);
+
+    VAO.unbind();
+    VBO.unbind();
+    EBO.unbind();
+}
