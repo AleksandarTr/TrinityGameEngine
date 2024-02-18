@@ -5,8 +5,8 @@ Text::Text(std::string font, Shader &shader, int windowWidth, int windowHeight, 
 : shader(shader), windowWidth(windowWidth), windowHeight(windowHeight), fixed(fixed) {
     info.location = font + ".png";
     info.format = "image/png";
+    info.wrapS = GL_CLAMP_TO_EDGE;
     fontTexture = new Texture(info, Mesh::getTextureSlot());
-
     readCharInfo(font);
 }
 
@@ -103,6 +103,7 @@ void Text::setMessage(std::string message, glm::vec3 color) {
 
         float height = fontTexture->getHeight();
         float width = fontTexture->getWidth();
+        //TODO: Use unused vectors of Vertex to adjust texture position in fragment shader
         v1.texPosition = glm::vec3(character.x / width, 1-(character.y + character.height) / height, 0);
         v2.texPosition = glm::vec3((character.x + character.width) / width, 1-(character.y + character.height) / height, 0);
         v3.texPosition = glm::vec3((character.x + character.width) / width, 1-character.y / height, 0);
@@ -176,6 +177,10 @@ void Text::generateVertices(int length, int left, int top, int charHeight, int c
         indices.push_back(4 * i + 2);
         indices.push_back(4 * i + 3);
     }
+}
+
+Text::~Text() {
+    delete mesh;
 }
 
 

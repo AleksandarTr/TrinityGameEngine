@@ -13,6 +13,7 @@ private:
 
     //TODO: Make transformations on each depth of the model tree, eg. scene[0] should rotate around its own axis
     glm::vec3 localPosition = glm::vec3(0);
+    bool erased = false;
 
     friend class gltfReader;
 
@@ -48,6 +49,8 @@ public:
     void scale(glm::vec3 scaling) override;
 
     void draw();
+
+    ~Model();
 };
 
 #endif

@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <set>
+#include <stack>
 
 Model &Model::operator[](int index) {
     return *models[index];
@@ -129,3 +131,32 @@ Model::Model(const Model &copy) {
         meshCopy->bind();
     }
 }
+
+Model::~Model() {
+    if(erased) return;
+    std::set<std::vector<Vertex>*> vertexVectors;
+    std::set<std::vector<GLuint>*> indexVectors;
+
+    std::stack<Model*> s;
+    s.push(this);
+
+    while(!s.empty()) {
+        Model* model = s.top();
+        s.pop();
+
+        for(Model *model : model->models) s.push(model);
+        for(Mesh* mesh : model->meshes) {
+            vertexVectors.insert(&(mesh->vertices));
+            indexVectors.insert(&(mesh->indices));
+            delete mesh;
+        }
+
+        model->erased = true;
+        if(model != this) delete model;
+    }
+
+    for(std::vector<Vertex>* vec : vertexVectors) delete vec;
+    for(std::vector<GLuint>* vec : indexVectors) delete vec;
+}
+
+

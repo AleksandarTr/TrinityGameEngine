@@ -48,8 +48,9 @@ int main() {
 
     Model object2 = object;
 
-    gltfReader chess("test/ABeautifulGame.gltf", shader);
-    Model &scene = chess.getScene(0);
+    auto chess = new gltfReader("test/ABeautifulGame.gltf", shader);
+    Model &scene = chess->getScene(0);
+    delete chess;
     scene.setAngularVelocity(glm::vec3(0, 2, 0));
 
     Light light(glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
@@ -134,9 +135,9 @@ int main() {
         }
 
         object.update(timeDelta);
-        scene.update(timeDelta);
+        //scene.update(timeDelta);
         text3D.getMesh().update(timeDelta);
-        scene.draw();
+        //scene.draw();
         object.draw();
         text3D.draw();
 

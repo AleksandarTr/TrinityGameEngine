@@ -302,7 +302,6 @@ Model &gltfReader::getScene(int index) {
         scene += model;
     }
 
-    delete [] meshBuffer;
     return scene;
 }
 
@@ -347,8 +346,8 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         glm::vec3 color = materials[primitive.material].baseColor;
 
         GLenum drawMode = primitive.mode;
-        std::vector<Vertex> vertices;
-        std::vector<GLuint> indices;
+        auto &vertices = *new std::vector<Vertex>();
+        auto &indices = *new std::vector<GLuint>();
 
         int ind = 0;
         while(ind < primitive.attributes.size() && primitive.attributes[ind] != "POSITION") ind++;
@@ -556,7 +555,7 @@ char* gltfReader::readAccessor(int accessor, int &width, int &size) {
         }
     }
 
-    delete sector;
+    delete [] sector;
     return destination;
 }
 
@@ -587,6 +586,13 @@ TextureInfo gltfReader::loadTexture(int textureId) {
     }
 
     return texture;
+}
+
+gltfReader::~gltfReader() {
+    if(meshBuffer) {
+        for(int i = 0; i < meshes.size(); i++) delete meshBuffer[i];
+        delete [] meshBuffer;
+    }
 }
 
 gltfReader::Buffer::Buffer(std::string &uri, std::size_t size, std::string &name, std::string &location) :

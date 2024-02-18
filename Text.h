@@ -53,6 +53,8 @@ public:
     void readCharInfo(std::string file);
 
     Mesh& getMesh();
+
+    ~Text();
 };
 
 #endif

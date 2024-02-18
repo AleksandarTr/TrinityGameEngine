@@ -13,14 +13,16 @@
 #include "Camera.h"
 
 class Mesh : public Movable {
+    friend class Model;
+
 protected:
     VertexArrayObject VAO = VertexArrayObject();
     VertexBufferObject VBO = VertexBufferObject();
     ElementBufferObject EBO = ElementBufferObject();
     Shader &shader;
 
-    std::vector<Vertex> vertices = std::vector<Vertex>();
-    std::vector<GLuint> indices = std::vector<GLuint>();
+    std::vector<Vertex> &vertices;
+    std::vector<GLuint> &indices;
     GLenum drawMode = GL_TRIANGLES;
 
     glm::mat4 modelTransformation = glm::mat4(1);

@@ -264,6 +264,8 @@ public:
     [[nodiscard]] ::Model& getScene(int index);
 
     int getSceneCount();
+
+    ~gltfReader();
 };
 
 #endif
