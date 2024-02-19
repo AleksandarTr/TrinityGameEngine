@@ -9,6 +9,7 @@
 #include "Light.h"
 #include "Model.h"
 #include "Text.h"
+#include "TextureHandler.h"
 
 int width = 1280;
 int height = 720;
@@ -62,7 +63,7 @@ int main() {
     double prevTime = glfwGetTime();
     object.setAngularVelocity(glm::vec3(0, 3, 0));
     shader.addLight(light);
-    shader.addLight(light2);
+    //shader.addLight(light2);
 
     light.setScale(glm::vec3(0.2f));
     light2.setScale(glm::vec3(0.25f));
@@ -86,20 +87,23 @@ int main() {
     Shader textShader("text.frag", "text.vert");
     textShader.unloadFiles();
 
-    Text text("Textures/arial", textShader, width, height);
-    text.generateMessage("   ", 5, 5, glm::vec3(0, 1, 1));
+    //Text text("Textures/arial", textShader, width, height);
+    //text.generateMessage("   ", 5, 5, glm::vec3(0, 1, 1));
 
-    Text text3D("Textures/arial", shader, width, height, false);
-    text3D.generateMessage("Hello world!", 5, 5, glm::vec3(1, 0, 0));
-    text3D.getMesh().scale(glm::vec3(5));
-    text3D.getMesh().setAngularVelocity(glm::vec3(0, 5, 0));
+    //Text text3D("Textures/arial", shader, width, height, false);
+    //text3D.generateMessage("Hello world!", 5, 5, glm::vec3(1, 0, 0));
+    //text3D.getMesh().scale(glm::vec3(5));
+    //text3D.getMesh().setAngularVelocity(glm::vec3(0, 5, 0));
 
     float fpsTimer = 0;
     int fps = 0;
 
+    TextureHandler& textureHandler = TextureHandler::getTextureHandler();
+
     glEnable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
+    camera.inputs(window);
 
     //Window loop
     while(!glfwWindowShouldClose(window)) {
@@ -107,6 +111,7 @@ int main() {
         double timeDelta = currentTIme - prevTime;
         glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        textureHandler.assignTexture();
 
         if(!blink) timer += timeDelta;
         if(timer > 2) {
@@ -130,20 +135,20 @@ int main() {
         if(fpsTimer > 1) {
             fpsTimer = 0;
             fps %= 1000;
-            text.setMessage(std::to_string(fps), glm::vec3(0, 1, 1));
+            //text.setMessage(std::to_string(fps), glm::vec3(0, 1, 1));
             fps = 0;
         }
 
         object.update(timeDelta);
         //scene.update(timeDelta);
-        text3D.getMesh().update(timeDelta);
-        //scene.draw();
+        //text3D.getMesh().update(timeDelta);
+        scene.draw();
         object.draw();
-        text3D.draw();
+        //text3D.draw();
 
-        text.draw();
+        //text.draw();
 
-        camera.inputs(window);
+        //camera.inputs(window);
         camera.update(timeDelta);
 
         prevTime = currentTIme;

@@ -15,6 +15,8 @@ struct Vertex {
 
 enum struct LightingType {PointLight, DirectionalLight, SpotLight};
 
+enum struct TextureType {Diffuse, PBR, Normal, Emissive, Oclussion, Text};
+
 struct TextureInfo {
     std::string location = "";
     std::string format = "image/jpeg";
@@ -22,6 +24,8 @@ struct TextureInfo {
     int minFilter = GL_NEAREST;
     int wrapS = GL_REPEAT;
     int wrapT = GL_REPEAT;
+    int width, height;
+    TextureType type = TextureType::Diffuse;
 };
 
 #endif

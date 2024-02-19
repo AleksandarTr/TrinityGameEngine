@@ -1,27 +1,35 @@
 #include "SingleTextureMesh.h"
+#include "TextureHandler.h"
 #include <algorithm>
 
 SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode,
                                      TextureInfo diffuseTexture, TextureInfo specularTexture, TextureInfo normalTexture)
 : Mesh(vertices, indices, shader, drawMode) {
     if(!diffuseTexture.location.empty()) {
-        this->diffuseTexture = loadTexture(diffuseTexture);
-        if(!specularTexture.location.empty()) this->specularTexture = loadTexture(specularTexture);
-        if(!normalTexture.location.empty()) this->normalTexture = loadTexture(normalTexture);
+        diffuseTexture.type = TextureType::Diffuse;
+        specularTexture.type = TextureType::PBR;
+        normalTexture.type = TextureType::Normal;
+        TextureHandler::getTextureHandler().loadTexture(diffuseTexture, &(this->diffuseTexture));
+        if(!specularTexture.location.empty())
+            TextureHandler::getTextureHandler().loadTexture(specularTexture, &(this->specularTexture));
+        if(!normalTexture.location.empty())
+            TextureHandler::getTextureHandler().loadTexture(normalTexture, &(this->normalTexture));
     }
 }
 
 void SingleTextureMesh::drawTextures() {
     if(diffuseTexture == nullptr) glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), false);
     else {
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), true);
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "diffuseTexture"), diffuseTexture->getSlot());
+        glActiveTexture(GL_TEXTURE0 + static_cast<int>(TextureType::Diffuse));
         diffuseTexture->bind();
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), true);
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "diffuseTexture"), GL_TEXTURE0 + static_cast<int>(TextureType::Diffuse));
 
         if(specularTexture) {
-            glUniform1i(glGetUniformLocation(shader.getProgramID(), "specularTexture"), specularTexture->getSlot());
-            glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), true);
+            glActiveTexture(GL_TEXTURE0 + static_cast<int>(TextureType::PBR));
             specularTexture->bind();
+            glUniform1i(glGetUniformLocation(shader.getProgramID(), "specularTexture"), GL_TEXTURE0 + static_cast<int>(TextureType::PBR));
+            glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), true);
         }
         else {
             glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), false);
@@ -30,9 +38,10 @@ void SingleTextureMesh::drawTextures() {
         }
 
         if(normalTexture) {
-            glUniform1i(glGetUniformLocation(shader.getProgramID(), "normalTexture"), normalTexture->getSlot());
-            glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyNormalTexture"), true);
+            glActiveTexture(GL_TEXTURE0 + static_cast<int>(TextureType::Normal));
             normalTexture->bind();
+            glUniform1i(glGetUniformLocation(shader.getProgramID(), "normalTexture"), GL_TEXTURE0 + static_cast<int>(TextureType::Normal));
+            glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyNormalTexture"), true);
         }
         else glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyNormalTexture"), false);
     }
@@ -43,15 +52,10 @@ SingleTextureMesh::~SingleTextureMesh() {
     delete specularTexture;
 }
 
-SingleTextureMesh::SingleTextureMesh(const SingleTextureMesh &mesh) : Mesh(mesh), diffuseTexture(mesh.diffuseTexture),
-specularTexture(mesh.specularTexture), normalTexture(mesh.normalTexture) {}
-
-Texture *SingleTextureMesh::loadTexture(TextureInfo texture) {
-    auto itr = loadedTextures.begin();
-    for (; itr != loadedTextures.end(); itr++)
-        if ((*itr)->getLocation() == texture.location) break;
-    if (itr != loadedTextures.end()) return *itr;
-    else return new Texture(texture, textureSlotAllocator++);
+SingleTextureMesh::SingleTextureMesh(const SingleTextureMesh &mesh) : Mesh(mesh) {
+    if(mesh.diffuseTexture) TextureHandler::getTextureHandler().loadTexture(mesh.diffuseTexture->getInfo(), &diffuseTexture);
+    if(mesh.specularTexture) TextureHandler::getTextureHandler().loadTexture(mesh.specularTexture->getInfo(), &specularTexture);
+    if(mesh.normalTexture) TextureHandler::getTextureHandler().loadTexture(mesh.normalTexture->getInfo(), &normalTexture);
 }
 
 void SingleTextureMesh::setMetallic(float value) {

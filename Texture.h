@@ -8,30 +8,24 @@
 #include "Structs.h"
 
 class Texture {
+    friend class TextureHandler;
+
 private:
+    Texture() = default;
+
     GLuint textureId = 0;
-    GLuint slot;
-    std::string location;
-    int width, height;
+    TextureInfo info;
 
 public:
-    Texture(TextureInfo info, GLuint slot);
-
     void bind();
 
     ~Texture();
 
     static void unbind();
 
+    const TextureInfo& getInfo();
+
     GLuint getId();
-
-    GLuint getSlot();
-
-    std::string getLocation();
-
-    int getHeight();
-
-    int getWidth();
 };
 
 #endif

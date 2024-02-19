@@ -30,14 +30,14 @@ add_executable(TrinityEngine main.cpp glad.c
         Light.h
         SingleTextureMesh.cpp
         SingleTextureMesh.h
-        MultiTextureMesh.cpp
-        MultiTextureMesh.h
         Model.cpp
         Model.h
         gltfReader.cpp
         gltfReader.h
         Text.cpp
         Text.h
+        TextureHandler.cpp
+        TextureHandler.h
 )
 
 add_library(glfw STATIC IMPORTED)

@@ -7,6 +7,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "SingleTextureMesh.h"
+#include <queue>
 
 class Text {
 private:
@@ -15,6 +16,16 @@ private:
         int width, height;
         int xOffset, yOffset;
         int xAdvance;
+    };
+
+    struct Job {
+        std::string message;
+        glm::vec3 color;
+        int length;
+        int x;
+        int y;
+        int charHeight;
+        int charWidth;
     };
 
     VertexArrayObject VAO = VertexArrayObject();
@@ -36,6 +47,8 @@ private:
     bool fixed;
 
     void generateVertices(int length, int x, int y, int charHeight, int charWidth);
+
+    std::queue<Job> jobs;
 
 public:
     Text(std::string font, Shader &shader, int windowWidth, int windowHeight, bool fixed = true);

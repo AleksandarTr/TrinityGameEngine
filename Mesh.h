@@ -29,9 +29,6 @@ protected:
     glm::mat4 rotationMatrix = glm::mat4(1);
 
     int textureSlot = -1;
-    static int textureSlotAllocator;
-    static std::vector<Texture*> loadedTextures;
-
 public:
     Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode);
 
@@ -46,8 +43,6 @@ public:
     void draw();
 
     virtual void initializeOtherFields();
-
-    static int getTextureSlot();
 
     void updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indices = nullptr);
 };

@@ -3,9 +3,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-int Mesh::textureSlotAllocator = 0;
-std::vector<Texture*> Mesh::loadedTextures = std::vector<Texture*>();
-
 Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode)
 : vertices(vertices), indices(indices), shader(shader), drawMode(drawMode) {}
 
@@ -55,10 +52,6 @@ void Mesh::updateTransformation() {
 
 Mesh::Mesh(const Mesh &copy) : indices(copy.indices), vertices(copy.vertices), shader(copy.shader), VAO(copy.VAO),
 VBO(copy.VBO), EBO(copy.EBO), textureSlot(copy.textureSlot), drawMode(copy.drawMode){}
-
-int Mesh::getTextureSlot() {
-    return textureSlotAllocator++;
-}
 
 void Mesh::updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indices) {
     VAO.bind();

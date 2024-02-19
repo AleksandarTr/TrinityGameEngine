@@ -13,8 +13,6 @@ private:
     float metallic = 0;
     float roughness = 0;
 
-    Texture* loadTexture(TextureInfo texture);
-
 public:
     SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode,
     TextureInfo diffuseTexture = TextureInfo(), TextureInfo specularTexture = TextureInfo(), TextureInfo normalTexture = TextureInfo());

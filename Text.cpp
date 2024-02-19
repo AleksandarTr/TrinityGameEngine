@@ -1,12 +1,14 @@
 #include "Text.h"
 #include "Mesh.h"
+#include "TextureHandler.h"
 
 Text::Text(std::string font, Shader &shader, int windowWidth, int windowHeight, bool fixed)
 : shader(shader), windowWidth(windowWidth), windowHeight(windowHeight), fixed(fixed) {
     info.location = font + ".png";
     info.format = "image/png";
     info.wrapS = GL_CLAMP_TO_EDGE;
-    fontTexture = new Texture(info, Mesh::getTextureSlot());
+    info.type = TextureType::Text;
+    TextureHandler::getTextureHandler().loadTexture(info, &fontTexture);
     readCharInfo(font);
 }
 
@@ -21,7 +23,7 @@ void Text::draw() {
     if(fixed) {
         shader.activate();
         VAO.bind();
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "font"), fontTexture->getSlot());
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "font"), GL_TEXTURE0 + static_cast<int>(TextureType::Text));
         fontTexture->bind();
 
         glDisable(GL_DEPTH_TEST);
@@ -101,8 +103,8 @@ void Text::setMessage(std::string message, glm::vec3 color) {
         v3.color = color;
         v4.color = color;
 
-        float height = fontTexture->getHeight();
-        float width = fontTexture->getWidth();
+        float height = fontTexture->getInfo().height;
+        float width = fontTexture->getInfo().width;
         //TODO: Use unused vectors of Vertex to adjust texture position in fragment shader
         v1.texPosition = glm::vec3(character.x / width, 1-(character.y + character.height) / height, 0);
         v2.texPosition = glm::vec3((character.x + character.width) / width, 1-(character.y + character.height) / height, 0);
