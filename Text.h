@@ -8,6 +8,7 @@
 #include "Texture.h"
 #include "SingleTextureMesh.h"
 #include <queue>
+#include <thread>
 
 class Text {
 private:
@@ -19,13 +20,11 @@ private:
     };
 
     struct Job {
+        Text &text;
         std::string message;
         glm::vec3 color;
-        int length;
-        int x;
-        int y;
-        int charHeight;
-        int charWidth;
+
+        Job(Text &text) : text(text) {}
     };
 
     VertexArrayObject VAO = VertexArrayObject();
@@ -48,7 +47,14 @@ private:
 
     void generateVertices(int length, int x, int y, int charHeight, int charWidth);
 
-    std::queue<Job> jobs;
+    void setMess(std::string message, glm::vec3 color);
+
+    static void handleChanges();
+
+    static std::queue<Job> jobs;
+    bool changed = false;
+    static bool close;
+    static std::thread textHandler;
 
 public:
     Text(std::string font, Shader &shader, int windowWidth, int windowHeight, bool fixed = true);
@@ -68,6 +74,8 @@ public:
     Mesh& getMesh();
 
     ~Text();
+
+    static void killTextHandler();
 };
 
 #endif

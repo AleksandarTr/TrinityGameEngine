@@ -1,5 +1,8 @@
 #include "TextureHandler.h"
 
+std::thread TextureHandler::textureThread(&TextureHandler::loadInMemory);
+bool TextureHandler::close = false;
+
 int TextureHandler::activeTextures[static_cast<unsigned long long>(TextureType::Count)] = {0};
 
 TextureHandler &TextureHandler::getTextureHandler() {
@@ -10,11 +13,10 @@ TextureHandler &TextureHandler::getTextureHandler() {
 void TextureHandler::loadTexture(TextureInfo info, Texture *destination) {
     Job job = {.info = std::move(info), .destination = destination};
     jobs.push(job);
-    if(!textureThread) textureThread = new std::thread(&TextureHandler::loadInMemory);
 }
 
-[[noreturn]] void TextureHandler::loadInMemory() {
-    while(true) {
+void TextureHandler::loadInMemory() {
+    while(!close) {
         if(getTextureHandler().jobs.empty()) continue;
         Job job = getTextureHandler().jobs.top();
         getTextureHandler().jobs.pop();
@@ -80,6 +82,7 @@ void TextureHandler::assignTexture() {
         }
 
         job->destination->textureId = job->result->textureId;
+        job->destination->info = job->info;
         job->data = nullptr;
     }
 }
@@ -90,6 +93,11 @@ void TextureHandler::bindTexture(Texture &texture) {
         glActiveTexture(GL_TEXTURE0 + static_cast<int>(texture.info.type));
     }
     texture.bind();
+}
+
+void TextureHandler::killTextureHandler() {
+    close = true;
+    textureThread.join();
 }
 
 bool TextureHandler::higherPriority::operator()(Job &job1, Job &job2) {

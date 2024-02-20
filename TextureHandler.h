@@ -2,8 +2,8 @@
 #define TRINITYENGINE_TEXTUREHANDLER_H
 
 #include <queue>
-#include <thread>
 #include <utility>
+#include <thread>
 #include "Texture.h"
 #include "Mesh.h"
 
@@ -34,8 +34,10 @@ private:
 
     std::priority_queue<Job, std::vector<Job>, higherPriority> jobs;
     std::queue<Job*> awaitingLoading;
-    std::thread *textureThread;
     static int activeTextures[static_cast<unsigned long long>(TextureType::Count)];
+    static bool close;
+    static std::thread textureThread;
+
 public:
     static TextureHandler& getTextureHandler();
 
@@ -45,7 +47,9 @@ public:
 
     static void bindTexture(Texture &texture);
 
-    [[noreturn]] static void loadInMemory();
+    static void loadInMemory();
+
+    static void killTextureHandler();
 };
 
 #endif

@@ -63,7 +63,7 @@ int main() {
     double prevTime = glfwGetTime();
     object.setAngularVelocity(glm::vec3(0, 3, 0));
     shader.addLight(light);
-    //shader.addLight(light2);
+    shader.addLight(light2);
 
     light.setScale(glm::vec3(0.2f));
     light2.setScale(glm::vec3(0.25f));
@@ -156,6 +156,8 @@ int main() {
         glfwPollEvents();
     }
 
+    TextureHandler::killTextureHandler();
+    Text::killTextHandler();
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;

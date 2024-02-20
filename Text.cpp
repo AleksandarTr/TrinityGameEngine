@@ -2,6 +2,11 @@
 #include "Mesh.h"
 #include "TextureHandler.h"
 
+bool Text::close = false;
+std::thread Text::textHandler(handleChanges);
+
+std::queue<Text::Job> Text::jobs = std::queue<Text::Job>();
+
 Text::Text(std::string font, Shader &shader, int windowWidth, int windowHeight, bool fixed)
 : shader(shader), windowWidth(windowWidth), windowHeight(windowHeight), fixed(fixed) {
     info.location = font + ".png";
@@ -22,6 +27,12 @@ void Text::generateMessage(std::string message, float x, float y, glm::vec3 colo
 void Text::draw() {
     if(vertices.empty()) throw std::logic_error("Cannot draw text which has not been generated!");
     if(fixed) {
+        if(changed) {
+            VBO.update(vertices);
+            VBO.unbind();
+            changed = false;
+        }
+
         shader.activate();
         VAO.bind();
 
@@ -35,6 +46,11 @@ void Text::draw() {
         VAO.unbind();
     }
     else {
+        if(changed) {
+            mesh->updateMesh(&vertices);
+            changed = false;
+        }
+
         shader.activate();
         glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyColor"), true);
         mesh->draw();
@@ -90,7 +106,7 @@ void Text::setLength(int length, int x, int y, int charHeight, int charWidth) {
     }
 }
 
-void Text::setMessage(std::string message, glm::vec3 color) {
+void Text::setMess(std::string message, glm::vec3 color) {
     if(vertices.size() / 4 < message.length()) throw std::invalid_argument("Message cannot fit in this text");
     for(int i = 0; i < message.size(); i++) {
         charInfo character = chars[message[i] - firstChar];
@@ -112,12 +128,6 @@ void Text::setMessage(std::string message, glm::vec3 color) {
         v3.texPosition = glm::vec3((character.x + character.width) / width, 1-character.y / height, 0);
         v4.texPosition = glm::vec3(character.x / width, 1-character.y / height, 0);
     }
-
-    if(fixed) {
-        VBO.update(vertices);
-        VBO.unbind();
-    }
-    else mesh->updateMesh(&vertices);
 }
 
 Mesh &Text::getMesh() {
@@ -184,6 +194,28 @@ void Text::generateVertices(int length, int left, int top, int charHeight, int c
 
 Text::~Text() {
     delete mesh;
+}
+
+void Text::handleChanges() {
+    while(!close) {
+        if(jobs.empty() || !jobs.front().text.fontTexture->getId()) continue;
+        Job job = jobs.front();
+        jobs.pop();
+        job.text.setMess(job.message, job.color);
+        job.text.changed = true;
+    }
+}
+
+void Text::setMessage(std::string message, glm::vec3 color) {
+    Job job(*this);
+    job.message = message;
+    job.color = color;
+    jobs.push(job);
+}
+
+void Text::killTextHandler() {
+    close = true;
+    textHandler.join();
 }
 
 
