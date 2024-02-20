@@ -87,13 +87,13 @@ int main() {
     Shader textShader("text.frag", "text.vert");
     textShader.unloadFiles();
 
-    //Text text("Textures/arial", textShader, width, height);
-    //text.generateMessage("   ", 5, 5, glm::vec3(0, 1, 1));
+    Text text("Textures/arial", textShader, width, height);
+    text.generateMessage("   ", 5, 5, glm::vec3(0, 1, 1));
 
-    //Text text3D("Textures/arial", shader, width, height, false);
-    //text3D.generateMessage("Hello world!", 5, 5, glm::vec3(1, 0, 0));
-    //text3D.getMesh().scale(glm::vec3(5));
-    //text3D.getMesh().setAngularVelocity(glm::vec3(0, 5, 0));
+    Text text3D("Textures/arial", shader, width, height, false);
+    text3D.generateMessage("Hello world!", 5, 5, glm::vec3(1, 0, 0));
+    text3D.getMesh().scale(glm::vec3(5));
+    text3D.getMesh().setAngularVelocity(glm::vec3(0, 5, 0));
 
     float fpsTimer = 0;
     int fps = 0;
@@ -135,20 +135,20 @@ int main() {
         if(fpsTimer > 1) {
             fpsTimer = 0;
             fps %= 1000;
-            //text.setMessage(std::to_string(fps), glm::vec3(0, 1, 1));
+            text.setMessage(std::to_string(fps), glm::vec3(0, 1, 1));
             fps = 0;
         }
 
         object.update(timeDelta);
-        //scene.update(timeDelta);
-        //text3D.getMesh().update(timeDelta);
+        scene.update(timeDelta);
+        text3D.getMesh().update(timeDelta);
         scene.draw();
         object.draw();
-        //text3D.draw();
+        text3D.draw();
 
-        //text.draw();
+        text.draw();
 
-        //camera.inputs(window);
+        camera.inputs(window);
         camera.update(timeDelta);
 
         prevTime = currentTIme;

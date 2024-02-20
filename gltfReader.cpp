@@ -465,7 +465,7 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         }
 
 
-        ::SingleTextureMesh& mesh = *new SingleTextureMesh(vertices, indices, shader, drawMode, diffuseTexture, specularTexture, normalTexture);
+        ::SingleTextureMesh& mesh = *new SingleTextureMesh(vertices, indices, shader, drawMode, diffuseTexture, specularTexture, normalTexture, meshes[index].name);
         mesh.bind();
         if(primitive.material != -1) {
             mesh.setMetallic(materials[primitive.material].metallic);

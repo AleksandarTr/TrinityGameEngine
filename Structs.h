@@ -15,7 +15,7 @@ struct Vertex {
 
 enum struct LightingType {PointLight, DirectionalLight, SpotLight};
 
-enum struct TextureType {Diffuse, PBR, Normal, Emissive, Oclussion, Text};
+enum struct TextureType {None = -1, Text, Diffuse, PBR, Normal, Emissive, Oclussion, Count};
 
 struct TextureInfo {
     std::string location = "";
@@ -25,7 +25,7 @@ struct TextureInfo {
     int wrapS = GL_REPEAT;
     int wrapT = GL_REPEAT;
     int width, height;
-    TextureType type = TextureType::Diffuse;
+    TextureType type = TextureType::None;
 };
 
 #endif

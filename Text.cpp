@@ -8,7 +8,8 @@ Text::Text(std::string font, Shader &shader, int windowWidth, int windowHeight, 
     info.format = "image/png";
     info.wrapS = GL_CLAMP_TO_EDGE;
     info.type = TextureType::Text;
-    TextureHandler::getTextureHandler().loadTexture(info, &fontTexture);
+    fontTexture = new Texture(info);
+    TextureHandler::getTextureHandler().loadTexture(info,  fontTexture);
     readCharInfo(font);
 }
 
@@ -23,14 +24,14 @@ void Text::draw() {
     if(fixed) {
         shader.activate();
         VAO.bind();
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "font"), GL_TEXTURE0 + static_cast<int>(TextureType::Text));
-        fontTexture->bind();
+
+        TextureHandler::bindTexture(*fontTexture);
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "font"), static_cast<int>(fontTexture->getInfo().type));
 
         glDisable(GL_DEPTH_TEST);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
         glEnable(GL_DEPTH_TEST);
 
-        Texture::unbind();
         VAO.unbind();
     }
     else {

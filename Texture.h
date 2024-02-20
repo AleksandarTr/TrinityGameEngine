@@ -11,12 +11,12 @@ class Texture {
     friend class TextureHandler;
 
 private:
-    Texture() = default;
-
     GLuint textureId = 0;
     TextureInfo info;
 
 public:
+    Texture(TextureInfo info);
+
     void bind();
 
     ~Texture();

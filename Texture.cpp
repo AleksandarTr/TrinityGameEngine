@@ -18,3 +18,5 @@ void Texture::unbind() {
 const TextureInfo &Texture::getInfo() {
     return info;
 }
+
+Texture::Texture(TextureInfo info) : info(std::move(info)) {}

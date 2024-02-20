@@ -1,23 +1,23 @@
 #include "TextureHandler.h"
-#include <iostream>
+
+int TextureHandler::activeTextures[static_cast<unsigned long long>(TextureType::Count)] = {0};
 
 TextureHandler &TextureHandler::getTextureHandler() {
     static TextureHandler textureHandler;
     return textureHandler;
 }
 
-void TextureHandler::loadTexture(TextureInfo info, Texture **destination) {
+void TextureHandler::loadTexture(TextureInfo info, Texture *destination) {
     Job job = {.info = std::move(info), .destination = destination};
     jobs.push(job);
     if(!textureThread) textureThread = new std::thread(&TextureHandler::loadInMemory);
 }
 
-void TextureHandler::loadInMemory() {
+[[noreturn]] void TextureHandler::loadInMemory() {
     while(true) {
         if(getTextureHandler().jobs.empty()) continue;
-        Job job = getTextureHandler().jobs.front();
+        Job job = getTextureHandler().jobs.top();
         getTextureHandler().jobs.pop();
-        std::cout << "Loaded: " << job.info.location << std::endl;
 
         bool found = false;
         Node *itr = getTextureHandler().loadedTextures;
@@ -57,9 +57,8 @@ void TextureHandler::assignTexture() {
         awaitingLoading.pop();
 
         if(!job->result) {
-            job->result = new Texture();
+            job->result = job->destination;
             glGenTextures(1, &job->result->textureId);
-            glActiveTexture(GL_TEXTURE0 + static_cast<int>(job->info.type));
             glBindTexture(GL_TEXTURE_2D, job->result->getId());
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, job->info.minFilter);
@@ -80,7 +79,19 @@ void TextureHandler::assignTexture() {
             stbi_image_free(job->data);
         }
 
-        *job->destination = job->result;
+        job->destination->textureId = job->result->textureId;
         job->data = nullptr;
     }
+}
+
+void TextureHandler::bindTexture(Texture &texture) {
+    if(activeTextures[static_cast<int>(texture.info.type)] != texture.textureId) {
+        activeTextures[static_cast<int>(texture.info.type)] = texture.textureId;
+        glActiveTexture(GL_TEXTURE0 + static_cast<int>(texture.info.type));
+    }
+    texture.bind();
+}
+
+bool TextureHandler::higherPriority::operator()(Job &job1, Job &job2) {
+    return job1.info.type >= job2.info.type;
 }

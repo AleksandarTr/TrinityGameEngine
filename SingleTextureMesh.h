@@ -12,10 +12,11 @@ private:
 
     float metallic = 0;
     float roughness = 0;
+    std::string name;
 
 public:
     SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode,
-    TextureInfo diffuseTexture = TextureInfo(), TextureInfo specularTexture = TextureInfo(), TextureInfo normalTexture = TextureInfo());
+    TextureInfo diffuseTexture = TextureInfo(), TextureInfo specularTexture = TextureInfo(), TextureInfo normalTexture = TextureInfo(), std::string name = "");
 
     SingleTextureMesh(const SingleTextureMesh&);
 
