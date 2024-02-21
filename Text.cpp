@@ -2,7 +2,7 @@
 #include "Mesh.h"
 #include "TextureHandler.h"
 
-bool Text::close = false;
+volatile bool Text::close = false;
 std::thread Text::textHandler(handleChanges);
 
 std::queue<Text::Job> Text::jobs = std::queue<Text::Job>();
@@ -19,9 +19,8 @@ Text::Text(std::string font, Shader &shader, int windowWidth, int windowHeight, 
 }
 
 void Text::generateMessage(std::string message, float x, float y, glm::vec3 color) {
-    if(vertices.empty()) setLength(message.length(), x, y, 50, 20);
-    else if(vertices.size() / 4 != message.length()) resetLength(message.length(), x, y, 50, 20);
-    setMessage(message, color);
+    if(vertices.empty() || vertices.size() / 4 != message.length()) setLength(message.length());
+    setMessage(message, color, x, y, 50);
 }
 
 void Text::draw() {
@@ -83,10 +82,10 @@ void Text::readCharInfo(std::string file) {
     reader.close();
 }
 
-void Text::setLength(int length, int x, int y, int charHeight, int charWidth) {
-    if(!vertices.empty()) throw std::invalid_argument("Text length has already been set.\nUse resetLength instead.");
+void Text::setLength(int length) {
+    if(vertices.size() / 4 == length) return;
     if(length <= 0) std::invalid_argument("Text length cannot be less than 1");
-    generateVertices(length, x, y, charHeight, charWidth);
+    generateVertices(length);
 
     if(fixed) {
         VAO.bind();
@@ -106,14 +105,37 @@ void Text::setLength(int length, int x, int y, int charHeight, int charWidth) {
     }
 }
 
-void Text::setMess(std::string message, glm::vec3 color) {
+void Text::setMess(std::string message, glm::vec3 color, int left, int top, int charHeight) {
     if(vertices.size() / 4 < message.length()) throw std::invalid_argument("Message cannot fit in this text");
+    float x, y;
+    float messageWidth = 0;
+    for(char ch : message) messageWidth += chars[ch - firstChar].xAdvance;
+    messageWidth -= chars[message[message.length() - 1] - firstChar].xAdvance;
+    messageWidth += chars[message[message.length() - 1] - firstChar].width;
+    float scale = 1.0f * charHeight / maxHeight;
+    messageWidth *= scale;
+
+    if(fixed) {
+        x = -1 + left / windowWidth;
+        y = 1 - (top + charHeight) / windowHeight;
+    }
+    else {
+        x = -messageWidth / windowWidth / 2;
+        y = charHeight / windowHeight / 2;
+    }
+
     for(int i = 0; i < message.size(); i++) {
         charInfo character = chars[message[i] - firstChar];
         Vertex &v1 = vertices[4 * i];
         Vertex &v2 = vertices[4 * i + 1];
         Vertex &v3 = vertices[4 * i + 2];
         Vertex &v4 = vertices[4 * i + 3];
+
+        v1.position = glm::vec3(x, y, 0);
+        v2.position = glm::vec3(x + character.width * scale / windowWidth, y, 0);
+        v3.position = glm::vec3(x + character.width * scale / windowWidth, y + character.height * scale / windowHeight, 0);
+        v4.position = glm::vec3(x, y + character.height * scale / windowHeight, 0);
+        x += character.xAdvance * scale / windowWidth;
 
         v1.color = color;
         v2.color = color;
@@ -135,41 +157,9 @@ Mesh &Text::getMesh() {
     return *mesh;
 }
 
-void Text::resetLength(int length, int x, int y, int charHeight, int charWidth) {
-    if(vertices.empty()) throw std::invalid_argument("Text length has not been set yet.\nUse setLength instead.");
-    if(length <= 0) std::invalid_argument("Text length cannot be less than 1");
-    vertices.clear();
-    indices.clear();
-    generateVertices(length, x, y, charHeight, charWidth);
-
-    if(fixed) {
-        VBO.update(vertices);
-        VBO.unbind();
-    }
-    else {
-        mesh->updateMesh(&vertices);
-    }
-}
-
-void Text::generateVertices(int length, int left, int top, int charHeight, int charWidth) {
-    float x, y;
-    if(fixed) {
-        x = -1 + left / windowWidth;
-        y = 1 - (top + charHeight) / windowHeight;
-    }
-    else {
-        x = - length * charWidth / windowWidth / 2;
-        y = charHeight / windowHeight / 2;
-    }
-
+void Text::generateVertices(int length) {
     for(int i = 0; i < length; i++) {
         Vertex v1, v2, v3, v4;
-
-        v1.position = glm::vec3(x, y, 0);
-        v2.position = glm::vec3(x + charWidth / windowWidth, y, 0);
-        v3.position = glm::vec3(x + charWidth / windowWidth, y + charHeight / windowHeight, 0);
-        v4.position = glm::vec3(x, y + charHeight / windowHeight, 0);
-        x += charWidth / windowWidth;
 
         if(!fixed) {
             v1.lightNormal = glm::vec3(0, 0, 1);
@@ -201,15 +191,18 @@ void Text::handleChanges() {
         if(jobs.empty() || !jobs.front().text.fontTexture->getId()) continue;
         Job job = jobs.front();
         jobs.pop();
-        job.text.setMess(job.message, job.color);
+        job.text.setMess(job.message, job.color, job.x, job.y, job.charHeight);
         job.text.changed = true;
     }
 }
 
-void Text::setMessage(std::string message, glm::vec3 color) {
+void Text::setMessage(std::string message, glm::vec3 color, int x, int y, int charHeight) {
     Job job(*this);
     job.message = message;
     job.color = color;
+    job.x = x;
+    job.y = y;
+    job.charHeight = charHeight;
     jobs.push(job);
 }
 

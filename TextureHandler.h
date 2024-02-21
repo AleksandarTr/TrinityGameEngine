@@ -35,7 +35,7 @@ private:
     std::priority_queue<Job, std::vector<Job>, higherPriority> jobs;
     std::queue<Job*> awaitingLoading;
     static int activeTextures[static_cast<unsigned long long>(TextureType::Count)];
-    static bool close;
+    static volatile bool close;
     static std::thread textureThread;
 
 public:

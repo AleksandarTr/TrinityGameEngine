@@ -23,6 +23,8 @@ private:
         Text &text;
         std::string message;
         glm::vec3 color;
+        int x, y;
+        int charHeight;
 
         Job(Text &text) : text(text) {}
     };
@@ -45,25 +47,23 @@ private:
     Mesh *mesh = nullptr;
     bool fixed;
 
-    void generateVertices(int length, int x, int y, int charHeight, int charWidth);
+    void generateVertices(int length);
 
-    void setMess(std::string message, glm::vec3 color);
+    void setMess(std::string message, glm::vec3 color, int x, int y, int charHeight);
 
     static void handleChanges();
 
     static std::queue<Job> jobs;
     bool changed = false;
-    static bool close;
+    static volatile bool close;
     static std::thread textHandler;
 
 public:
     Text(std::string font, Shader &shader, int windowWidth, int windowHeight, bool fixed = true);
 
-    void setLength(int length, int x, int y, int charHeight, int charWidth);
+    void setLength(int length);
 
-    void resetLength(int length, int x, int y, int charHeight, int charWidth);
-
-    void setMessage(std::string message, glm::vec3 color);
+    void setMessage(std::string message, glm::vec3 color, int x, int y, int charHeight);
 
     void generateMessage(std::string message, float x, float y, glm::vec3 color);
 

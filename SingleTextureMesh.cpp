@@ -7,48 +7,48 @@ SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<
                                      TextureInfo diffuseTexture, TextureInfo specularTexture, TextureInfo normalTexture, std::string name)
 : Mesh(vertices, indices, shader, drawMode), name(std::move(name)) {
     if(!diffuseTexture.location.empty()) {
-        if(diffuseTexture.type == TextureType::None) diffuseTexture.type = TextureType::Diffuse;
-        if(specularTexture.type == TextureType::None) specularTexture.type = TextureType::PBR;
-        if(normalTexture.type == TextureType::None) normalTexture.type = TextureType::Normal;
-
+        if (diffuseTexture.type == TextureType::None) diffuseTexture.type = TextureType::Diffuse;
         this->diffuseTexture = new Texture(diffuseTexture);
         TextureHandler::getTextureHandler().loadTexture(diffuseTexture, this->diffuseTexture);
-        if(!specularTexture.location.empty()) {
-            this->specularTexture = new Texture(specularTexture);
-            TextureHandler::getTextureHandler().loadTexture(specularTexture, this->specularTexture);
-        }
-        if(!normalTexture.location.empty()) {
-            this->normalTexture = new Texture(normalTexture);
-            TextureHandler::getTextureHandler().loadTexture(normalTexture, this->normalTexture);
-        }
+    }
+    if(!specularTexture.location.empty()) {
+        if (specularTexture.type == TextureType::None) specularTexture.type = TextureType::PBR;
+        this->specularTexture = new Texture(specularTexture);
+        TextureHandler::getTextureHandler().loadTexture(specularTexture, this->specularTexture);
+    }
+    if(!normalTexture.location.empty()) {
+        if (normalTexture.type == TextureType::None) normalTexture.type = TextureType::Normal;
+        this->normalTexture = new Texture(normalTexture);
+        TextureHandler::getTextureHandler().loadTexture(normalTexture, this->normalTexture);
     }
 }
 
 void SingleTextureMesh::drawTextures() {
-    if(!diffuseTexture) glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), false);
-    else {
+    if (diffuseTexture && diffuseTexture->getId()) {
         TextureHandler::bindTexture(*diffuseTexture);
         glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), true);
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "diffuseTexture"), static_cast<int>(diffuseTexture->getInfo().type));
-
-        if(specularTexture && specularTexture->getId()) {
-            TextureHandler::bindTexture(*specularTexture);
-            glUniform1i(glGetUniformLocation(shader.getProgramID(), "specularTexture"), static_cast<int>(specularTexture->getInfo().type));
-            glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), true);
-        }
-        else {
-            glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), false);
-            glUniform1f(glGetUniformLocation(shader.getProgramID(), "metallic"), metallic);
-            glUniform1f(glGetUniformLocation(shader.getProgramID(), "roughness"), roughness);
-        }
-
-        if(normalTexture && normalTexture->getId()) {
-            TextureHandler::bindTexture(*normalTexture);
-            glUniform1i(glGetUniformLocation(shader.getProgramID(), "normalTexture"), static_cast<int>(normalTexture->getInfo().type));
-            glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyNormalTexture"), true);
-        }
-        else glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyNormalTexture"), false);
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "diffuseTexture"),
+                    static_cast<int>(diffuseTexture->getInfo().type));
     }
+    else glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), false);
+
+    if(specularTexture && specularTexture->getId()) {
+        TextureHandler::bindTexture(*specularTexture);
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "specularTexture"), static_cast<int>(specularTexture->getInfo().type));
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), true);
+    }
+    else {
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), false);
+        glUniform1f(glGetUniformLocation(shader.getProgramID(), "metallic"), metallic);
+        glUniform1f(glGetUniformLocation(shader.getProgramID(), "roughness"), roughness);
+    }
+
+    if(normalTexture && normalTexture->getId()) {
+        TextureHandler::bindTexture(*normalTexture);
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "normalTexture"), static_cast<int>(normalTexture->getInfo().type));
+        glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyNormalTexture"), true);
+    }
+    else glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyNormalTexture"), false);
 }
 
 SingleTextureMesh::~SingleTextureMesh() {

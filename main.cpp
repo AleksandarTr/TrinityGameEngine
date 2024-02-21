@@ -52,7 +52,7 @@ int main() {
     auto chess = new gltfReader("test/ABeautifulGame.gltf", shader);
     Model &scene = chess->getScene(0);
     delete chess;
-    scene.setAngularVelocity(glm::vec3(0, 2, 0));
+    //scene.setAngularVelocity(glm::vec3(0, 2, 0));
 
     Light light(glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
     light.move(glm::vec3(5));
@@ -63,7 +63,7 @@ int main() {
     double prevTime = glfwGetTime();
     object.setAngularVelocity(glm::vec3(0, 3, 0));
     shader.addLight(light);
-    shader.addLight(light2);
+    //shader.addLight(light2);
 
     light.setScale(glm::vec3(0.2f));
     light2.setScale(glm::vec3(0.25f));
@@ -135,7 +135,7 @@ int main() {
         if(fpsTimer > 1) {
             fpsTimer = 0;
             fps %= 1000;
-            text.setMessage(std::to_string(fps), glm::vec3(0, 1, 1));
+            text.setMessage(std::to_string(fps), glm::vec3(0, 1, 1), 5, 5, 50);
             fps = 0;
         }
 

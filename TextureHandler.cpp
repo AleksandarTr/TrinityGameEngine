@@ -1,7 +1,7 @@
 #include "TextureHandler.h"
 
 std::thread TextureHandler::textureThread(&TextureHandler::loadInMemory);
-bool TextureHandler::close = false;
+volatile bool TextureHandler::close = false;
 
 int TextureHandler::activeTextures[static_cast<unsigned long long>(TextureType::Count)] = {0};
 
@@ -82,6 +82,8 @@ void TextureHandler::assignTexture() {
         }
 
         job->destination->textureId = job->result->textureId;
+        job->info.type = std::max(job->info.type, static_cast<TextureType>(0));
+        job->info.type = std::min(job->info.type, static_cast<TextureType>(static_cast<int>(TextureType::Count) - 1));
         job->destination->info = job->info;
         job->data = nullptr;
     }
