@@ -1,11 +1,7 @@
+#include <iostream>
 #include "Text.h"
 #include "Mesh.h"
 #include "TextureHandler.h"
-
-volatile bool Text::close = false;
-std::thread Text::textHandler(handleChanges);
-
-std::queue<Text::Job> Text::jobs = std::queue<Text::Job>();
 
 Text::Text(std::string font, Shader &shader, int windowWidth, int windowHeight, bool fixed)
 : shader(shader), windowWidth(windowWidth), windowHeight(windowHeight), fixed(fixed) {
@@ -57,7 +53,34 @@ void Text::draw() {
     }
 }
 
+bool isBigEndian();
+
+void bigToLittleEndian(char *integer) {
+    char buffer[4];
+    for(int i = 0; i < 4; i++) buffer[3 - i] = integer[i];
+    memcpy(integer, buffer, 4);
+}
+
 void Text::readCharInfo(std::string file) {
+    std::ifstream dimensionReader(file + ".png", std::ios::binary);
+    if(!dimensionReader.is_open()) throw std::invalid_argument(file + ".png not found.");
+    bool flip = !isBigEndian();
+    char buffer[4];
+    int temp;
+
+    dimensionReader.seekg(16);
+    dimensionReader.read(buffer, 4);
+    if(flip) bigToLittleEndian(buffer);
+    memcpy(&temp, buffer, 4);
+    fontWidth = temp;
+
+    dimensionReader.read(buffer, 4);
+    if(flip) bigToLittleEndian(buffer);
+    memcpy(&temp, buffer, 4);
+    fontHeight = temp;
+
+    dimensionReader.close();
+
     std::ifstream reader(file + ".sfl");
     if(!reader.is_open()) throw std::invalid_argument(file + ".sfl not found.");
 
@@ -105,7 +128,7 @@ void Text::setLength(int length) {
     }
 }
 
-void Text::setMess(std::string message, glm::vec3 color, int left, int top, int charHeight) {
+void Text::setMessage(std::string message, glm::vec3 color, int left, int top, int charHeight) {
     if(vertices.size() / 4 < message.length()) throw std::invalid_argument("Message cannot fit in this text");
     float x, y;
     float messageWidth = 0;
@@ -142,14 +165,14 @@ void Text::setMess(std::string message, glm::vec3 color, int left, int top, int 
         v3.color = color;
         v4.color = color;
 
-        float height = fontTexture->getInfo().height;
-        float width = fontTexture->getInfo().width;
         //TODO: Use unused vectors of Vertex to adjust texture position in fragment shader
-        v1.texPosition = glm::vec3(character.x / width, 1-(character.y + character.height) / height, 0);
-        v2.texPosition = glm::vec3((character.x + character.width) / width, 1-(character.y + character.height) / height, 0);
-        v3.texPosition = glm::vec3((character.x + character.width) / width, 1-character.y / height, 0);
-        v4.texPosition = glm::vec3(character.x / width, 1-character.y / height, 0);
+        v1.texPosition = glm::vec3(character.x / fontWidth, 1-(character.y + character.height) / fontHeight, 0);
+        v2.texPosition = glm::vec3((character.x + character.width) / fontWidth, 1-(character.y + character.height) / fontHeight, 0);
+        v3.texPosition = glm::vec3((character.x + character.width) / fontWidth, 1-character.y / fontHeight, 0);
+        v4.texPosition = glm::vec3(character.x / fontWidth, 1-character.y / fontHeight, 0);
     }
+
+    changed = true;
 }
 
 Mesh &Text::getMesh() {
@@ -186,30 +209,7 @@ Text::~Text() {
     delete mesh;
 }
 
-void Text::handleChanges() {
-    while(!close) {
-        if(jobs.empty() || !jobs.front().text.fontTexture->getId()) continue;
-        Job job = jobs.front();
-        jobs.pop();
-        job.text.setMess(job.message, job.color, job.x, job.y, job.charHeight);
-        job.text.changed = true;
-    }
-}
 
-void Text::setMessage(std::string message, glm::vec3 color, int x, int y, int charHeight) {
-    Job job(*this);
-    job.message = message;
-    job.color = color;
-    job.x = x;
-    job.y = y;
-    job.charHeight = charHeight;
-    jobs.push(job);
-}
-
-void Text::killTextHandler() {
-    close = true;
-    textHandler.join();
-}
 
 
 

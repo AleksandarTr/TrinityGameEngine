@@ -1,3 +1,4 @@
+#include <iostream>
 #include "TextureHandler.h"
 
 std::thread TextureHandler::textureThread(&TextureHandler::loadInMemory);
@@ -12,14 +13,21 @@ TextureHandler &TextureHandler::getTextureHandler() {
 
 void TextureHandler::loadTexture(TextureInfo info, Texture *destination) {
     Job job = {.info = std::move(info), .destination = destination};
-    jobs.push(job);
+    {
+        std::scoped_lock<std::mutex> lock(jobMutex);
+        jobs.push(job);
+    }
 }
 
 void TextureHandler::loadInMemory() {
     while(!close) {
         if(getTextureHandler().jobs.empty()) continue;
-        Job job = getTextureHandler().jobs.top();
-        getTextureHandler().jobs.pop();
+        Job job;
+        {
+            std::scoped_lock<std::mutex> lock(getTextureHandler().jobMutex);
+            job = getTextureHandler().jobs.top();
+            getTextureHandler().jobs.pop();
+        }
 
         bool found = false;
         Node *itr = getTextureHandler().loadedTextures;
@@ -28,7 +36,10 @@ void TextureHandler::loadInMemory() {
                 while (itr->job.data);
                 itr->job.data = reinterpret_cast<unsigned char *>(1);
                 itr->job.destination = job.destination;
-                getTextureHandler().awaitingLoading.push(&itr->job);
+                {
+                    std::scoped_lock<std::mutex> lock(getTextureHandler().loadingMutex);
+                    getTextureHandler().awaitingLoading.push(&itr->job);
+                }
                 found = true;
                 break;
             }
@@ -49,14 +60,19 @@ void TextureHandler::loadInMemory() {
         else getTextureHandler().loadedTextures = texture;
         getTextureHandler().lastTexture = texture;
 
+        std::scoped_lock<std::mutex> lock(getTextureHandler().loadingMutex);
         getTextureHandler().awaitingLoading.push(&getTextureHandler().lastTexture->job);
     }
 }
 
 void TextureHandler::assignTexture() {
     while(!awaitingLoading.empty()) {
-        Job *job = awaitingLoading.front();
-        awaitingLoading.pop();
+        Job *job;
+        {
+            std::scoped_lock<std::mutex> lock(loadingMutex);
+            job = awaitingLoading.front();
+            awaitingLoading.pop();
+        }
 
         if(!job->result) {
             job->result = job->destination;
@@ -103,5 +119,5 @@ void TextureHandler::killTextureHandler() {
 }
 
 bool TextureHandler::higherPriority::operator()(Job &job1, Job &job2) {
-    return job1.info.type >= job2.info.type;
+    return job1.info.type > job2.info.type || (job1.info.type == job2.info.type && !job2.result);
 }

@@ -157,7 +157,6 @@ int main() {
     }
 
     TextureHandler::killTextureHandler();
-    Text::killTextHandler();
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;

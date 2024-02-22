@@ -4,6 +4,7 @@
 #include <queue>
 #include <utility>
 #include <thread>
+#include <mutex>
 #include "Texture.h"
 #include "Mesh.h"
 
@@ -33,7 +34,9 @@ private:
     Node* lastTexture = nullptr;
 
     std::priority_queue<Job, std::vector<Job>, higherPriority> jobs;
+    std::mutex jobMutex;
     std::queue<Job*> awaitingLoading;
+    std::mutex loadingMutex;
     static int activeTextures[static_cast<unsigned long long>(TextureType::Count)];
     static volatile bool close;
     static std::thread textureThread;
