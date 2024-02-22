@@ -452,6 +452,7 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         TextureInfo diffuseTexture;
         TextureInfo specularTexture;
         TextureInfo normalTexture;
+        TextureInfo occlusionTexture;
 
         if(primitive.material != -1) {
             int diffuseTextureIndex = materials[primitive.material].baseTextureIndex;
@@ -462,10 +463,13 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
 
             int normalTextureIndex = materials[primitive.material].normalTextureIndex;
             if (normalTextureIndex != -1) normalTexture = loadTexture(normalTextureIndex);
+
+            int occlusionTextureIndex = materials[primitive.material].occlusionTextureIndex;
+            if (occlusionTextureIndex != -1) occlusionTexture = loadTexture(occlusionTextureIndex);
         }
 
 
-        ::SingleTextureMesh& mesh = *new SingleTextureMesh(vertices, indices, shader, drawMode, diffuseTexture, specularTexture, normalTexture, meshes[index].name);
+        ::SingleTextureMesh& mesh = *new SingleTextureMesh(vertices, indices, shader, drawMode, diffuseTexture, specularTexture, normalTexture, occlusionTexture, meshes[index].name);
         mesh.bind();
         if(primitive.material != -1) {
             mesh.setMetallic(materials[primitive.material].metallic);

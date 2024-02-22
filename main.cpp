@@ -54,16 +54,24 @@ int main() {
     delete chess;
     //scene.setAngularVelocity(glm::vec3(0, 2, 0));
 
-    Light light(glm::vec3(1), glm::vec3(-1), LightingType::PointLight);
+    Light light(glm::vec3(0.25), glm::vec3(-1), LightingType::PointLight);
     light.move(glm::vec3(5));
 
     Light light2(glm::vec3(1, 0, 0), glm::vec3(-1), LightingType::PointLight);
     light2.move(glm::vec3(-10));
 
+    Light directionLight(glm::vec3(0.5), glm::vec3(-1), LightingType::DirectionalLight);
+    directionLight.move(glm::vec3(10, 0, 0));
+
+    Light spotLight(glm::vec3(0.8), glm::vec3(-1), LightingType::SpotLight);
+    spotLight.move(glm::vec3(5));
+
     double prevTime = glfwGetTime();
     object.setAngularVelocity(glm::vec3(0, 3, 0));
+    shader.addLight(spotLight);
+    shader.addLight(directionLight);
     shader.addLight(light);
-    //shader.addLight(light2);
+    shader.addLight(light2);
 
     light.setScale(glm::vec3(0.2f));
     light2.setScale(glm::vec3(0.25f));
@@ -103,6 +111,8 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     camera.inputs(window);
 
     //Window loop
