@@ -10,79 +10,46 @@
 #include "Model.h"
 #include "Text.h"
 #include "TextureHandler.h"
-
-int width = 1280;
-int height = 720;
+#include "Window.h"
 
 int main() {
-    //Initialize GLFW
-    glfwInit();
+    Window window;
+    window.setDrawShader("singleTex");
+    window.setTextShader("text");
+    window.setShadowShader("shadow");
 
-    //Set OpenGL version and profile
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    //Initalize window and handle case where it doesn't open
-    GLFWwindow *window = glfwCreateWindow(width, height, "Test", NULL, NULL);
-    if(window == NULL) {
-        std::cout << "Failed to create window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-    gladLoadGL();
-    glViewport(0, 0, width, height);
-
-    //Create shader program
-    Shader shader("singleTex.frag", "singleTex.vert");
-    shader.unloadFiles();
-
-    gltfReader objectReader("Textures/pyramid.gltf", shader);
-    Model &objectScene = objectReader.getScene(0);
-    Model &object = objectScene[0];
-
-    Camera camera(width, height, glm::vec3(-0.5f,0.5f,10));
-
+    window.loadGLTF("Textures/pyramid.gltf");
+    int objectScene = window.getScene(0);
+    Model &object = window.getModel(objectScene)[0];
     object.move(glm::vec3(-2));
 
-    Model object2 = object;
-
-    auto chess = new gltfReader("test/ABeautifulGame.gltf", shader);
-    Model &scene = chess->getScene(0);
-    delete chess;
+    window.loadGLTF("test/ABeautifulGame.gltf");
+    int sceneIndex = window.getScene(0);
+    Model &scene = window.getModel(sceneIndex);
+    window.unloadGLTF();
     //scene.setAngularVelocity(glm::vec3(0, 2, 0));
-
-    Light light(glm::vec3(0.25), glm::vec3(-1), LightingType::PointLight);
+    Light& light = window.getLight(window.addLight(glm::vec3(0.25), glm::vec3(-1), LightingType::PointLight));
     light.move(glm::vec3(5));
 
-    Light light2(glm::vec3(1, 0, 0), glm::vec3(-1), LightingType::PointLight);
+    Light& light2 = window.getLight(window.addLight(glm::vec3(1, 0, 0), glm::vec3(-1), LightingType::PointLight));
     light2.move(glm::vec3(-10));
 
-    Light directionLight(glm::vec3(0.5), glm::vec3(-1), LightingType::DirectionalLight);
+    Light& directionLight = window.getLight(window.addLight(glm::vec3(0.5), glm::vec3(-1), LightingType::DirectionalLight));
     directionLight.move(glm::vec3(10, 0, 0));
 
-    Light spotLight(glm::vec3(0.8), glm::vec3(-1), LightingType::SpotLight);
+    Light& spotLight = window.getLight(window.addLight(glm::vec3(0.8), glm::vec3(-1), LightingType::SpotLight));
     spotLight.move(glm::vec3(5));
 
-    double prevTime = glfwGetTime();
     object.setAngularVelocity(glm::vec3(0, 3, 0));
-    shader.addLight(spotLight);
-    shader.addLight(directionLight);
-    shader.addLight(light);
-    shader.addLight(light2);
 
     light.setScale(glm::vec3(0.2f));
     light2.setScale(glm::vec3(0.25f));
     object.setScale(glm::vec3(1, 10, 1));
     scene.scale(glm::vec3(10));
 
-    shader.setCamera(camera);
-    camera.addShader(shader);
-    camera.setFov(45);
-    camera.setNearPlane(0.1f);
-    camera.setFarPlane(100);
+    window.setFov(45);
+    window.setNearPlane(0.1f);
+    window.setFarPlane(100);
 
     double timer = 0;
     double blinker = 0;
@@ -90,15 +57,12 @@ int main() {
     bool blink = false;
     bool isOn = true;
 
-    glfwSetCursorPos(window, width/2, height/2);
-
-    Shader textShader("text.frag", "text.vert");
-    textShader.unloadFiles();
-
-    Text text("Textures/arial", textShader, width, height);
+    int textIndex = window.addText("Textures/arial");
+    Text& text = window.getText(textIndex, true);
     text.generateMessage("   ", 5, 5, glm::vec3(0, 1, 1));
 
-    Text text3D("Textures/arial", shader, width, height, false);
+    int text3DIndex = window.addText("Textures/arial", false);
+    Text& text3D = window.getText(text3DIndex, false);
     text3D.generateMessage("Hello world!", 5, 5, glm::vec3(1, 0, 0));
     text3D.getMesh().scale(glm::vec3(5));
     text3D.getMesh().setAngularVelocity(glm::vec3(0, 5, 0));
@@ -106,22 +70,10 @@ int main() {
     float fpsTimer = 0;
     int fps = 0;
 
-    TextureHandler& textureHandler = TextureHandler::getTextureHandler();
-
-    glEnable(GL_DEPTH_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    camera.inputs(window);
-
     //Window loop
-    while(!glfwWindowShouldClose(window)) {
-        double currentTIme = glfwGetTime();
-        double timeDelta = currentTIme - prevTime;
-        glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        textureHandler.assignTexture();
+    while(!glfwWindowShouldClose(window.getID())) {
+        window.drawFrame();
+        float timeDelta = window.getTimeDelta();
 
         if(!blink) timer += timeDelta;
         if(timer > 2) {
@@ -148,26 +100,7 @@ int main() {
             text.setMessage(std::to_string(fps), glm::vec3(0, 1, 1), 5, 5, 50);
             fps = 0;
         }
-
-        object.update(timeDelta);
-        scene.update(timeDelta);
-        text3D.getMesh().update(timeDelta);
-        scene.draw();
-        object.draw();
-        text3D.draw();
-
-        text.draw();
-
-        camera.inputs(window);
-        camera.update(timeDelta);
-
-        prevTime = currentTIme;
-        glfwSwapBuffers(window);
-        glfwPollEvents();
     }
 
-    TextureHandler::killTextureHandler();
-    glfwDestroyWindow(window);
-    glfwTerminate();
     return 0;
 }

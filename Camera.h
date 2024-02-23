@@ -33,6 +33,8 @@ private:
 public:
     Camera(int width, int height, glm::vec3 position);
 
+    Camera& operator=(const Camera& camera);
+
     void updateMatrix();
 
     void inputs(GLFWwindow* window);

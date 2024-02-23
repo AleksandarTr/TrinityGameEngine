@@ -11,7 +11,7 @@ bool isBigEndian() {
     return *(char*)&test != 1;
 }
 
-gltfReader::gltfReader(std::string uri, Shader &shader) : shader(shader) {
+gltfReader::gltfReader(std::string uri) {
     std::ifstream reader(uri);
     nlohmann::json data = nlohmann::json::parse(reader);
     reader.close();
@@ -469,7 +469,7 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         }
 
 
-        ::SingleTextureMesh& mesh = *new SingleTextureMesh(vertices, indices, shader, drawMode, diffuseTexture, specularTexture, normalTexture, occlusionTexture, meshes[index].name);
+        ::SingleTextureMesh& mesh = *new SingleTextureMesh(vertices, indices, drawMode, diffuseTexture, specularTexture, normalTexture, occlusionTexture, meshes[index].name);
         mesh.bind();
         if(primitive.material != -1) {
             mesh.setMetallic(materials[primitive.material].metallic);

@@ -39,9 +39,15 @@ public:
 
     void removeLight(Light &light);
 
+    Light& getLight(int index);
+
+    int getLightCount();
+
     ~Shader();
 
     void loadLights();
+
+    static GLuint getActiveShader();
 };
 
 #endif

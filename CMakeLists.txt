@@ -38,6 +38,8 @@ add_executable(TrinityEngine main.cpp glad.c
         Text.h
         TextureHandler.cpp
         TextureHandler.h
+        Window.cpp
+        Window.h
 )
 
 add_library(glfw STATIC IMPORTED)

@@ -119,3 +119,15 @@ void Shader::removeLight(Light &light) {
         lightsChanged = true;
     }
 }
+
+GLuint Shader::getActiveShader() {
+    return activeShader;
+}
+
+Light &Shader::getLight(int index) {
+    return *lights.at(index);
+}
+
+int Shader::getLightCount() {
+    return lights.size();
+}

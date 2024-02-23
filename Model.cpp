@@ -63,9 +63,9 @@ void Model::transform(glm::mat4 transform) {
 
 Model::Model(std::vector<Mesh*> &meshes) : meshes(meshes) {}
 
-void Model::draw() {
-    for(auto model : models) model->draw();
-    for(auto mesh : meshes) mesh->draw();
+void Model::draw(bool loadTextures) {
+    for(auto model : models) model->draw(loadTextures);
+    for(auto mesh : meshes) mesh->draw(loadTextures);
 }
 
 void Model::move(glm::vec3 direction) {

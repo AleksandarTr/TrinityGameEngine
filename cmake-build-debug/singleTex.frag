@@ -36,16 +36,11 @@ vec3 lighting = vec3(0, 0, 0);
 int lightInd = 0;
 float maxSpec = 1;
 
-float calcDiffuse(vec3 lightVec, vec3 norm) {
-    return max(dot(norm, lightVec), 0);
-}
-
 float calcDropoff(vec3 lightVec) {
     float a = 0.01f;
     float b = 0.005f;
     float dist = length(lightVec);
-    //return 1.0f / (a * dist * dist + b * dist + 1.0f);
-    return 1.0f / (dist * dist);
+    return 1.0f / (a * dist * dist + b * dist + 1.0f);
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -82,23 +77,6 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     float ggx1  = GeometrySchlickGGX(NdotL, roughness);
 
     return ggx1 * ggx2;
-}
-
-vec4 calcSpec(vec3 lightVec, vec3 norm) {
-//    vec3 viewDir = normalize(camPos - pos);
-//    vec3 F0 = vec3(0.04);
-//    F0 = mix(F0, diffuseVector, specularVector.b);
-//    vec3 halfVec = normalize(lightVec + viewDir);
-//
-//    float NDF = DistributionGGX(norm, halfVec, specularVector.g);
-//    float G = GeometrySmith(norm, viewDir, lightDir[lightInd], specularVector.g);
-//    vec3 F = fresnelSchlick(max(dot(halfVec, viewDir), 0), F0);
-//
-//    vec3 kD = vec3(1.0f) - F;
-//    kD *= 1.0 - specularVector.b;
-//    vec3 specular = (NDF * G / (4.0 * max(dot(norm, viewDir), 0.0) * max(dot(norm, lightDir[lightInd]), 0.0) + 0.0001)) * F;
-//    return vec4(specular, 1.0f);
-    return vec4(1.0f);
 }
 
 void pointLight() {

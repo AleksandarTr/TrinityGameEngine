@@ -48,7 +48,7 @@ public:
 
     void scale(glm::vec3 scaling) override;
 
-    void draw();
+    void draw(bool loadTextures = true);
 
     ~Model();
 };

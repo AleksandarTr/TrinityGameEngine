@@ -3,8 +3,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode)
-: vertices(vertices), indices(indices), shader(shader), drawMode(drawMode) {}
+Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, GLenum drawMode)
+: vertices(vertices), indices(indices), drawMode(drawMode) {}
 
 void Mesh::bind() {
     VAO.bind();
@@ -22,21 +22,19 @@ void Mesh::bind() {
     EBO.unbind();
 }
 
-void Mesh::draw() {
-    shader.activate();
+void Mesh::draw(bool loadTextures) {
     VAO.bind();
     if(movedFlag) {
         movedFlag = false;
         updateTransformation();
     }
 
-    glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), "model"), 1, GL_FALSE, glm::value_ptr(modelTransformation));
-    glUniformMatrix4fv(glGetUniformLocation(shader.getProgramID(), "rotation"), 1, GL_FALSE, glm::value_ptr(rotationMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), "model"), 1, GL_FALSE, glm::value_ptr(modelTransformation));
+    glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), "rotation"), 1, GL_FALSE, glm::value_ptr(rotationMatrix));
     initializeOtherFields();
-    drawTextures();
+    if(loadTextures) drawTextures();
 
     glDrawElements(drawMode, indices.size(), GL_UNSIGNED_INT, 0);
-    Texture::unbind();
     VAO.unbind();
 }
 
@@ -50,7 +48,7 @@ void Mesh::updateTransformation() {
     modelTransformation = translationMat * rotationMatrix * scalingMatrix;
 }
 
-Mesh::Mesh(const Mesh &copy) : indices(copy.indices), vertices(copy.vertices), shader(copy.shader), VAO(copy.VAO),
+Mesh::Mesh(const Mesh &copy) : indices(copy.indices), vertices(copy.vertices), VAO(copy.VAO),
 VBO(copy.VBO), EBO(copy.EBO), textureSlot(copy.textureSlot), drawMode(copy.drawMode){}
 
 void Mesh::updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indices) {

@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <iostream>
 
-SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode,
+SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, GLenum drawMode,
                                      TextureInfo diffuseTexture, TextureInfo specularTexture, TextureInfo normalTexture, TextureInfo occlusionTexture, std::string name)
-: Mesh(vertices, indices, shader, drawMode), name(std::move(name)) {
+: Mesh(vertices, indices, drawMode), name(std::move(name)) {
     if(!diffuseTexture.location.empty()) {
         if (diffuseTexture.type == TextureType::None) diffuseTexture.type = TextureType::Diffuse;
         this->diffuseTexture = new Texture(diffuseTexture);
@@ -34,36 +34,36 @@ SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<
 void SingleTextureMesh::drawTextures() {
     if (diffuseTexture && diffuseTexture->getId()) {
         TextureHandler::bindTexture(*diffuseTexture);
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), true);
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "diffuseTexture"),
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "useTexture"), true);
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "diffuseTexture"),
                     static_cast<int>(diffuseTexture->getInfo().type));
     }
-    else glUniform1i(glGetUniformLocation(shader.getProgramID(), "useTexture"), false);
+    else glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "useTexture"), false);
 
     if(specularTexture && specularTexture->getId()) {
         TextureHandler::bindTexture(*specularTexture);
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "specularTexture"), static_cast<int>(specularTexture->getInfo().type));
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), true);
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "specularTexture"), static_cast<int>(specularTexture->getInfo().type));
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applySpecularTexture"), true);
     }
     else {
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "applySpecularTexture"), false);
-        glUniform1f(glGetUniformLocation(shader.getProgramID(), "metallic"), metallic);
-        glUniform1f(glGetUniformLocation(shader.getProgramID(), "roughness"), roughness);
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applySpecularTexture"), false);
+        glUniform1f(glGetUniformLocation(Shader::getActiveShader(), "metallic"), metallic);
+        glUniform1f(glGetUniformLocation(Shader::getActiveShader(), "roughness"), roughness);
     }
 
     if(normalTexture && normalTexture->getId()) {
         TextureHandler::bindTexture(*normalTexture);
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "normalTexture"), static_cast<int>(normalTexture->getInfo().type));
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyNormalTexture"), true);
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "normalTexture"), static_cast<int>(normalTexture->getInfo().type));
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyNormalTexture"), true);
     }
-    else glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyNormalTexture"), false);
+    else glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyNormalTexture"), false);
 
     if(occlusionTexture && occlusionTexture->getId()) {
         TextureHandler::bindTexture(*occlusionTexture);
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "occlusionTexture"), static_cast<int>(occlusionTexture->getInfo().type));
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyOcclusionTexture"), true);
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "occlusionTexture"), static_cast<int>(occlusionTexture->getInfo().type));
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyOcclusionTexture"), true);
     }
-    else glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyOcclusionTexture"), false);
+    else glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyOcclusionTexture"), false);
 }
 
 SingleTextureMesh::~SingleTextureMesh() {
@@ -76,13 +76,20 @@ SingleTextureMesh::SingleTextureMesh(const SingleTextureMesh &mesh) : Mesh(mesh)
         diffuseTexture = new Texture(mesh.diffuseTexture->getInfo());
         TextureHandler::getTextureHandler().loadTexture(mesh.diffuseTexture->getInfo(), diffuseTexture);
     }
+
     if(mesh.specularTexture) {
         specularTexture = new Texture(mesh.specularTexture->getInfo());
         TextureHandler::getTextureHandler().loadTexture(mesh.specularTexture->getInfo(), specularTexture);
     }
+
     if(mesh.normalTexture) {
         normalTexture = new Texture(mesh.normalTexture->getInfo());
         TextureHandler::getTextureHandler().loadTexture(mesh.normalTexture->getInfo(), normalTexture);
+    }
+
+    if(mesh.occlusionTexture) {
+        occlusionTexture = new Texture(mesh.occlusionTexture->getInfo());
+        TextureHandler::getTextureHandler().loadTexture(mesh.occlusionTexture->getInfo(), occlusionTexture);
     }
 }
 

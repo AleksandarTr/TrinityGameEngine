@@ -19,7 +19,6 @@ protected:
     VertexArrayObject VAO = VertexArrayObject();
     VertexBufferObject VBO = VertexBufferObject();
     ElementBufferObject EBO = ElementBufferObject();
-    Shader &shader;
 
     std::vector<Vertex> &vertices;
     std::vector<GLuint> &indices;
@@ -30,7 +29,7 @@ protected:
 
     int textureSlot = -1;
 public:
-    Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode);
+    Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, GLenum drawMode);
 
     Mesh(const Mesh&);
 
@@ -40,7 +39,7 @@ public:
 
     virtual void drawTextures() = 0;
 
-    void draw();
+    void draw(bool loadTextures = true);
 
     virtual void initializeOtherFields();
 

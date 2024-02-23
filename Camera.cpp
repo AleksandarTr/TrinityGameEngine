@@ -99,4 +99,21 @@ glm::mat4 Camera::getCameraMatrix() {
     return cameraMat;
 }
 
+Camera &Camera::operator=(const Camera &camera) {
+    if(this == &camera) return *this;
+
+    FOV = camera.FOV;
+    nearPlane = camera.nearPlane;
+    farPlane = camera.farPlane;
+
+    sensitivity = camera.sensitivity;
+    speed = camera.speed;
+
+    orientation = camera.orientation;
+    up = camera.up;
+    cameraMat = camera.cameraMat;
+
+    return *this;
+}
+
 

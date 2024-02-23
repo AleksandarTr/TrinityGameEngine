@@ -20,7 +20,6 @@ private:
     VertexArrayObject VAO = VertexArrayObject();
     VertexBufferObject VBO = VertexBufferObject();
     ElementBufferObject EBO = ElementBufferObject();
-    Shader& shader;
 
     Texture *fontTexture = nullptr;
     std::vector<Vertex> vertices;
@@ -40,7 +39,7 @@ private:
     void generateVertices(int length);
 
 public:
-    Text(std::string font, Shader &shader, int windowWidth, int windowHeight, bool fixed = true);
+    Text(std::string font, int windowWidth, int windowHeight, bool fixed = true);
 
     void setLength(int length);
 
@@ -48,7 +47,7 @@ public:
 
     void generateMessage(std::string message, float x, float y, glm::vec3 color);
 
-    void draw();
+    void draw(bool loadTextures = true);
 
     void readCharInfo(std::string file);
 

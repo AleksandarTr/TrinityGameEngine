@@ -16,7 +16,7 @@ private:
     std::string name;
 
 public:
-    SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, Shader &shader, GLenum drawMode,
+    SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, GLenum drawMode,
     TextureInfo diffuseTexture = TextureInfo(), TextureInfo specularTexture = TextureInfo(), TextureInfo normalTexture = TextureInfo(),
     TextureInfo occlusionTexture = TextureInfo(), std::string name = "");
 

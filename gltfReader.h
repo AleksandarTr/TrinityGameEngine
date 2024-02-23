@@ -244,7 +244,6 @@ private:
     std::vector<Camera> cameras;
     std::vector<Node> nodes;
     std::vector<Scene> scenes;
-    Shader &shader;
 
     std::vector<::Mesh*> **meshBuffer = nullptr;
 
@@ -259,7 +258,7 @@ private:
     TextureInfo loadTexture(int textureId);
 
 public:
-    gltfReader(std::string uri, Shader &shader);
+    gltfReader(std::string uri);
 
     [[nodiscard]] ::Model& getScene(int index);
 

@@ -3,8 +3,8 @@
 #include "Mesh.h"
 #include "TextureHandler.h"
 
-Text::Text(std::string font, Shader &shader, int windowWidth, int windowHeight, bool fixed)
-: shader(shader), windowWidth(windowWidth), windowHeight(windowHeight), fixed(fixed) {
+Text::Text(std::string font, int windowWidth, int windowHeight, bool fixed)
+: windowWidth(windowWidth), windowHeight(windowHeight), fixed(fixed) {
     info.location = font + ".png";
     info.format = "image/png";
     info.wrapS = GL_CLAMP_TO_EDGE;
@@ -19,7 +19,7 @@ void Text::generateMessage(std::string message, float x, float y, glm::vec3 colo
     setMessage(message, color, x, y, 50);
 }
 
-void Text::draw() {
+void Text::draw(bool loadTextures) {
     if(vertices.empty()) throw std::logic_error("Cannot draw text which has not been generated!");
     if(fixed) {
         if(changed) {
@@ -28,11 +28,10 @@ void Text::draw() {
             changed = false;
         }
 
-        shader.activate();
         VAO.bind();
 
         TextureHandler::bindTexture(*fontTexture);
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "font"), static_cast<int>(fontTexture->getInfo().type));
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "font"), static_cast<int>(fontTexture->getInfo().type));
 
         glDisable(GL_DEPTH_TEST);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -46,10 +45,9 @@ void Text::draw() {
             changed = false;
         }
 
-        shader.activate();
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyColor"), true);
-        mesh->draw();
-        glUniform1i(glGetUniformLocation(shader.getProgramID(), "applyColor"), false);
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyColor"), true);
+        mesh->draw(loadTextures);
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyColor"), false);
     }
 }
 
@@ -123,7 +121,7 @@ void Text::setLength(int length) {
         EBO.unbind();
     }
     else {
-        mesh = new SingleTextureMesh(vertices, indices, shader, GL_TRIANGLES, info);
+        mesh = new SingleTextureMesh(vertices, indices, GL_TRIANGLES, info);
         mesh->bind();
     }
 }

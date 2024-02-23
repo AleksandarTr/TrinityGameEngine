@@ -9,6 +9,10 @@ private:
     glm::vec3 direction;
     LightingType type;
 
+    GLuint shadowBuffer;
+    GLuint shadowMap;
+    const unsigned int shadowWidth = 1024, shadowHeight = 1024;
+
 public:
     Light(glm::vec3 color, glm::vec3 direction, LightingType type);
 
@@ -23,6 +27,8 @@ public:
     LightingType getType() const;
 
     void setType(LightingType type);
+
+    void drawShadowMap();
 };
 
 #endif
