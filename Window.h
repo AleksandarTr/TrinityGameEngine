@@ -28,8 +28,14 @@ private:
     gltfReader *gltf = nullptr;
 
     float previousTime = 0, timeDelta = 0;
-    void render(bool loadTextures);
+    void render(bool loadTextures, bool drawText);
     void updateModels(float timeDelta);
+
+    Light* lights[16];
+    int lightCount = 0;
+    bool lightsChanged = false;
+    void loadLights();
+    float shadowSampleCount = 0.1f;
 
 public:
     explicit Window(int width = 1280, int height = 720);

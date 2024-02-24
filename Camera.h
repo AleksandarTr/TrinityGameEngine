@@ -18,7 +18,6 @@ private:
     glm::vec3 orientation = glm::vec3(0,0,-1.0f);
     glm::vec3 up = glm::vec3(0, 1.0f, 0);
     glm::mat4 cameraMat = glm::mat4(1);
-    std::vector<Shader*> shaders = std::vector<Shader*>();
 
     int width;
     int height;
@@ -44,12 +43,6 @@ public:
     void setNearPlane(float nearPlane);
 
     void setFarPlane(float farPlane);
-
-    void addShader(Shader &shader);
-
-    void removeShader(int index = -1);
-
-    void removeShader(Shader &shader);
 
     glm::mat4 getCameraMatrix();
 };

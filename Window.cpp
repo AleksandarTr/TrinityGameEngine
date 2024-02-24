@@ -31,8 +31,6 @@ void Window::setDrawShader(Shader &shader) {
     if(dynamicShader & DRAW_SHADER_BIT) delete drawShader;
     drawShader = &shader;
     dynamicShader &= ~DRAW_SHADER_BIT;
-    drawShader->setCamera(camera);
-    camera.addShader(*drawShader);
 }
 
 void Window::setShadowShader(Shader &shader) {
@@ -52,8 +50,6 @@ void Window::setDrawShader(const std::string& uri) {
     drawShader = new Shader(uri + ".frag", uri + ".vert");
     drawShader->unloadFiles();
     dynamicShader |= DRAW_SHADER_BIT;
-    drawShader->setCamera(camera);
-    camera.addShader(*drawShader);
 }
 
 void Window::setShadowShader(std::string uri) {
@@ -157,19 +153,20 @@ int Window::copyText(int index, bool fixed) {
 }
 
 Light &Window::getLight(int index) {
-    if(!drawShader) throw std::range_error("Cannot get light, because the draw shader has not been set yet.");
-    return drawShader->getLight(index);
+    if(index < 0 || index >= lightCount) throw std::out_of_range("Index is out of range of valid lights");
+    return *lights[index];
 }
 
 int Window::addLight(glm::vec3 color, glm::vec3 direction, LightingType type) {
-    if(!drawShader) throw std::range_error("Cannot add light, because the draw shader has not been set yet.");
-    drawShader->addLight(*new Light(color, direction, type));
-    return drawShader->getLightCount() - 1;
+    if(lightCount >= 16) throw std::out_of_range("Only 16 lights are allowed at any time");
+    lights[lightCount] = new Light(color, direction, type);
+    lightsChanged = true;
+    return lightCount++;
 }
 
-void Window::render(bool loadTextures) {
+void Window::render(bool loadTextures, bool drawText) {
     for(Model* model : models) model->draw(loadTextures);
-    for(Text *text : textMeshes) text->draw(loadTextures);
+    if(drawText) for(Text *text : textMeshes) text->draw(loadTextures);
 }
 
 void Window::drawFrame() {
@@ -177,23 +174,40 @@ void Window::drawFrame() {
     float currentTime = glfwGetTime();
     timeDelta = currentTime - previousTime;
     previousTime = currentTime;
-
-    camera.inputs(window);
-    camera.update(timeDelta);
     updateModels(timeDelta);
+    static float shadowCnt = 0;
+    shadowCnt += timeDelta;
+
+    glEnable(GL_CULL_FACE);
+    if(shadowCnt > shadowSampleCount) {
+        shadowCnt = 0;
+        shadowShader->activate();
+        glCullFace(GL_FRONT);
+
+        glViewport(0, 0, Light::shadowWidth, Light::shadowHeight);
+        for (int i = 0; i < lightCount; i++) {
+            lights[i]->drawShadowMap();
+            render(false, false);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+    }
 
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
     glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    camera.inputs(window);
+    camera.update(timeDelta);
+
     drawShader->activate();
-    render(true);
+    loadLights();
+    glUniformMatrix4fv(glGetUniformLocation(drawShader->getProgramID(), "camMatrix"), 1, GL_FALSE,glm::value_ptr(camera.getCameraMatrix()));
+    render(true, true);
     textShader->activate();
     for(Text *text : texts) text->draw(false);
 
@@ -206,3 +220,35 @@ void Window::updateModels(float timeDelta) {
     for(Text *text : textMeshes) text->getMesh().update(timeDelta);
 }
 
+void Window::loadLights() {
+    for(int i = 0; i < lightCount; i++) {
+        glm::vec3 lightSource = lights[i]->getPosition();
+        glm::vec3 lightDir = lights[i]->getDirection();
+        glm::vec3 lightColor = lights[i]->getColor();
+
+        char l1[20];
+        char l2[20];
+        char l3[20];
+        char l4[20];
+        char l5[20];
+        char l6[20];
+        sprintf(l1, "lightPos[%d]", i);
+        sprintf(l2, "lightingType[%d]", i);
+        sprintf(l3, "lightDir[%d]", i);
+        sprintf(l4, "lightColor[%d]", i);
+        sprintf(l5, "lightMatrix[%d]", i);
+        sprintf(l6, "shadowMap[%d]", i);
+
+        glUniform3f(glGetUniformLocation(drawShader->getProgramID(), l1), lightSource.x, lightSource.y,lightSource.z);
+        glUniform1i(glGetUniformLocation(drawShader->getProgramID(), l2),static_cast<GLint>(lights[i]->getType()));
+        glUniform3f(glGetUniformLocation(drawShader->getProgramID(), l3), lightDir.x, lightDir.y, lightDir.z);
+        glUniform4f(glGetUniformLocation(drawShader->getProgramID(), l4), lightColor.x, lightColor.y, lightColor.z,1.0f);
+
+        lights[i]->getShadowMap().getInfo().type = static_cast<TextureType>(static_cast<int>(TextureType::ShadowMap0) + i);
+        TextureHandler::bindTexture(lights[i]->getShadowMap());
+        glUniformMatrix4fv(glGetUniformLocation(drawShader->getProgramID(), l5), 1, false, glm::value_ptr(lights[i]->getLightMatrix()));
+        glUniform1i(glGetUniformLocation(drawShader->getProgramID(), l6),static_cast<GLint>(lights[i]->getShadowMap().getInfo().type));
+    }
+    glUniform1i(glGetUniformLocation(drawShader->getProgramID(), "lightNum"), lightCount);
+    lightsChanged = false;
+}

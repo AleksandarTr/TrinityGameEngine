@@ -5,8 +5,9 @@
 Light::Light(glm::vec3 color, glm::vec3 direction, LightingType type) : color(color), type(type), direction(direction) {
     glGenFramebuffers(1, &shadowBuffer);
 
-    glGenTextures(1, &shadowMap);
-    glBindTexture(GL_TEXTURE_2D, shadowMap);
+    shadowMap = new Texture(TextureInfo());
+    glGenTextures(1, &shadowMap->textureId);
+    glBindTexture(GL_TEXTURE_2D, shadowMap->textureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowWidth, shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -14,7 +15,7 @@ Light::Light(glm::vec3 color, glm::vec3 direction, LightingType type) : color(co
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap->textureId, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -45,8 +46,22 @@ void Light::setType(LightingType type) {
 }
 
 void Light::drawShadowMap() {
-    glViewport(0, 0, shadowWidth, shadowHeight);
     glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
     glClear(GL_DEPTH_BUFFER_BIT);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    float FOV = 9, nearPlane = 0.1f, farPlane = 10.0f;
+    glm::mat4 lightProjection;
+    if(type == LightingType::DirectionalLight) lightProjection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, nearPlane, farPlane);
+    else lightProjection = glm::perspective(glm::radians(FOV), 1.0f * shadowWidth / shadowHeight, nearPlane, farPlane);
+    glm::mat4 lightView = glm::lookAt(getPosition(),getPosition() + direction,glm::vec3( 0.0f, 1.0f,  0.0f));
+    lightMatrix = lightProjection * lightView;
+    glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), "lightMatrix"), 1, false, glm::value_ptr(lightMatrix));
+}
+
+Texture &Light::getShadowMap() {
+    return *shadowMap;
+}
+
+const glm::mat4& Light::getLightMatrix() {
+    return lightMatrix;
 }

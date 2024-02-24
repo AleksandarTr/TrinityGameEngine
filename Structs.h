@@ -15,7 +15,9 @@ struct Vertex {
 
 enum struct LightingType {PointLight, DirectionalLight, SpotLight};
 
-enum struct TextureType {None = -1, Text, Diffuse, PBR, Normal, Emissive, Oclussion, Count};
+enum struct TextureType {None = -1, Text, Diffuse, PBR, Normal, Emissive, Oclussion,
+        ShadowMap0, ShadowMap1, ShadowMap2, ShadowMap3, ShadowMap4, ShadowMap5, ShadowMap6, ShadowMap7,
+        ShadowMap8, ShadowMap9, ShadowMap10, ShadowMap11, ShadowMap12, ShadowMap13, ShadowMap14, ShadowMap15, Count};
 
 struct TextureInfo {
     std::string location = "";

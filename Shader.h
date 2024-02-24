@@ -13,13 +13,6 @@ private:
     GLuint programId = 0, fragmentShader = 0, vertexShader = 0;
     static GLuint activeShader;
 
-    Camera *camera = nullptr;
-    bool cameraMovedFlag = false;
-    friend void Camera::updateMatrix();
-
-    std::vector<Light*> lights;
-    bool lightsChanged = false;
-
     std::string readFile(std::string location);
 
 public:
@@ -31,21 +24,7 @@ public:
 
     void unloadFiles();
 
-    void setCamera(Camera &camera);
-
-    void addLight(Light& light);
-
-    void removeLight(int index = -1);
-
-    void removeLight(Light &light);
-
-    Light& getLight(int index);
-
-    int getLightCount();
-
     ~Shader();
-
-    void loadLights();
 
     static GLuint getActiveShader();
 };

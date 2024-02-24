@@ -11,10 +11,13 @@ out vec3 texCoord;
 out vec3 normal;
 out vec3 pos;
 out mat3 TBN;
+out vec4 lightFragPos[16];
 
 uniform mat4 camMatrix;
 uniform mat4 model;
 uniform mat4 rotation;
+uniform int lightNum;
+uniform mat4 lightMatrix[16];
 
 void main() {
     pos = vec3(model * vec4(aPos, 1.0f));
@@ -22,6 +25,8 @@ void main() {
     texCoord = aTex;
     color = aCol;
     normal = vec3(rotation * vec4(aNorm, 1));
+
+    for(int i = 0; i < lightNum; i++) lightFragPos[i] = lightMatrix[i] * vec4(pos, 1.0f);
 
     vec3 T = normalize(vec3(model * vec4(aTan, 0.0)));
     vec3 B = normalize(vec3(model * vec4(aBitan, 0.0)));

@@ -10,10 +10,12 @@ private:
     LightingType type;
 
     GLuint shadowBuffer;
-    GLuint shadowMap;
-    const unsigned int shadowWidth = 1024, shadowHeight = 1024;
+    Texture *shadowMap;
+    glm::mat4 lightMatrix = glm::mat4(1);
 
 public:
+    const static unsigned int shadowWidth = 1024, shadowHeight = 1024;
+
     Light(glm::vec3 color, glm::vec3 direction, LightingType type);
 
     const glm::vec3 &getColor() const;
@@ -29,6 +31,10 @@ public:
     void setType(LightingType type);
 
     void drawShadowMap();
+
+    Texture& getShadowMap();
+
+    const glm::mat4 &getLightMatrix();
 };
 
 #endif

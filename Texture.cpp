@@ -15,7 +15,7 @@ void Texture::unbind() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-const TextureInfo &Texture::getInfo() {
+TextureInfo &Texture::getInfo() {
     return info;
 }
 

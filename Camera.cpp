@@ -15,7 +15,6 @@ void Camera::updateMatrix() {
     proj = glm::perspective(glm::radians(FOV), 1.0f * width / height, nearPlane, farPlane);
 
     cameraMat = proj * view;
-    for(auto shader : shaders) shader->cameraMovedFlag = true;
 }
 
 void Camera::inputs(GLFWwindow *window) {
@@ -72,27 +71,6 @@ void Camera::setNearPlane(float nearPlane) {
 
 void Camera::setFarPlane(float farPlane) {
     this->farPlane = farPlane;
-}
-
-void Camera::addShader(Shader &shader) {
-    if(std::find(shaders.begin(), shaders.end(), &shader) != shaders.end()) return;
-    shaders.push_back(&shader);
-}
-
-void Camera::removeShader(int index) {
-    if(index == -1) {
-        shaders.pop_back();
-        return;
-    }
-
-    shaders.erase(shaders.begin() + index);
-}
-
-void Camera::removeShader(Shader &shader) {
-    auto position = std::find(shaders.begin(), shaders.end(), &shader);
-    if(position == shaders.end()) return;
-
-    shaders.erase(position);
 }
 
 glm::mat4 Camera::getCameraMatrix() {

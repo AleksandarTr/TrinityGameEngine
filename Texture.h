@@ -9,6 +9,7 @@
 
 class Texture {
     friend class TextureHandler;
+    friend class Light;
 
 private:
     GLuint textureId = 0;
@@ -23,7 +24,7 @@ public:
 
     static void unbind();
 
-    const TextureInfo& getInfo();
+    TextureInfo& getInfo();
 
     GLuint getId();
 };

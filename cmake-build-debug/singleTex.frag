@@ -25,6 +25,8 @@ uniform vec3 lightPos[16];
 uniform vec3 lightDir[16];
 uniform int lightingType[16];
 uniform int lightNum;
+in vec4 lightFragPos[16];
+uniform sampler2D shadowMap[16];
 
 uniform vec3 camPos;
 vec3 normalCalc;
@@ -134,9 +136,70 @@ void spotLight() {
     lighting *= inten;
 }
 
+bool inShadow(vec4 position) {
+    vec3 projCoords = position.xyz / position.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = 0;
+
+    switch(lightInd) {
+        case 0:
+            closestDepth = texture(shadowMap[0], projCoords.xy).r;
+            break;
+        case 1:
+            closestDepth = texture(shadowMap[1], projCoords.xy).r;
+            break;
+        case 2:
+            closestDepth = texture(shadowMap[2], projCoords.xy).r;
+            break;
+        case 3:
+            closestDepth = texture(shadowMap[3], projCoords.xy).r;
+            break;
+        case 4:
+            closestDepth = texture(shadowMap[4], projCoords.xy).r;
+            break;
+        case 5:
+            closestDepth = texture(shadowMap[5], projCoords.xy).r;
+            break;
+        case 6:
+            closestDepth = texture(shadowMap[6], projCoords.xy).r;
+            break;
+        case 7:
+            closestDepth = texture(shadowMap[7], projCoords.xy).r;
+            break;
+        case 8:
+            closestDepth = texture(shadowMap[8], projCoords.xy).r;
+            break;
+        case 9:
+            closestDepth = texture(shadowMap[9], projCoords.xy).r;
+            break;
+        case 10:
+            closestDepth = texture(shadowMap[10], projCoords.xy).r;
+            break;
+        case 11:
+            closestDepth = texture(shadowMap[11], projCoords.xy).r;
+            break;
+        case 12:
+            closestDepth = texture(shadowMap[12], projCoords.xy).r;
+            break;
+        case 13:
+            closestDepth = texture(shadowMap[13], projCoords.xy).r;
+            break;
+        case 14:
+            closestDepth = texture(shadowMap[14], projCoords.xy).r;
+            break;
+        case 15:
+            closestDepth = texture(shadowMap[15], projCoords.xy).r;
+            break;
+    }
+
+    float bias = max(0.05 * (1.0 - dot(normalCalc, lightDir[lightInd])), 0.005);
+    return projCoords.z - 0.005 > closestDepth;
+}
+
 void main() {
+    vec4 diffuseTextureVector = texture(diffuseTexture, vec2(texCoord));
     normalCalc = applyNormalTexture ? TBN * (texture(normalTexture, vec2(texCoord)).rgb * 2.0 - 1.0) : normal;
-    diffuseVector = useTexture ? pow(texture(diffuseTexture, vec2(texCoord)).rgb, vec3(2.2)) : vec3(color);
+    diffuseVector = useTexture ? pow(diffuseTextureVector.rgb, vec3(2.2)) : vec3(color);
 
     specularVector = applySpecularTexture ? texture(specularTexture, vec2(texCoord)).rgb : vec3(1.0f, metallic, roughness);
     specularVector.r = applyOcclusionTexture ? texture(occlusionTexture, vec2(texCoord)).r : ambientOcclusion;
@@ -144,6 +207,7 @@ void main() {
     vec3 resLight = vec3(0, 0, 0);
     for(int i = 0; i < lightNum; i++) {
         lightInd = i;
+        if(inShadow(lightFragPos[i])) continue;
         switch (lightingType[i]) {
             case 0:
                 pointLight();
@@ -170,6 +234,6 @@ void main() {
     resLight = resLight / (resLight + vec3(1.0));
     resLight = pow(resLight, vec3(1.0/2.2));
 
-    FragColor = vec4(resLight, texture(diffuseTexture, vec2(texCoord)).a);
+    FragColor = vec4(resLight, diffuseTextureVector.a);
     if(applyColor && useTexture) FragColor *= vec4(color, 1);
 }
