@@ -35,7 +35,7 @@ private:
     int lightCount = 0;
     bool lightsChanged = false;
     void loadLights();
-    float shadowSampleCount = 0.1f;
+    float shadowSampleCount = 0;
 
 public:
     explicit Window(int width = 1280, int height = 720);

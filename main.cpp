@@ -34,11 +34,11 @@ int main() {
 //    Light& light2 = window.getLight(window.addLight(glm::vec3(1, 0, 0), glm::vec3(-1), LightingType::PointLight));
 //    light2.move(glm::vec3(-10));
 
-    Light& directionLight = window.getLight(window.addLight(glm::vec3(1), glm::vec3(0, -0.2, -1), LightingType::DirectionalLight));
-    directionLight.move(glm::vec3(0, 1, 5));
+    Light& directionLight = window.getLight(window.addLight(glm::vec3(1), glm::vec3(0, -1, -1), LightingType::DirectionalLight));
+    directionLight.move(glm::vec3(0, 5, 5));
 
-    //Light& spotLight = window.getLight(window.addLight(glm::vec3(1), glm::vec3(-1), LightingType::SpotLight));
-    //spotLight.move(glm::vec3(5));
+    Light& spotLight = window.getLight(window.addLight(glm::vec3(1), glm::vec3(-1), LightingType::SpotLight));
+    spotLight.move(glm::vec3(5));
 
     object.setAngularVelocity(glm::vec3(0, 3, 0));
 
@@ -59,7 +59,7 @@ int main() {
 
     int textIndex = window.addText("Textures/arial");
     Text& text = window.getText(textIndex, true);
-    text.generateMessage("    ", 5, 5, glm::vec3(0, 1, 1));
+    text.generateMessage("   ", 5, 5, glm::vec3(0, 1, 1));
 
     int text3DIndex = window.addText("Textures/arial", false);
     Text& text3D = window.getText(text3DIndex, false);
@@ -96,7 +96,7 @@ int main() {
         fps++;
         if(fpsTimer > 1) {
             fpsTimer = 0;
-            fps %= 10000;
+            fps %= 1000;
             text.setMessage(std::to_string(fps), glm::vec3(0, 1, 1), 5, 5, 50);
             fps = 0;
         }

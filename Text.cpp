@@ -170,6 +170,18 @@ void Text::setMessage(std::string message, glm::vec3 color, int left, int top, i
         v4.texPosition = glm::vec3(character.x / fontWidth, 1-character.y / fontHeight, 0);
     }
 
+    for(int i = message.size(); i < vertices.size() / 4; i++) {
+        Vertex &v1 = vertices[4 * i];
+        Vertex &v2 = vertices[4 * i + 1];
+        Vertex &v3 = vertices[4 * i + 2];
+        Vertex &v4 = vertices[4 * i + 3];
+
+        v1.position = glm::vec3(0);
+        v2.position = glm::vec3(0);
+        v3.position = glm::vec3(0);
+        v4.position = glm::vec3(0);
+    }
+
     changed = true;
 }
 

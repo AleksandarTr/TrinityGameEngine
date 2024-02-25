@@ -56,12 +56,11 @@ void TextureHandler::loadInMemory() {
         job.info.height = imgH;
 
         Node *texture = new Node(job);
-        if(getTextureHandler().loadedTextures) getTextureHandler().lastTexture = texture;
-        else getTextureHandler().loadedTextures = texture;
-        getTextureHandler().lastTexture = texture;
+        texture->next = getTextureHandler().loadedTextures;
+        getTextureHandler().loadedTextures = texture;
 
         std::scoped_lock<std::mutex> lock(getTextureHandler().loadingMutex);
-        getTextureHandler().awaitingLoading.push(&getTextureHandler().lastTexture->job);
+        getTextureHandler().awaitingLoading.push(&getTextureHandler().loadedTextures->job);
     }
 }
 
@@ -93,6 +92,7 @@ void TextureHandler::assignTexture() {
             glTexImage2D(GL_TEXTURE_2D, 0, format, job->info.width, job->info.height, 0, format, GL_UNSIGNED_BYTE, job->data);
             glGenerateMipmap(GL_TEXTURE_2D);
             job->result->unbind();
+            job->result->info = job->info;
 
             stbi_image_free(job->data);
         }
@@ -100,7 +100,7 @@ void TextureHandler::assignTexture() {
         job->destination->textureId = job->result->textureId;
         job->info.type = std::max(job->info.type, static_cast<TextureType>(0));
         job->info.type = std::min(job->info.type, static_cast<TextureType>(static_cast<int>(TextureType::Count) - 1));
-        job->destination->info = job->info;
+        job->destination->info = job->result->info;
         job->data = nullptr;
     }
 }
@@ -109,8 +109,8 @@ void TextureHandler::bindTexture(Texture &texture) {
     if(activeTextures[static_cast<int>(texture.info.type)] != texture.textureId) {
         activeTextures[static_cast<int>(texture.info.type)] = texture.textureId;
         glActiveTexture(GL_TEXTURE0 + static_cast<int>(texture.info.type));
+        texture.bind();
     }
-    texture.bind();
 }
 
 void TextureHandler::killTextureHandler() {

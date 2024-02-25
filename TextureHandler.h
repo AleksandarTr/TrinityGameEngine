@@ -31,7 +31,6 @@ private:
     };
 
     Node* loadedTextures = nullptr;
-    Node* lastTexture = nullptr;
 
     std::priority_queue<Job, std::vector<Job>, higherPriority> jobs;
     std::mutex jobMutex;

@@ -136,64 +136,74 @@ void spotLight() {
     lighting *= inten;
 }
 
-bool inShadow(vec4 position) {
+#define calcShadow(i) texelSize = 1.0f / textureSize(shadowMap[i], 0); \
+    for(int x = -1; x <= 1; x++) { \
+      for(int y = -1; y <= 1; y++) { \
+          float pcfDepth = texture(shadowMap[i], projCoords.xy + vec2(x,y) * texelSize).r; \
+          shadow += projCoords.z > pcfDepth ? 1.0 : 0; \
+      } \
+    }
+
+float calculateShadow(vec4 position) {
     vec3 projCoords = position.xyz / position.w;
     projCoords = projCoords * 0.5 + 0.5;
-    float closestDepth = 0;
+    if(projCoords.z > 1.0f) return 0;
+
+    float shadow = 0;
+    vec2 texelSize;
 
     switch(lightInd) {
         case 0:
-            closestDepth = texture(shadowMap[0], projCoords.xy).r;
+            calcShadow(0);
             break;
         case 1:
-            closestDepth = texture(shadowMap[1], projCoords.xy).r;
+            calcShadow(1);
             break;
         case 2:
-            closestDepth = texture(shadowMap[2], projCoords.xy).r;
+            calcShadow(2);
             break;
         case 3:
-            closestDepth = texture(shadowMap[3], projCoords.xy).r;
+            calcShadow(3);
             break;
         case 4:
-            closestDepth = texture(shadowMap[4], projCoords.xy).r;
+            calcShadow(4);
             break;
         case 5:
-            closestDepth = texture(shadowMap[5], projCoords.xy).r;
+            calcShadow(5);
             break;
         case 6:
-            closestDepth = texture(shadowMap[6], projCoords.xy).r;
+            calcShadow(6);
             break;
         case 7:
-            closestDepth = texture(shadowMap[7], projCoords.xy).r;
+            calcShadow(7);
             break;
         case 8:
-            closestDepth = texture(shadowMap[8], projCoords.xy).r;
+            calcShadow(8);
             break;
         case 9:
-            closestDepth = texture(shadowMap[9], projCoords.xy).r;
+            calcShadow(9);
             break;
         case 10:
-            closestDepth = texture(shadowMap[10], projCoords.xy).r;
+            calcShadow(10);
             break;
         case 11:
-            closestDepth = texture(shadowMap[11], projCoords.xy).r;
+            calcShadow(11);
             break;
         case 12:
-            closestDepth = texture(shadowMap[12], projCoords.xy).r;
+            calcShadow(12);
             break;
         case 13:
-            closestDepth = texture(shadowMap[13], projCoords.xy).r;
+            calcShadow(13);
             break;
         case 14:
-            closestDepth = texture(shadowMap[14], projCoords.xy).r;
+            calcShadow(14);
             break;
         case 15:
-            closestDepth = texture(shadowMap[15], projCoords.xy).r;
+            calcShadow(15);
             break;
     }
 
-    float bias = max(0.05 * (1.0 - dot(normalCalc, lightDir[lightInd])), 0.005);
-    return projCoords.z - 0.005 > closestDepth;
+    return shadow / 9;
 }
 
 void main() {
@@ -207,7 +217,6 @@ void main() {
     vec3 resLight = vec3(0, 0, 0);
     for(int i = 0; i < lightNum; i++) {
         lightInd = i;
-        if(inShadow(lightFragPos[i])) continue;
         switch (lightingType[i]) {
             case 0:
                 pointLight();
@@ -223,6 +232,7 @@ void main() {
         }
 
         resLight = resLight + lighting;
+        resLight *= 1.0f - calculateShadow(lightFragPos[i]);
     }
 
     resLight.x = min(resLight.x, 1);
