@@ -47,7 +47,7 @@ public:
 
     void assignTexture();
 
-    static void bindTexture(Texture &texture);
+    static void bindTexture(Texture &texture, GLenum target = GL_TEXTURE_2D);
 
     static void loadInMemory();
 

@@ -51,13 +51,20 @@ void Light::drawShadowMap() {
     glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    float FOV = 20, nearPlane = 0.1f, farPlane = 10.0f;
+    float FOV;
+    if (type == LightingType::SpotLight) FOV = 10;
+    else FOV = 90;
+
     glm::mat4 lightProjection;
-    if(type == LightingType::DirectionalLight) lightProjection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, nearPlane, farPlane);
+    float nearPlane = 0.1f, farPlane = 100.0f;
+    if (type == LightingType::DirectionalLight)
+        lightProjection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, nearPlane, farPlane);
     else lightProjection = glm::perspective(glm::radians(FOV), 1.0f * shadowWidth / shadowHeight, nearPlane, farPlane);
-    glm::mat4 lightView = glm::lookAt(getPosition(),getPosition() + direction,glm::vec3( 0.0f, 1.0f,  0.0f));
+
+    glm::mat4 lightView = glm::lookAt(getPosition(), getPosition() + direction, glm::vec3(0,1,0));
     lightMatrix = lightProjection * lightView;
-    glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), "lightMatrix"), 1, false, glm::value_ptr(lightMatrix));
+
+    glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), "lightMatrix"), 1, false,glm::value_ptr(lightMatrix));
 }
 
 Texture &Light::getShadowMap() {

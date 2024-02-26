@@ -20,6 +20,8 @@ private:
     const unsigned char SHADOW_SHADER_BIT = 0b0000001;
     const unsigned char TEXT_SHADER_BIT = 0b000001;
     unsigned char dynamicShader = 0;
+    void loadShader(Shader*&, const std::string&, unsigned char);
+    void changeShader(Shader*&, Shader&, unsigned char);
 
     std::vector<Model*> models;
     std::vector<Text*> textMeshes;
@@ -46,10 +48,10 @@ public:
     void setDrawShader(const std::string& uri);
 
     void setShadowShader(Shader &shader);
-    void setShadowShader(std::string uri);
+    void setShadowShader(const std::string& uri);
 
     void setTextShader(Shader &shader);
-    void setTextShader(std::string uri);
+    void setTextShader(const std::string& uri);
 
     void setFov(float fov);
     void setNearPlane(float nearPlane);

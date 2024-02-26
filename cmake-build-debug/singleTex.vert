@@ -6,18 +6,20 @@ layout (location = 3) in vec3 aNorm;
 layout (location = 4) in vec3 aTan;
 layout (location = 5) in vec3 aBitan;
 
+#define maxLightCount 16
+
 out vec3 color;
 out vec3 texCoord;
 out vec3 normal;
 out vec3 pos;
 out mat3 TBN;
-out vec4 lightFragPos[16];
+out vec4 lightFragPos[maxLightCount];
 
 uniform mat4 camMatrix;
 uniform mat4 model;
 uniform mat4 rotation;
 uniform int lightNum;
-uniform mat4 lightMatrix[16];
+uniform mat4 lightMatrix[maxLightCount];
 
 void main() {
     pos = vec3(model * vec4(aPos, 1.0f));

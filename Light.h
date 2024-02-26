@@ -11,7 +11,7 @@ private:
 
     GLuint shadowBuffer;
     Texture *shadowMap;
-    glm::mat4 lightMatrix = glm::mat4(1);
+    glm::mat4 lightMatrix;
 
 public:
     const static unsigned int shadowWidth = 1024, shadowHeight = 1024;

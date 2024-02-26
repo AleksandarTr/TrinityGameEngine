@@ -105,11 +105,11 @@ void TextureHandler::assignTexture() {
     }
 }
 
-void TextureHandler::bindTexture(Texture &texture) {
+void TextureHandler::bindTexture(Texture &texture, GLenum target) {
     if(activeTextures[static_cast<int>(texture.info.type)] != texture.textureId) {
         activeTextures[static_cast<int>(texture.info.type)] = texture.textureId;
         glActiveTexture(GL_TEXTURE0 + static_cast<int>(texture.info.type));
-        texture.bind();
+        texture.bind(target);
     }
 }
 

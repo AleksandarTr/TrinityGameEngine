@@ -18,7 +18,7 @@ private:
 public:
     Texture(TextureInfo info);
 
-    void bind();
+    void bind(GLenum target = GL_TEXTURE_2D);
 
     ~Texture();
 

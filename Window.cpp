@@ -28,42 +28,27 @@ Window::Window(int width, int height) : width(width), height(height), camera(wid
 }
 
 void Window::setDrawShader(Shader &shader) {
-    if(dynamicShader & DRAW_SHADER_BIT) delete drawShader;
-    drawShader = &shader;
-    dynamicShader &= ~DRAW_SHADER_BIT;
+    changeShader(drawShader, shader, DRAW_SHADER_BIT);
 }
 
 void Window::setShadowShader(Shader &shader) {
-    if(dynamicShader & SHADOW_SHADER_BIT) delete shadowShader;
-    shadowShader = &shader;
-    dynamicShader &= ~SHADOW_SHADER_BIT;
+    changeShader(shadowShader, shader, SHADOW_SHADER_BIT);
 }
 
 void Window::setTextShader(Shader &shader) {
-    if(dynamicShader & TEXT_SHADER_BIT) delete textShader;
-    textShader = &shader;
-    dynamicShader &= ~TEXT_SHADER_BIT;
+    changeShader(textShader, shader, TEXT_SHADER_BIT);
 }
 
 void Window::setDrawShader(const std::string& uri) {
-    if(dynamicShader & DRAW_SHADER_BIT) delete drawShader;
-    drawShader = new Shader(uri + ".frag", uri + ".vert");
-    drawShader->unloadFiles();
-    dynamicShader |= DRAW_SHADER_BIT;
+    loadShader(drawShader, uri, DRAW_SHADER_BIT);
 }
 
-void Window::setShadowShader(std::string uri) {
-    if(dynamicShader & SHADOW_SHADER_BIT) delete shadowShader;
-    shadowShader = new Shader(uri + ".frag", uri + ".vert");
-    shadowShader->unloadFiles();
-    dynamicShader |= SHADOW_SHADER_BIT;
+void Window::setShadowShader(const std::string& uri) {
+    loadShader(shadowShader, uri, SHADOW_SHADER_BIT);
 }
 
-void Window::setTextShader(std::string uri) {
-    if(dynamicShader & TEXT_SHADER_BIT) delete textShader;
-    textShader = new Shader(uri + ".frag", uri + ".vert");
-    textShader->unloadFiles();
-    dynamicShader |= TEXT_SHADER_BIT;
+void Window::setTextShader(const std::string& uri) {
+    loadShader(textShader, uri, TEXT_SHADER_BIT);
 }
 
 Window::~Window() {
@@ -226,29 +211,46 @@ void Window::loadLights() {
         glm::vec3 lightDir = lights[i]->getDirection();
         glm::vec3 lightColor = lights[i]->getColor();
 
-        char l1[20];
-        char l2[20];
-        char l3[20];
-        char l4[20];
-        char l5[20];
-        char l6[20];
-        sprintf(l1, "lightPos[%d]", i);
-        sprintf(l2, "lightingType[%d]", i);
-        sprintf(l3, "lightDir[%d]", i);
-        sprintf(l4, "lightColor[%d]", i);
-        sprintf(l5, "lightMatrix[%d]", i);
-        sprintf(l6, "shadowMap[%d]", i);
+        char fieldName[20];
+        sprintf(fieldName, "lightPos[%d]", i);
+        glUniform3f(glGetUniformLocation(drawShader->getProgramID(), fieldName), lightSource.x, lightSource.y,lightSource.z);
 
-        glUniform3f(glGetUniformLocation(drawShader->getProgramID(), l1), lightSource.x, lightSource.y,lightSource.z);
-        glUniform1i(glGetUniformLocation(drawShader->getProgramID(), l2),static_cast<GLint>(lights[i]->getType()));
-        glUniform3f(glGetUniformLocation(drawShader->getProgramID(), l3), lightDir.x, lightDir.y, lightDir.z);
-        glUniform4f(glGetUniformLocation(drawShader->getProgramID(), l4), lightColor.x, lightColor.y, lightColor.z,1.0f);
+        sprintf(fieldName, "lightingType[%d]", i);
+        glUniform1i(glGetUniformLocation(drawShader->getProgramID(), fieldName),static_cast<GLint>(lights[i]->getType()));
+
+        sprintf(fieldName, "lightDir[%d]", i);
+        glUniform3f(glGetUniformLocation(drawShader->getProgramID(), fieldName), lightDir.x, lightDir.y, lightDir.z);
+
+        sprintf(fieldName, "lightColor[%d]", i);
+        glUniform4f(glGetUniformLocation(drawShader->getProgramID(), fieldName), lightColor.x, lightColor.y, lightColor.z,1.0f);
 
         lights[i]->getShadowMap().getInfo().type = static_cast<TextureType>(static_cast<int>(TextureType::ShadowMap0) + i);
         TextureHandler::bindTexture(lights[i]->getShadowMap());
-        glUniformMatrix4fv(glGetUniformLocation(drawShader->getProgramID(), l5), 1, false, glm::value_ptr(lights[i]->getLightMatrix()));
-        glUniform1i(glGetUniformLocation(drawShader->getProgramID(), l6),static_cast<GLint>(lights[i]->getShadowMap().getInfo().type));
+        sprintf(fieldName, "lightMatrix[%d]", i);
+        glUniformMatrix4fv(glGetUniformLocation(drawShader->getProgramID(), fieldName), 1, false, glm::value_ptr(lights[i]->getLightMatrix()));
+
+        sprintf(fieldName, "shadowMap[%d]", i);
+        glUniform1i(glGetUniformLocation(drawShader->getProgramID(), fieldName),static_cast<GLint>(lights[i]->getShadowMap().getInfo().type));
     }
     glUniform1i(glGetUniformLocation(drawShader->getProgramID(), "lightNum"), lightCount);
     lightsChanged = false;
+}
+
+void Window::loadShader(Shader *&shader, const std::string &uri, unsigned char shaderBit) {
+    if(dynamicShader & shaderBit) delete shader;
+    bool geometryShader = false;
+    if(FILE *check = fopen(std::string(uri + ".geom").c_str(), "r")) {
+        geometryShader = true;
+        fclose(check);
+    }
+
+    shader = new Shader(uri + ".frag", uri + ".vert", geometryShader ? uri + ".geom" : "");
+    shader->unloadFiles();
+    dynamicShader |= shaderBit;
+}
+
+void Window::changeShader(Shader *&localShader, Shader &externalShader, unsigned char shaderBit) {
+    if(dynamicShader & shaderBit) delete localShader;
+    localShader = &externalShader;
+    dynamicShader &= ~shaderBit;
 }

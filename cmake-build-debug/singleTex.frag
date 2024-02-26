@@ -20,13 +20,14 @@ uniform float metallic;
 uniform float roughness;
 float ambientOcclusion = 0.1f;
 
-uniform vec4 lightColor[16];
-uniform vec3 lightPos[16];
-uniform vec3 lightDir[16];
-uniform int lightingType[16];
+#define maxLightCount 16
+uniform vec4 lightColor[maxLightCount];
+uniform vec3 lightPos[maxLightCount];
+uniform vec3 lightDir[maxLightCount];
+uniform int lightingType[maxLightCount];
 uniform int lightNum;
-in vec4 lightFragPos[16];
-uniform sampler2D shadowMap[16];
+in vec4 lightFragPos[maxLightCount];
+uniform sampler2D shadowMap[maxLightCount];
 
 uniform vec3 camPos;
 vec3 normalCalc;
@@ -147,7 +148,7 @@ void spotLight() {
 float calculateShadow(vec4 position) {
     vec3 projCoords = position.xyz / position.w;
     projCoords = projCoords * 0.5 + 0.5;
-    if(projCoords.z > 1.0f) return 0;
+    if (projCoords.z > 1.0f) return 0;
 
     float shadow = 0;
     vec2 texelSize;
@@ -212,7 +213,7 @@ void main() {
     diffuseVector = useTexture ? pow(diffuseTextureVector.rgb, vec3(2.2)) : vec3(color);
 
     specularVector = applySpecularTexture ? texture(specularTexture, vec2(texCoord)).rgb : vec3(1.0f, metallic, roughness);
-    specularVector.r = applyOcclusionTexture ? texture(occlusionTexture, vec2(texCoord)).r : ambientOcclusion;
+    specularVector.r = applyOcclusionTexture ? texture(occlusionTexture, vec2(texCoord)).r * 0.5 : ambientOcclusion;
 
     vec3 resLight = vec3(0, 0, 0);
     for(int i = 0; i < lightNum; i++) {
@@ -231,8 +232,7 @@ void main() {
                 break;
         }
 
-        resLight = resLight + lighting;
-        resLight *= 1.0f - calculateShadow(lightFragPos[i]);
+        resLight = resLight + lighting * (1.0f - calculateShadow(lightFragPos[i]));
     }
 
     resLight.x = min(resLight.x, 1);

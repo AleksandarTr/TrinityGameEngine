@@ -10,13 +10,13 @@ class Light;
 
 class Shader {
 private:
-    GLuint programId = 0, fragmentShader = 0, vertexShader = 0;
+    GLuint programId = 0, fragmentShader = 0, vertexShader = 0, geometryShader = 0;
     static GLuint activeShader;
 
     std::string readFile(std::string location);
 
 public:
-    Shader(std::string fragmentShaderSource, std::string vertexShaderSource);
+    Shader(std::string fragmentShaderSource, std::string vertexShaderSource, std::string geometryShaderSource = "");
 
     GLuint getProgramID();
 
