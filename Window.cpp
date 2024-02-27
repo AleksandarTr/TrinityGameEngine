@@ -5,6 +5,7 @@
 #include <iostream>
 #include <glm/glm.hpp>
 #include <utility>
+#include <stack>
 #include "Model.h"
 #include "Light.h"
 
@@ -107,13 +108,16 @@ void Window::unloadGLTF() {
 }
 
 int Window::getScene(int index) {
-    if(!gltf) throw std::range_error("Cannot get a scene, because the no gltf file is loaded.");
+    if(!gltf) throw std::range_error("Cannot get a scene, because no gltf file is loaded.");
     models.push_back(&gltf->getScene(index));
+
+    addModelToDrawOrder(models.at(models.size() - 1));
+
     return models.size() - 1;
 }
 
 int Window::getSceneCount() {
-    if(!gltf) throw std::range_error("Cannot get the scene count, because the no gltf file is loaded.");
+    if(!gltf) throw std::range_error("Cannot get the scene count, because no gltf file is loaded.");
     return gltf->getSceneCount();
 }
 
@@ -123,6 +127,7 @@ Model &Window::getModel(int index) {
 
 int Window::copyModel(int index) {
     models.push_back(new Model(*models.at(index)));
+    addModelToDrawOrder(models.at(models.size() - 1));
     return models.size() - 1;
 }
 
@@ -150,11 +155,13 @@ int Window::addLight(glm::vec3 color, glm::vec3 direction, LightingType type) {
 }
 
 void Window::render(bool loadTextures, bool drawText) {
-    for(Model* model : models) model->draw(loadTextures);
+    for(Mesh* model : drawOrder) model->draw(loadTextures);
     if(drawText) for(Text *text : textMeshes) text->draw(loadTextures);
 }
 
 void Window::drawFrame() {
+    if(!drawOrderSorted) sortDrawOrder();
+
     TextureHandler::getTextureHandler().assignTexture();
     float currentTime = glfwGetTime();
     timeDelta = currentTime - previousTime;
@@ -207,30 +214,9 @@ void Window::updateModels(float timeDelta) {
 
 void Window::loadLights() {
     for(int i = 0; i < lightCount; i++) {
-        glm::vec3 lightSource = lights[i]->getPosition();
-        glm::vec3 lightDir = lights[i]->getDirection();
-        glm::vec3 lightColor = lights[i]->getColor();
-
-        char fieldName[20];
-        sprintf(fieldName, "lightPos[%d]", i);
-        glUniform3f(glGetUniformLocation(drawShader->getProgramID(), fieldName), lightSource.x, lightSource.y,lightSource.z);
-
-        sprintf(fieldName, "lightingType[%d]", i);
-        glUniform1i(glGetUniformLocation(drawShader->getProgramID(), fieldName),static_cast<GLint>(lights[i]->getType()));
-
-        sprintf(fieldName, "lightDir[%d]", i);
-        glUniform3f(glGetUniformLocation(drawShader->getProgramID(), fieldName), lightDir.x, lightDir.y, lightDir.z);
-
-        sprintf(fieldName, "lightColor[%d]", i);
-        glUniform4f(glGetUniformLocation(drawShader->getProgramID(), fieldName), lightColor.x, lightColor.y, lightColor.z,1.0f);
-
+        lights[i]->loadLight(i);
         lights[i]->getShadowMap().getInfo().type = static_cast<TextureType>(static_cast<int>(TextureType::ShadowMap0) + i);
         TextureHandler::bindTexture(lights[i]->getShadowMap());
-        sprintf(fieldName, "lightMatrix[%d]", i);
-        glUniformMatrix4fv(glGetUniformLocation(drawShader->getProgramID(), fieldName), 1, false, glm::value_ptr(lights[i]->getLightMatrix()));
-
-        sprintf(fieldName, "shadowMap[%d]", i);
-        glUniform1i(glGetUniformLocation(drawShader->getProgramID(), fieldName),static_cast<GLint>(lights[i]->getShadowMap().getInfo().type));
     }
     glUniform1i(glGetUniformLocation(drawShader->getProgramID(), "lightNum"), lightCount);
     lightsChanged = false;
@@ -253,4 +239,62 @@ void Window::changeShader(Shader *&localShader, Shader &externalShader, unsigned
     if(dynamicShader & shaderBit) delete localShader;
     localShader = &externalShader;
     dynamicShader &= ~shaderBit;
+}
+
+void Window::setShadowSampleRate(int samplesPerSecond) {
+    shadowSampleCount = 1.0 / samplesPerSecond;
+}
+
+void Window::addModelToDrawOrder(Model *newModel) {
+    std::stack<Model*> s;
+    s.push(newModel);
+
+    while(!s.empty()) {
+        Model *model = s.top();
+        s.pop();
+
+        for(int i = 0; i < model->getMeshCount(); i++) drawOrder.push_back(model->getMesh(i));
+        for(int i = 0; i < model->getModelCount(); i++) s.push(&(*model)[i]);
+    }
+
+    drawOrderSorted = false;
+}
+
+void Window::sortDrawOrder() {
+    drawOrderSorted = true;
+    int lastSuitablePosition;
+    int suitability;
+    static constexpr TextureType textureTypes[] = {TextureType::Diffuse, TextureType::PBR, TextureType::Normal, TextureType::Oclussion};
+    static constexpr int textureTypeCount = sizeof textureTypes / sizeof textureTypes[0];
+
+    for(int i = 0; i < drawOrder.size(); i++)
+    {
+        lastSuitablePosition = i;
+        suitability = 0;
+        auto &currentMesh = dynamic_cast<SingleTextureMesh&>(*drawOrder.at(i));
+        for(int j =  i - 1; j >= 0; j--) {
+            auto &prevMesh = dynamic_cast<SingleTextureMesh&>(*drawOrder.at(j));
+            int currentSuitability = 0;
+
+            for(auto textureType : textureTypes) {
+                if(!currentMesh.getTexture(textureType)) {
+                    if(!prevMesh.getTexture(textureType)) currentSuitability++;
+                    continue;
+                }
+                if (!prevMesh.getTexture(textureType) ||
+                    currentMesh.getTexture(textureType)->getInfo().location ==
+                    prevMesh.getTexture(textureType)->getInfo().location)
+                    currentSuitability++;
+            }
+
+            if(currentSuitability > suitability) {
+                lastSuitablePosition = j;
+                suitability = currentSuitability;
+            }
+            if(currentSuitability == textureTypeCount) break;
+        }
+
+        for(int j = i; j > lastSuitablePosition; j--) drawOrder.at(j) = drawOrder.at(j-1);
+        drawOrder.at(lastSuitablePosition) = &currentMesh;
+    }
 }

@@ -27,20 +27,21 @@ int main() {
     int sceneIndex = window.getScene(0);
     Model &scene = window.getModel(sceneIndex);
     window.unloadGLTF();
-    //scene.setAngularVelocity(glm::vec3(0, 2, 0));
+    scene.setAngularVelocity(glm::vec3(0, 2, 0));
     Light& light = window.getLight(window.addLight(glm::vec3(0.5), glm::vec3(0, -1, -3), LightingType::PointLight));
     light.move(glm::vec3(0, 2, 6));
-//
-//    Light& light2 = window.getLight(window.addLight(glm::vec3(1, 0, 0), glm::vec3(-1), LightingType::PointLight));
-//    light2.move(glm::vec3(-10));
 
-    //Light& directionLight = window.getLight(window.addLight(glm::vec3(0.25), glm::vec3(0, -1, -1), LightingType::DirectionalLight));
-    //directionLight.move(glm::vec3(0, 5, 5));
+    Light& light2 = window.getLight(window.addLight(glm::vec3(1, 0, 0), glm::vec3(1), LightingType::PointLight));
+    light2.move(glm::vec3(-10));
 
-    //Light& spotLight = window.getLight(window.addLight(glm::vec3(1), glm::vec3(-1), LightingType::SpotLight));
-    //spotLight.move(glm::vec3(5));
+    Light& directionLight = window.getLight(window.addLight(glm::vec3(0.25), glm::vec3(0, -1, -1), LightingType::DirectionalLight));
+    directionLight.move(glm::vec3(0, 5, 5));
+
+    Light& spotLight = window.getLight(window.addLight(glm::vec3(0.8), glm::vec3(-1), LightingType::SpotLight));
+    spotLight.move(glm::vec3(5));
 
     object.setAngularVelocity(glm::vec3(0, 3, 0));
+    window.setShadowSampleRate(30);
 
     object.setScale(glm::vec3(1, 10, 1));
     scene.scale(glm::vec3(10));
@@ -81,8 +82,8 @@ int main() {
         if(blink) blinker += timeDelta;
         if(blinker > 0.1) {
             blinker = 0;
-            //if(isOn) light2.setColor(glm::vec3(0));
-            //else light2.setColor(glm::vec3(1, 0, 0));
+            if(isOn) light2.setColor(glm::vec3(0));
+            else light2.setColor(glm::vec3(1, 0, 0));
             isOn = !isOn;
             if(++blinkCnt > 8) {
                 blinkCnt = 0;

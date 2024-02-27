@@ -38,6 +38,12 @@ public:
 
     Model& at(int index);
 
+    int getModelCount();
+
+    Mesh* getMesh(int index);
+
+    int getMeshCount();
+
     void transform(glm::mat4 transform);
 
     void move(glm::vec3 direction) override;

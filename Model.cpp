@@ -159,4 +159,16 @@ Model::~Model() {
     for(std::vector<GLuint>* vec : indexVectors) delete vec;
 }
 
+Mesh *Model::getMesh(int index) {
+    return meshes.at(index);
+}
+
+int Model::getMeshCount() {
+    return meshes.size();
+}
+
+int Model::getModelCount() {
+    return models.size();
+}
+
 

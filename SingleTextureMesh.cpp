@@ -100,3 +100,18 @@ void SingleTextureMesh::setMetallic(float value) {
 void SingleTextureMesh::setRoughness(float value) {
     roughness = value;
 }
+
+Texture *SingleTextureMesh::getTexture(TextureType type) {
+    switch(type){
+        case TextureType::Diffuse:
+            return diffuseTexture;
+        case TextureType::PBR:
+            return specularTexture;
+        case TextureType::Normal:
+            return normalTexture;
+        case TextureType::Oclussion:
+            return occlusionTexture;
+        default:
+            throw std::out_of_range("There is no texture with given type");
+    }
+}

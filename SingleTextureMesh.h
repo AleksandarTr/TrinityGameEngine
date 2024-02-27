@@ -29,6 +29,8 @@ public:
     void setMetallic(float value);
 
     void setRoughness(float value);
+
+    Texture* getTexture(TextureType type);
 };
 
 #endif

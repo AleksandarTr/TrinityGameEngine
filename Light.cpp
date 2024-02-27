@@ -1,4 +1,5 @@
 #include "Light.h"
+#include "TextureHandler.h"
 
 #include <utility>
 
@@ -73,4 +74,29 @@ Texture &Light::getShadowMap() {
 
 const glm::mat4& Light::getLightMatrix() {
     return lightMatrix;
+}
+
+void Light::loadLight(int index) {
+    glm::vec3 lightSource = getPosition();
+    glm::vec3 lightDir = direction;
+    glm::vec3 lightColor = color;
+
+    char fieldName[20];
+    sprintf(fieldName, "lightPos[%d]", index);
+    glUniform3f(glGetUniformLocation(Shader::getActiveShader(), fieldName), lightSource.x, lightSource.y,lightSource.z);
+
+    sprintf(fieldName, "lightingType[%d]", index);
+    glUniform1i(glGetUniformLocation(Shader::getActiveShader(), fieldName),static_cast<GLint>(type));
+
+    sprintf(fieldName, "lightDir[%d]", index);
+    glUniform3f(glGetUniformLocation(Shader::getActiveShader(), fieldName), lightDir.x, lightDir.y, lightDir.z);
+
+    sprintf(fieldName, "lightColor[%d]", index);
+    glUniform4f(glGetUniformLocation(Shader::getActiveShader(), fieldName), lightColor.x, lightColor.y, lightColor.z,1.0f);
+
+    sprintf(fieldName, "lightMatrix[%d]", index);
+    glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), fieldName), 1, false, glm::value_ptr(lightMatrix));
+
+    sprintf(fieldName, "shadowMap[%d]", index);
+    glUniform1i(glGetUniformLocation(Shader::getActiveShader(), fieldName),static_cast<GLint>(shadowMap->getInfo().type));
 }

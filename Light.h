@@ -34,6 +34,8 @@ public:
 
     Texture& getShadowMap();
 
+    void loadLight(int index);
+
     const glm::mat4 &getLightMatrix();
 };
 

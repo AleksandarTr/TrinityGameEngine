@@ -121,6 +121,7 @@ void Text::setLength(int length) {
         EBO.unbind();
     }
     else {
+        delete mesh;
         mesh = new SingleTextureMesh(vertices, indices, GL_TRIANGLES, info);
         mesh->bind();
     }

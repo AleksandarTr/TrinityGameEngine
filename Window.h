@@ -27,6 +27,11 @@ private:
     std::vector<Text*> textMeshes;
     std::vector<Text*> texts;
 
+    std::vector<Mesh*> drawOrder;
+    bool drawOrderSorted = false;
+    void addModelToDrawOrder(Model*);
+    void sortDrawOrder();
+
     gltfReader *gltf = nullptr;
 
     float previousTime = 0, timeDelta = 0;
@@ -37,7 +42,7 @@ private:
     int lightCount = 0;
     bool lightsChanged = false;
     void loadLights();
-    float shadowSampleCount = 0;
+    float shadowSampleCount = 1 / 24.0;
 
 public:
     explicit Window(int width = 1280, int height = 720);
@@ -76,6 +81,8 @@ public:
     float getTimeDelta();
 
     void drawFrame();
+
+    void setShadowSampleRate(int samplesPerSecond);
 
     ~Window();
 };
