@@ -52,7 +52,7 @@ public:
 
     void setRotation(glm::quat rotation);
 
-    void setScale(glm::vec3 scale);
+    virtual void setScale(glm::vec3 scale);
 
     virtual void scale(glm::vec3 scaling);
 

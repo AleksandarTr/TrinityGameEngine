@@ -3,8 +3,11 @@
 #include "Shader.h"
 #include <algorithm>
 
+Camera* Camera::activeCamera = nullptr;
+
 Camera::Camera(int width, int height, glm::vec3 position) : width(width), height(height) {
     move(position);
+    calculateCameraFrustum();
 }
 
 void Camera::updateMatrix() {
@@ -15,6 +18,7 @@ void Camera::updateMatrix() {
     proj = glm::perspective(glm::radians(FOV), 1.0f * width / height, nearPlane, farPlane);
 
     cameraMat = proj * view;
+    calculateCameraFrustum();
 }
 
 void Camera::inputs(GLFWwindow *window) {
@@ -94,4 +98,31 @@ Camera &Camera::operator=(const Camera &camera) {
     return *this;
 }
 
+void Camera::activateCamera() {
+    activeCamera = this;
+}
 
+Camera *Camera::getActiveCamera() {
+    return activeCamera;
+}
+
+void Camera::calculateCameraFrustum() {
+    frustum[FrustumSide::front] = {.point=getPosition() + nearPlane, .normal = glm::normalize(orientation)};
+    frustum[FrustumSide::back] = {.point=getPosition() + farPlane, .normal = -glm::normalize(orientation)};
+
+    float fovX = FOV * width / height;
+    glm::vec3 bottomLeft = glm::rotateY(glm::rotateX(orientation, -fovX / 2), -FOV / 2);
+    glm::vec3 topRight = glm::rotateY(glm::rotateX(orientation, fovX / 2), FOV / 2);
+
+    glm::vec3 horizontal = glm::cross(orientation, up);
+    glm::vec3 vertical = glm::cross(horizontal, up);
+
+    frustum[FrustumSide::left] = {.point=getPosition(), .normal = glm::normalize(glm::cross(vertical, bottomLeft))};
+    frustum[FrustumSide::right] = {.point=getPosition(), .normal = glm::normalize(glm::cross(vertical, topRight))};
+    frustum[FrustumSide::top] = {.point=getPosition(), .normal = glm::normalize(glm::cross(topRight, horizontal))};
+    frustum[FrustumSide::bottom] = {.point=getPosition(), .normal = glm::normalize(glm::cross(horizontal, bottomLeft))};
+}
+
+Camera::Plane *Camera::getViewFrustum() {
+    return frustum;
+}

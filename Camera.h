@@ -14,6 +14,12 @@
 class Shader;
 
 class Camera : public Movable {
+public:
+    struct Plane {
+        glm::vec3 point;
+        glm::vec3 normal;
+    };
+
 private:
     glm::vec3 orientation = glm::vec3(0,0,-1.0f);
     glm::vec3 up = glm::vec3(0, 1.0f, 0);
@@ -27,9 +33,18 @@ private:
 
     float FOV = 45;
     float nearPlane = 0.1f;
-    float farPlane = FLT_MAX;
+    float farPlane = 100.0f;
+
+    Plane frustum[6];
+    void calculateCameraFrustum();
+
+    static Camera *activeCamera;
 
 public:
+    enum FrustumSide {
+        front, back, left, right, top, bottom
+    };
+
     Camera(int width, int height, glm::vec3 position);
 
     Camera& operator=(const Camera& camera);
@@ -45,6 +60,12 @@ public:
     void setFarPlane(float farPlane);
 
     glm::mat4 getCameraMatrix();
+
+    void activateCamera();
+
+    static Camera* getActiveCamera();
+
+    Plane* getViewFrustum();
 };
 
 #endif

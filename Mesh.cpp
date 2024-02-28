@@ -20,9 +20,12 @@ void Mesh::bind() {
     VAO.unbind();
     VBO.unbind();
     EBO.unbind();
+    calculateBoundingSphere();
 }
 
 void Mesh::draw(bool loadTextures) {
+    if(!isVisible()) return;
+
     VAO.bind();
     if(movedFlag) {
         movedFlag = false;
@@ -59,4 +62,42 @@ void Mesh::updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indice
     VAO.unbind();
     VBO.unbind();
     EBO.unbind();
+
+    calculateBoundingSphere();
+}
+
+void Mesh::calculateBoundingSphere() {
+    boundingSphere = 0;
+    for(auto vertex : vertices) {
+        boundingSphere = std::max(boundingSphere, vertex.position.x);
+        boundingSphere = std::max(boundingSphere, vertex.position.y);
+        boundingSphere = std::max(boundingSphere, vertex.position.z);
+    }
+
+    boundingSphere *= std::max(std::max(getScale().x, getScale().y), getScale().z);
+}
+
+void Mesh::setScale(glm::vec3 scale) {
+    float prevScale = std::max(std::max(getScale().x, getScale().y), getScale().z);
+    float newScale = std::max(std::max(scale.x, scale.y), scale.z);
+    boundingSphere *= newScale / prevScale;
+
+    Movable::setScale(scale);
+}
+
+void Mesh::scale(glm::vec3 scaling) {
+    float prevScale = std::max(std::max(getScale().x, getScale().y), getScale().z);
+    Movable::scale(scaling);
+    float newScale = std::max(std::max(getScale().x, getScale().y), getScale().z);
+    boundingSphere *= newScale / prevScale;
+}
+
+bool Mesh::isVisible() {
+    Camera::Plane *cameraFrustum = Camera::getActiveCamera()->getViewFrustum();
+    for(int i = 0; i < 2; i++) {
+        float D = glm::dot(cameraFrustum->normal, cameraFrustum->point);
+        if(glm::dot(glm::vec4(cameraFrustum->normal, D), glm::vec4(getPosition(), 1)) < -boundingSphere) return false;
+        cameraFrustum++;
+    }
+    return true;
 }

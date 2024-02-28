@@ -27,6 +27,9 @@ protected:
     glm::mat4 modelTransformation = glm::mat4(1);
     glm::mat4 rotationMatrix = glm::mat4(1);
 
+    float boundingSphere;
+    void calculateBoundingSphere();
+
     int textureSlot = -1;
 public:
     Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, GLenum drawMode);
@@ -44,6 +47,12 @@ public:
     virtual void initializeOtherFields();
 
     void updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indices = nullptr);
+
+    void scale(glm::vec3 scaling) override;
+
+    void setScale(glm::vec3 scale) override;
+
+    bool isVisible();
 };
 
 #endif

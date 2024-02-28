@@ -169,6 +169,7 @@ void Window::drawFrame() {
     updateModels(timeDelta);
     static float shadowCnt = 0;
     shadowCnt += timeDelta;
+    camera.activateCamera();
 
     glEnable(GL_CULL_FACE);
     if(shadowCnt > shadowSampleCount) {
