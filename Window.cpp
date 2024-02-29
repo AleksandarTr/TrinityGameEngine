@@ -170,7 +170,6 @@ void Window::drawFrame() {
     updateModels(timeDelta);
     static float shadowCnt = 0;
     shadowCnt += timeDelta;
-    //camera.activateCamera();
 
     glEnable(GL_CULL_FACE);
     if(shadowCnt > shadowSampleCount) {
@@ -180,6 +179,7 @@ void Window::drawFrame() {
 
         glViewport(0, 0, Light::shadowWidth, Light::shadowHeight);
         for (int i = 0; i < lightCount; i++) {
+            lights[i]->activateCamera();
             lights[i]->drawShadowMap();
             render(false, false);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -195,6 +195,7 @@ void Window::drawFrame() {
     glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    camera.activateCamera();
     camera.inputs(window);
     camera.update(timeDelta);
 

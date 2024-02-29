@@ -3,7 +3,10 @@
 
 #include <utility>
 
-Light::Light(glm::vec3 color, glm::vec3 direction, LightingType type) : color(color), type(type), direction(direction) {
+Light::Light(glm::vec3 color, glm::vec3 direction, LightingType type) : color(color), type(type), Camera(shadowWidth, shadowHeight, glm::vec3(0)) {
+    setOrientation(direction);
+    if(type == LightingType::DirectionalLight) setMode(true);
+
     glGenFramebuffers(1, &shadowBuffer);
 
     shadowMap = new Texture(TextureInfo());
@@ -32,53 +35,36 @@ void Light::setColor(const glm::vec3 color) {
     Light::color = color;
 }
 
-const glm::vec3 &Light::getDirection() const {
-    return direction;
-}
-
-void Light::setDirection(const glm::vec3 direction) {
-    Light::direction = direction;
-}
-
 LightingType Light::getType() const {
     return type;
 }
 
 void Light::setType(LightingType type) {
     Light::type = type;
+    if(type == LightingType::DirectionalLight) setMode(true);
+    else setMode(false);
+}
+
+void Light::setType(LightingType type, float nearPlane, float farPlane, float left_fov, float right, float bottom, float top) {
+    setType(type);
+
+    if(type == LightingType::DirectionalLight) setOrthographic(left_fov, right, top, bottom, nearPlane, farPlane);
+    else setPerspective(left_fov, nearPlane, farPlane);
 }
 
 void Light::drawShadowMap() {
     glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
     glClear(GL_DEPTH_BUFFER_BIT);
-
-    float FOV;
-    if (type == LightingType::SpotLight) FOV = 10;
-    else FOV = 90;
-
-    glm::mat4 lightProjection;
-    float nearPlane = 0.1f, farPlane = 100.0f;
-    if (type == LightingType::DirectionalLight)
-        lightProjection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, nearPlane, farPlane);
-    else lightProjection = glm::perspective(glm::radians(FOV), 1.0f * shadowWidth / shadowHeight, nearPlane, farPlane);
-
-    glm::mat4 lightView = glm::lookAt(getPosition(), getPosition() + direction, glm::vec3(0,1,0));
-    lightMatrix = lightProjection * lightView;
-
-    glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), "lightMatrix"), 1, false,glm::value_ptr(lightMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), "lightMatrix"), 1, false,glm::value_ptr(getCameraMatrix()));
 }
 
 Texture &Light::getShadowMap() {
     return *shadowMap;
 }
 
-const glm::mat4& Light::getLightMatrix() {
-    return lightMatrix;
-}
-
 void Light::loadLight(int index) {
     glm::vec3 lightSource = getPosition();
-    glm::vec3 lightDir = direction;
+    glm::vec3 lightDir = getOrientation();
     glm::vec3 lightColor = color;
 
     char fieldName[20];
@@ -95,8 +81,23 @@ void Light::loadLight(int index) {
     glUniform4f(glGetUniformLocation(Shader::getActiveShader(), fieldName), lightColor.x, lightColor.y, lightColor.z,1.0f);
 
     sprintf(fieldName, "lightMatrix[%d]", index);
-    glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), fieldName), 1, false, glm::value_ptr(lightMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), fieldName), 1, false, glm::value_ptr(getCameraMatrix()));
 
     sprintf(fieldName, "shadowMap[%d]", index);
     glUniform1i(glGetUniformLocation(Shader::getActiveShader(), fieldName),static_cast<GLint>(shadowMap->getInfo().type));
+}
+
+void Light::setPerspective(float fov, float nearPlane, float farPlane) {
+    setFov(fov);
+    setNearPlane(nearPlane);
+    setFarPlane(farPlane);
+}
+
+void Light::setOrthographic(float left, float right, float top, float bottom, float nearPlane, float farPlane) {
+    setLeftBorder(left);
+    setRightBorder(right);
+    setTopBorder(top);
+    setBottomBorder(bottom);
+    setNearPlane(nearPlane);
+    setFarPlane(farPlane);
 }

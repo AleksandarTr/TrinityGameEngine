@@ -3,15 +3,13 @@
 
 #include "SingleTextureMesh.h"
 
-class Light : public Movable {
+class Light : public Camera {
 private:
     glm::vec3 color;
-    glm::vec3 direction;
     LightingType type;
 
     GLuint shadowBuffer;
     Texture *shadowMap;
-    glm::mat4 lightMatrix;
 
 public:
     const static unsigned int shadowWidth = 1024, shadowHeight = 1024;
@@ -22,13 +20,11 @@ public:
 
     void setColor(const glm::vec3 color);
 
-    const glm::vec3 &getDirection() const;
-
-    void setDirection(const glm::vec3 direction);
-
     LightingType getType() const;
 
     void setType(LightingType type);
+
+    void setType(LightingType type, float nearPlane, float farPlane, float left_fov, float right = 0, float bottom = 0, float top = 0);
 
     void drawShadowMap();
 
@@ -36,7 +32,9 @@ public:
 
     void loadLight(int index);
 
-    const glm::mat4 &getLightMatrix();
+    void setPerspective(float fov, float nearPlane, float farPlane);
+
+    void setOrthographic(float left, float right, float top, float bottom, float nearPlane, float farPlane);
 };
 
 #endif

@@ -6,17 +6,19 @@
 Camera* Camera::activeCamera = nullptr;
 
 Camera::Camera(int width, int height, glm::vec3 position) : width(width), height(height) {
-    move(position);
-    move(glm::vec3(0, 1, 0));
+    Movable::move(position);
     calculateCameraFrustum();
 }
 
 void Camera::updateMatrix() {
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 proj = glm::mat4(1.0f);
+    glm::mat4 view;
+    glm::mat4 proj;
 
     view = glm::lookAt(getPosition(), getPosition() + orientation, up);
-    proj = glm::perspective(glm::radians(FOV), 1.0f * width / height, nearPlane, farPlane);
+    if(orthographic)
+        proj = glm::ortho(projectionLeft, projectionRight, projectionBottom, projectionTop, nearPlane, farPlane);
+    else
+        proj = glm::perspective(glm::radians(FOV), 1.0f * width / height, nearPlane, farPlane);
 
     cameraMat = proj * view;
     calculateCameraFrustum();
@@ -68,14 +70,17 @@ void Camera::inputs(GLFWwindow *window) {
 
 void Camera::setFov(float fov) {
     FOV = fov;
+    movedFlag = true;
 }
 
 void Camera::setNearPlane(float nearPlane) {
     this->nearPlane = nearPlane;
+    movedFlag = true;
 }
 
 void Camera::setFarPlane(float farPlane) {
     this->farPlane = farPlane;
+    movedFlag = true;
 }
 
 glm::mat4 Camera::getCameraMatrix() {
@@ -96,11 +101,16 @@ Camera &Camera::operator=(const Camera &camera) {
     up = camera.up;
     cameraMat = camera.cameraMat;
 
+    movedFlag = true;
     return *this;
 }
 
 void Camera::activateCamera() {
     activeCamera = this;
+    if(movedFlag) {
+        updateMatrix();
+        movedFlag = false;
+    }
 }
 
 Camera *Camera::getActiveCamera() {
@@ -124,4 +134,38 @@ void Camera::calculateCameraFrustum() {
 
 Camera::Plane *Camera::getViewFrustum() {
     return frustum;
+}
+
+glm::vec3 Camera::getOrientation() const {
+    return orientation;
+}
+
+void Camera::setOrientation(glm::vec3 orientation) {
+    this->orientation = orientation;
+    movedFlag = true;
+}
+
+void Camera::setMode(bool isOrthographic) {
+    orthographic = isOrthographic;
+    movedFlag = true;
+}
+
+void Camera::setLeftBorder(float value) {
+    projectionLeft = value;
+    movedFlag = true;
+}
+
+void Camera::setRightBorder(float value) {
+    projectionRight = value;
+    movedFlag = true;
+}
+
+void Camera::setBottomBorder(float value) {
+    projectionBottom = value;
+    movedFlag = true;
+}
+
+void Camera::setTopBorder(float value) {
+    projectionTop = value;
+    movedFlag = true;
 }
