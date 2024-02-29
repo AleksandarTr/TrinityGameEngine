@@ -50,6 +50,9 @@ int main() {
     window.setNearPlane(0.1f);
     window.setFarPlane(100);
 
+    Camera temp(1280, 720, glm::vec3(0, 1, 0));
+    temp.activateCamera();
+
     double timer = 0;
     double blinker = 0;
     double blinkCnt = 0;
@@ -60,11 +63,11 @@ int main() {
     Text& text = window.getText(textIndex, true);
     text.generateMessage("   ", 5, 5, glm::vec3(0, 1, 1));
 
-    int text3DIndex = window.addText("Textures/arial", false);
-    Text& text3D = window.getText(text3DIndex, false);
-    text3D.generateMessage("Hello world!", 5, 5, glm::vec3(1, 0, 0));
-    text3D.getMesh().scale(glm::vec3(5));
-    text3D.getMesh().setAngularVelocity(glm::vec3(0, 5, 0));
+    //int text3DIndex = window.addText("Textures/arial", false);
+    //Text& text3D = window.getText(text3DIndex, false);
+    //text3D.generateMessage("Hello world!", 5, 5, glm::vec3(1, 0, 0));
+    //text3D.getMesh().scale(glm::vec3(5));
+    //text3D.getMesh().setAngularVelocity(glm::vec3(0, 5, 0));
 
     float fpsTimer = 0;
     int fps = 0;

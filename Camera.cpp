@@ -7,6 +7,7 @@ Camera* Camera::activeCamera = nullptr;
 
 Camera::Camera(int width, int height, glm::vec3 position) : width(width), height(height) {
     move(position);
+    move(glm::vec3(0, 1, 0));
     calculateCameraFrustum();
 }
 
@@ -107,20 +108,18 @@ Camera *Camera::getActiveCamera() {
 }
 
 void Camera::calculateCameraFrustum() {
-    frustum[FrustumSide::front] = {.point=getPosition() + nearPlane, .normal = glm::normalize(orientation)};
-    frustum[FrustumSide::back] = {.point=getPosition() + farPlane, .normal = -glm::normalize(orientation)};
+    frustum[FrustumSide::front] = {.point=getPosition() + nearPlane * orientation, .normal = glm::normalize(orientation)};
+    frustum[FrustumSide::back] = {.point=getPosition() + farPlane * orientation, .normal = -glm::normalize(orientation)};
 
-    float fovX = FOV * width / height;
-    glm::vec3 bottomLeft = glm::rotateY(glm::rotateX(orientation, -fovX / 2), -FOV / 2);
-    glm::vec3 topRight = glm::rotateY(glm::rotateX(orientation, fovX / 2), FOV / 2);
+    const float halfVSide = farPlane * tanf(FOV * .5f);
+    const float halfHSide = halfVSide * width/height;
+    const glm::vec3 frontMultFar = farPlane * orientation;
+    const glm::vec3 right = glm::cross(orientation, up);
 
-    glm::vec3 horizontal = glm::cross(orientation, up);
-    glm::vec3 vertical = glm::cross(horizontal, up);
-
-    frustum[FrustumSide::left] = {.point=getPosition(), .normal = glm::normalize(glm::cross(vertical, bottomLeft))};
-    frustum[FrustumSide::right] = {.point=getPosition(), .normal = glm::normalize(glm::cross(vertical, topRight))};
-    frustum[FrustumSide::top] = {.point=getPosition(), .normal = glm::normalize(glm::cross(topRight, horizontal))};
-    frustum[FrustumSide::bottom] = {.point=getPosition(), .normal = glm::normalize(glm::cross(horizontal, bottomLeft))};
+    frustum[FrustumSide::left] = {.point=getPosition(), .normal = glm::normalize(glm::cross(up,frontMultFar + right * halfHSide))};
+    frustum[FrustumSide::right] = {.point=getPosition(), .normal = glm::normalize(glm::cross(frontMultFar - right * halfHSide, up))};
+    frustum[FrustumSide::top] = {.point=getPosition(), .normal = glm::normalize(glm::cross(right, frontMultFar - up * halfVSide))};
+    frustum[FrustumSide::bottom] = {.point=getPosition(), .normal = glm::normalize(glm::cross(frontMultFar + up * halfVSide, right))};
 }
 
 Camera::Plane *Camera::getViewFrustum() {

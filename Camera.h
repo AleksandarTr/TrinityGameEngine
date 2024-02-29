@@ -42,7 +42,7 @@ private:
 
 public:
     enum FrustumSide {
-        front, back, left, right, top, bottom
+        front, back, top, bottom, left, right
     };
 
     Camera(int width, int height, glm::vec3 position);

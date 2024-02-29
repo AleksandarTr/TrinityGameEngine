@@ -69,9 +69,9 @@ void Mesh::updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indice
 void Mesh::calculateBoundingSphere() {
     boundingSphere = 0;
     for(auto vertex : vertices) {
-        boundingSphere = std::max(boundingSphere, vertex.position.x);
-        boundingSphere = std::max(boundingSphere, vertex.position.y);
-        boundingSphere = std::max(boundingSphere, vertex.position.z);
+        boundingSphere = std::max(boundingSphere, std::abs(vertex.position.x));
+        boundingSphere = std::max(boundingSphere, std::abs(vertex.position.y));
+        boundingSphere = std::max(boundingSphere, std::abs(vertex.position.z));
     }
 
     boundingSphere *= std::max(std::max(getScale().x, getScale().y), getScale().z);
@@ -94,9 +94,10 @@ void Mesh::scale(glm::vec3 scaling) {
 
 bool Mesh::isVisible() {
     Camera::Plane *cameraFrustum = Camera::getActiveCamera()->getViewFrustum();
-    for(int i = 0; i < 2; i++) {
-        float D = glm::dot(cameraFrustum->normal, cameraFrustum->point);
-        if(glm::dot(glm::vec4(cameraFrustum->normal, D), glm::vec4(getPosition(), 1)) < -boundingSphere) return false;
+    for(int i = 0; i < 4; i++) {
+        glm::vec3 meshPlaneVector = getPosition() - cameraFrustum->point;
+        float dist = glm::dot(cameraFrustum->normal, meshPlaneVector);
+        if(dist < -boundingSphere) return false;
         cameraFrustum++;
     }
     return true;

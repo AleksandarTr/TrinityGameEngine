@@ -26,6 +26,7 @@ Window::Window(int width, int height) : width(width), height(height), camera(wid
 
     glfwMakeContextCurrent(window);
     gladLoadGL();
+    glfwSetCursorPos(window, width/2, height/2);
 }
 
 void Window::setDrawShader(Shader &shader) {
@@ -169,7 +170,7 @@ void Window::drawFrame() {
     updateModels(timeDelta);
     static float shadowCnt = 0;
     shadowCnt += timeDelta;
-    camera.activateCamera();
+    //camera.activateCamera();
 
     glEnable(GL_CULL_FACE);
     if(shadowCnt > shadowSampleCount) {
