@@ -150,7 +150,7 @@ namespace glm
 		vec<3, T, Q> const& direction,
 		vec<3, T, Q> const& up);
 
-	/// Build a FrustumRight-handed look at quaternion.
+	/// Build a right-handed look at quaternion.
 	///
 	/// @param direction Desired forward direction onto which the -z-axis gets mapped. Needs to be normalized.
 	/// @param up Up vector, how the camera is oriented. Typically (0, 1, 0).
@@ -159,7 +159,7 @@ namespace glm
 		vec<3, T, Q> const& direction,
 		vec<3, T, Q> const& up);
 
-	/// Build a FrustumLeft-handed look at quaternion.
+	/// Build a left-handed look at quaternion.
 	///
 	/// @param direction Desired forward direction onto which the +z-axis gets mapped. Needs to be normalized.
 	/// @param up Up vector, how the camera is oriented. Typically (0, 1, 0).

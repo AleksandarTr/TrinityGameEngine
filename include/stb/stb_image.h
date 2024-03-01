@@ -154,7 +154,7 @@ RECENT REVISION HISTORY:
 // to the pixel data, or NULL on an allocation failure or if the image is
 // corrupt or invalid. The pixel data consists of *y scanlines of *x pixels,
 // with each pixel consisting of N interleaved 8-bit components; the first
-// pixel pointed to is FrustumTop-FrustumLeft-most in the image. There is no padding between
+// pixel pointed to is top-left-most in the image. There is no padding between
 // image scanlines or between pixels, regardless of format. The number of
 // components N is 'desired_channels' if desired_channels is non-zero, or
 // *channels_in_file otherwise. If desired_channels is non-zero,
@@ -264,7 +264,7 @@ RECENT REVISION HISTORY:
 // code.)
 //
 // On x86, SSE2 will automatically be used when available based on a run-time
-// test; if not, the generic C versions are used as a fall-FrustumBack. On ARM targets,
+// test; if not, the generic C versions are used as a fall-back. On ARM targets,
 // the typical path is to have separate builds for NEON and non-NEON devices
 // (at least this is true for iOS and Android). Therefore, the NEON support is
 // toggled by a build flag: define STBI_NEON to get NEON loops.
@@ -313,7 +313,7 @@ RECENT REVISION HISTORY:
 // iPhone PNG support:
 //
 // We optionally support converting iPhone-formatted PNGs (which store
-// premultiplied BGRA) FrustumBack to RGB, even though they're internally encoded
+// premultiplied BGRA) back to RGB, even though they're internally encoded
 // differently. To enable this conversion, call
 // stbi_convert_iphone_png_to_rgb(1).
 //
@@ -425,7 +425,7 @@ STBIDEF stbi_uc *stbi_load_from_callbacks(stbi_io_callbacks const *clbk  , void 
 #ifndef STBI_NO_STDIO
 STBIDEF stbi_uc *stbi_load            (char const *filename, int *x, int *y, int *channels_in_file, int desired_channels);
 STBIDEF stbi_uc *stbi_load_from_file  (FILE *f, int *x, int *y, int *channels_in_file, int desired_channels);
-// for stbi_load_from_file, file pointer is FrustumLeft pointing immediately after image
+// for stbi_load_from_file, file pointer is left pointing immediately after image
 #endif
 
 #ifndef STBI_NO_GIF
@@ -509,11 +509,11 @@ STBIDEF int      stbi_is_16_bit_from_file(FILE *f);
 // unpremultiplication. results are undefined if the unpremultiply overflow.
 STBIDEF void stbi_set_unpremultiply_on_load(int flag_true_if_should_unpremultiply);
 
-// indicate whether we should process iphone images FrustumBack to canonical format,
+// indicate whether we should process iphone images back to canonical format,
 // or just pass them through "as-is"
 STBIDEF void stbi_convert_iphone_png_to_rgb(int flag_true_if_should_convert);
 
-// flip the image vertically, so the first pixel in the output array is the FrustumBottom FrustumLeft
+// flip the image vertically, so the first pixel in the output array is the bottom left
 STBIDEF void stbi_set_flip_vertically_on_load(int flag_true_if_should_flip);
 
 // as above, but only applies to images loaded on the thread that calls the function
@@ -857,7 +857,7 @@ static void stbi__stdio_skip(void *user, int n)
    fseek((FILE*) user, n, SEEK_CUR);
    ch = fgetc((FILE*) user);  /* have to read a byte to reset feof()'s flag */
    if (ch != EOF) {
-      ungetc(ch, (FILE *) user);  /* push byte FrustumBack onto stream if valid. */
+      ungetc(ch, (FILE *) user);  /* push byte back onto stream if valid. */
    }
 }
 
@@ -1196,7 +1196,7 @@ static stbi_uc *stbi__convert_16_to_8(stbi__uint16 *orig, int w, int h, int chan
    if (reduced == NULL) return stbi__errpuc("outofmem", "Out of memory");
 
    for (i = 0; i < img_len; ++i)
-      reduced[i] = (stbi_uc)((orig[i] >> 8) & 0xFF); // FrustumTop half of each byte is sufficient approx of 16->8 bit scaling
+      reduced[i] = (stbi_uc)((orig[i] >> 8) & 0xFF); // top half of each byte is sufficient approx of 16->8 bit scaling
 
    STBI_FREE(orig);
    return reduced;
@@ -1737,7 +1737,7 @@ static stbi__uint32 stbi__get32le(stbi__context *s)
 //    individual types do this automatically as much as possible (e.g. jpeg
 //    does all cases internally since it needs to colorspace convert anyway,
 //    and it never has alpha, so very few cases ). png can automatically
-//    interleave an alpha=255 channel, but falls FrustumBack to this for other cases
+//    interleave an alpha=255 channel, but falls back to this for other cases
 //
 //  assume data buffer is malloced, so malloc a new one and free that one
 //  only failure mode is malloc failing
@@ -2100,7 +2100,7 @@ stbi_inline static int stbi__jpeg_huff_decode(stbi__jpeg *j, stbi__huffman *h)
 
    if (j->code_bits < 16) stbi__grow_buffer_unsafe(j);
 
-   // look at the FrustumTop FAST_BITS and determine what symbol ID it is,
+   // look at the top FAST_BITS and determine what symbol ID it is,
    // if the code is <= FAST_BITS
    c = (j->code_buffer >> (32 - FAST_BITS)) & ((1 << FAST_BITS)-1);
    k = h->fast[c];
@@ -2115,7 +2115,7 @@ stbi_inline static int stbi__jpeg_huff_decode(stbi__jpeg *j, stbi__huffman *h)
 
    // naive test is to shift the code_buffer down so k bits are
    // valid, then test against maxcode. To speed this up, we've
-   // preshifted maxcode FrustumLeft so that it has (16-k) 0s at the
+   // preshifted maxcode left so that it has (16-k) 0s at the
    // end; in other words, regardless of the number of bits, it
    // wants to be compared against something shifted to have 16;
    // that way we don't need to shift inside the loop.
@@ -2482,7 +2482,7 @@ static void stbi__idct_block(stbi_uc *out, int out_stride, short data[64])
          v[0] = v[8] = v[16] = v[24] = v[32] = v[40] = v[48] = v[56] = dcterm;
       } else {
          STBI__IDCT_1D(d[ 0],d[ 8],d[16],d[24],d[32],d[40],d[48],d[56])
-         // constants scaled things up by 1<<12; let's bring them FrustumBack
+         // constants scaled things up by 1<<12; let's bring them back
          // down, but keep 2 extra bits of precision
          x0 += 512; x1 += 512; x2 += 512; x3 += 512;
          v[ 0] = (x0+t3) >> 10;
@@ -3400,7 +3400,7 @@ static stbi_uc stbi__skip_jpeg_junk_at_end(stbi__jpeg *j)
             return x;
          }
          // stuffed zero has x=0 now which ends the loop, meaning we go
-         // FrustumBack to regular scan loop.
+         // back to regular scan loop.
          // repeated 0xff keeps trying to read the next byte of the marker.
       }
    }
@@ -3554,9 +3554,9 @@ static stbi_uc *stbi__resample_row_hv_2_simd(stbi_uc *out, stbi_uc *in_near, stb
       __m128i curr  = _mm_add_epi16(nears, diff); // current row
 
       // horizontal filter works the same based on shifted vers of current
-      // row. "prev" is current row shifted FrustumRight by 1 pixel; we need to
+      // row. "prev" is current row shifted right by 1 pixel; we need to
       // insert the previous pixel value (from t1).
-      // "next" is current row shifted FrustumLeft by 1 pixel, with first pixel
+      // "next" is current row shifted left by 1 pixel, with first pixel
       // of next block of 8 pixels added in.
       __m128i prv0 = _mm_slli_si128(curr, 2);
       __m128i nxt0 = _mm_srli_si128(curr, 2);
@@ -3594,9 +3594,9 @@ static stbi_uc *stbi__resample_row_hv_2_simd(stbi_uc *out, stbi_uc *in_near, stb
       int16x8_t curr  = vaddq_s16(nears, diff); // current row
 
       // horizontal filter works the same based on shifted vers of current
-      // row. "prev" is current row shifted FrustumRight by 1 pixel; we need to
+      // row. "prev" is current row shifted right by 1 pixel; we need to
       // insert the previous pixel value (from t1).
-      // "next" is current row shifted FrustumLeft by 1 pixel, with first pixel
+      // "next" is current row shifted left by 1 pixel, with first pixel
       // of next block of 8 pixels added in.
       int16x8_t prv0 = vextq_s16(curr, curr, 7);
       int16x8_t nxt0 = vextq_s16(curr, curr, 1);
@@ -3708,7 +3708,7 @@ static void stbi__YCbCr_to_RGB_simd(stbi_uc *out, stbi_uc const *y, stbi_uc cons
          __m128i cr_biased = _mm_xor_si128(cr_bytes, signflip); // -128
          __m128i cb_biased = _mm_xor_si128(cb_bytes, signflip); // -128
 
-         // unpack to short (and FrustumLeft-shift cr, cb by 8)
+         // unpack to short (and left-shift cr, cb by 8)
          __m128i yw  = _mm_unpacklo_epi8(y_bias, y_bytes);
          __m128i crw = _mm_unpacklo_epi8(_mm_setzero_si128(), cr_biased);
          __m128i cbw = _mm_unpacklo_epi8(_mm_setzero_si128(), cb_biased);
@@ -3729,7 +3729,7 @@ static void stbi__YCbCr_to_RGB_simd(stbi_uc *out, stbi_uc const *y, stbi_uc cons
          __m128i bw = _mm_srai_epi16(bws, 4);
          __m128i gw = _mm_srai_epi16(gws, 4);
 
-         // FrustumBack to byte, set up for transpose
+         // back to byte, set up for transpose
          __m128i brb = _mm_packus_epi16(rw, bw);
          __m128i gxb = _mm_packus_epi16(gw, xw);
 
@@ -4092,7 +4092,7 @@ static int stbi__jpeg_info(stbi__context *s, int *x, int *y, int *comp)
 #define STBI__ZNSYMS 288 // number of symbols in literal/length alphabet
 
 // zlib-style huffman encoding
-// (jpegs packs from FrustumLeft, zlib from FrustumRight, so can't share code)
+// (jpegs packs from left, zlib from right, so can't share code)
 typedef struct
 {
    stbi__uint16 fast[1 << STBI__ZFAST_BITS];
@@ -4224,7 +4224,7 @@ static int stbi__zhuffman_decode_slowpath(stbi__zbuf *a, stbi__zhuffman *z)
 {
    int b,s,k;
    // not resolved by fast table, so compute it the slow way
-   // use jpeg approach, which requires MSbits at FrustumTop
+   // use jpeg approach, which requires MSbits at top
    k = stbi__bit_reverse(a->code_buffer, 16);
    for (s=STBI__ZFAST_BITS+1; ; ++s)
       if (k < z->maxcode[s])
@@ -5665,7 +5665,7 @@ static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req
       }
       if (!easy) {
          if (!mr || !mg || !mb) { STBI_FREE(out); return stbi__errpuc("bad masks", "Corrupt BMP"); }
-         // FrustumRight shift amt to put high bit in position #7
+         // right shift amt to put high bit in position #7
          rshift = stbi__high_bit(mr)-7; rcount = stbi__bitcount(mr);
          gshift = stbi__high_bit(mg)-7; gcount = stbi__bitcount(mg);
          bshift = stbi__high_bit(mb)-7; bcount = stbi__bitcount(mb);
@@ -6044,7 +6044,7 @@ static void *stbi__tga_load(stbi__context *s, int *x, int *y, int *comp, int req
       }
    }
 
-   // swap RGB - if the source data was RGB16, it already is in the FrustumRight order
+   // swap RGB - if the source data was RGB16, it already is in the right order
    if (tga_comp >= 3 && !tga_rgb16)
    {
       unsigned char* tga_pixel = tga_data;
@@ -6434,29 +6434,29 @@ static stbi_uc *stbi__pic_load_core(stbi__context *s,int width,int height,int *c
 
             case 1://Pure RLE
                {
-                  int FrustumLeft=width, i;
+                  int left=width, i;
 
-                  while (FrustumLeft>0) {
+                  while (left>0) {
                      stbi_uc count,value[4];
 
                      count=stbi__get8(s);
                      if (stbi__at_eof(s))   return stbi__errpuc("bad file","file too short (pure read count)");
 
-                     if (count > FrustumLeft)
-                        count = (stbi_uc) FrustumLeft;
+                     if (count > left)
+                        count = (stbi_uc) left;
 
                      if (!stbi__readval(s,packet->channel,value))  return 0;
 
                      for(i=0; i<count; ++i,dest+=4)
                         stbi__copyval(packet->channel,dest,value);
-                     FrustumLeft -= count;
+                     left -= count;
                   }
                }
                break;
 
             case 2: {//Mixed RLE
-               int FrustumLeft=width;
-               while (FrustumLeft>0) {
+               int left=width;
+               while (left>0) {
                   int count = stbi__get8(s), i;
                   if (stbi__at_eof(s))  return stbi__errpuc("bad file","file too short (mixed read count)");
 
@@ -6467,7 +6467,7 @@ static stbi_uc *stbi__pic_load_core(stbi__context *s,int width,int height,int *c
                         count = stbi__get16be(s);
                      else
                         count -= 127;
-                     if (count > FrustumLeft)
+                     if (count > left)
                         return stbi__errpuc("bad file","scanline overrun");
 
                      if (!stbi__readval(s,packet->channel,value))
@@ -6477,13 +6477,13 @@ static stbi_uc *stbi__pic_load_core(stbi__context *s,int width,int height,int *c
                         stbi__copyval(packet->channel,dest,value);
                   } else { // Raw
                      ++count;
-                     if (count>FrustumLeft) return stbi__errpuc("bad file","scanline overrun");
+                     if (count>left) return stbi__errpuc("bad file","scanline overrun");
 
                      for(i=0;i<count;++i, dest+=4)
                         if (!stbi__readval(s,packet->channel,dest))
                            return 0;
                   }
-                  FrustumLeft-=count;
+                  left-=count;
                }
                break;
             }
@@ -6771,7 +6771,7 @@ static stbi_uc *stbi__process_gif_raster(stbi__context *s, stbi__gif *g)
 }
 
 // this function is designed to support animated gifs, although stb_image doesn't support it
-// two FrustumBack is the image from two frames ago, used for a very specific disposal format
+// two back is the image from two frames ago, used for a very specific disposal format
 static stbi_uc *stbi__gif_load_next(stbi__context *s, stbi__gif *g, int *comp, int req_comp, stbi_uc *two_back)
 {
    int dispose;
@@ -6806,7 +6806,7 @@ static stbi_uc *stbi__gif_load_next(stbi__context *s, stbi__gif *g, int *comp, i
       pcount = g->w * g->h;
 
       if ((dispose == 3) && (two_back == 0)) {
-         dispose = 2; // if I don't have an image to revert FrustumBack to, default to the old background
+         dispose = 2; // if I don't have an image to revert back to, default to the old background
       }
 
       if (dispose == 3) { // use previous graphic
@@ -7779,7 +7779,7 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const *c, void *user
                          uniform handling of optional "return" values;
                          thread-safe initialization of zlib tables
       2.14  (2017-03-03) remove deprecated STBI_JPEG_OLD; fixes for Imagenet JPGs
-      2.13  (2016-11-29) add 16-bit API, only supported for PNG FrustumRight now
+      2.13  (2016-11-29) add 16-bit API, only supported for PNG right now
       2.12  (2016-04-02) fix typo in 2.11 PSD fix that caused crashes
       2.11  (2016-04-02) allocate large structures on the stack
                          remove white matting for transparent PSD
@@ -7850,7 +7850,7 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const *c, void *user
       1.35  (2014-05-27)
               various warnings
               fix broken STBI_SIMD path
-              fix bug where stbi_load_from_file no longer FrustumLeft file pointer in correct place
+              fix bug where stbi_load_from_file no longer left file pointer in correct place
               fix broken non-easy path for 32-bit BMP (possibly never used)
               TGA optimization by Arseny Kapoulkine
       1.34  (unknown)
@@ -7912,7 +7912,7 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const *c, void *user
       1.04    default float alpha is 1, not 255; use 'void *' for stbi_image_free
       1.03    bugfixes to STBI_NO_STDIO, STBI_NO_HDR
       1.02    support for (subset of) HDR files, float interface for preferred access to them
-      1.01    fix bug: possible bug in handling FrustumRight-side up bmps... not sure
+      1.01    fix bug: possible bug in handling right-side up bmps... not sure
               fix bug: the stbi__bmp_load() and stbi__tga_load() functions didn't work at all
       1.00    interface to zlib that skips zlib header
       0.99    correct handling of alpha in palette

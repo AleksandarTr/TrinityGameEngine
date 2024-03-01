@@ -68,7 +68,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> orthoZO(T left, T right, T bottom, T top, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-			return orthoLH_ZO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, zNear, zFar);
+			return orthoLH_ZO(left, right, bottom, top, zNear, zFar);
 #		else
 			return orthoRH_ZO(left, right, bottom, top, zNear, zFar);
 #		endif
@@ -78,7 +78,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> orthoNO(T left, T right, T bottom, T top, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-			return orthoLH_NO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, zNear, zFar);
+			return orthoLH_NO(left, right, bottom, top, zNear, zFar);
 #		else
 			return orthoRH_NO(left, right, bottom, top, zNear, zFar);
 #		endif
@@ -88,7 +88,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> orthoLH(T left, T right, T bottom, T top, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_ZO_BIT
-			return orthoLH_ZO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, zNear, zFar);
+			return orthoLH_ZO(left, right, bottom, top, zNear, zFar);
 #		else
 			return orthoLH_NO(left, right, bottom, top, zNear, zFar);
 #		endif
@@ -99,7 +99,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> orthoRH(T left, T right, T bottom, T top, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_ZO_BIT
-			return orthoRH_ZO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, zNear, zFar);
+			return orthoRH_ZO(left, right, bottom, top, zNear, zFar);
 #		else
 			return orthoRH_NO(left, right, bottom, top, zNear, zFar);
 #		endif
@@ -109,11 +109,11 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> ortho(T left, T right, T bottom, T top, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_LH_ZO
-			return orthoLH_ZO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, zNear, zFar);
+			return orthoLH_ZO(left, right, bottom, top, zNear, zFar);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_LH_NO
-			return orthoLH_NO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, zNear, zFar);
+			return orthoLH_NO(left, right, bottom, top, zNear, zFar);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_RH_ZO
-			return orthoRH_ZO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, zNear, zFar);
+			return orthoRH_ZO(left, right, bottom, top, zNear, zFar);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_RH_NO
 			return orthoRH_NO(left, right, bottom, top, zNear, zFar);
 #		endif
@@ -179,7 +179,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> frustumZO(T left, T right, T bottom, T top, T nearVal, T farVal)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-			return frustumLH_ZO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, nearVal, farVal);
+			return frustumLH_ZO(left, right, bottom, top, nearVal, farVal);
 #		else
 			return frustumRH_ZO(left, right, bottom, top, nearVal, farVal);
 #		endif
@@ -189,7 +189,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> frustumNO(T left, T right, T bottom, T top, T nearVal, T farVal)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-			return frustumLH_NO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, nearVal, farVal);
+			return frustumLH_NO(left, right, bottom, top, nearVal, farVal);
 #		else
 			return frustumRH_NO(left, right, bottom, top, nearVal, farVal);
 #		endif
@@ -199,7 +199,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> frustumLH(T left, T right, T bottom, T top, T nearVal, T farVal)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_ZO_BIT
-			return frustumLH_ZO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, nearVal, farVal);
+			return frustumLH_ZO(left, right, bottom, top, nearVal, farVal);
 #		else
 			return frustumLH_NO(left, right, bottom, top, nearVal, farVal);
 #		endif
@@ -209,7 +209,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> frustumRH(T left, T right, T bottom, T top, T nearVal, T farVal)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_ZO_BIT
-			return frustumRH_ZO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, nearVal, farVal);
+			return frustumRH_ZO(left, right, bottom, top, nearVal, farVal);
 #		else
 			return frustumRH_NO(left, right, bottom, top, nearVal, farVal);
 #		endif
@@ -219,11 +219,11 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> frustum(T left, T right, T bottom, T top, T nearVal, T farVal)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_LH_ZO
-			return frustumLH_ZO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, nearVal, farVal);
+			return frustumLH_ZO(left, right, bottom, top, nearVal, farVal);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_LH_NO
-			return frustumLH_NO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, nearVal, farVal);
+			return frustumLH_NO(left, right, bottom, top, nearVal, farVal);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_RH_ZO
-			return frustumRH_ZO(FrustumLeft, FrustumRight, FrustumBottom, FrustumTop, nearVal, farVal);
+			return frustumRH_ZO(left, right, bottom, top, nearVal, farVal);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_RH_NO
 			return frustumRH_NO(left, right, bottom, top, nearVal, farVal);
 #		endif
