@@ -94,10 +94,8 @@ void Mesh::scale(glm::vec3 scaling) {
 
 bool Mesh::isVisible() {
     Camera::Plane *cameraFrustum = Camera::getActiveCamera()->getViewFrustum();
-    for(int i = 0; i < 4; i++) {
-        glm::vec3 meshPlaneVector = getPosition() - cameraFrustum->point;
-        float dist = glm::dot(cameraFrustum->normal, meshPlaneVector);
-        if(dist < -boundingSphere) return false;
+    for(int i = 0; i < 6; i++) {
+        if(glm::dot(cameraFrustum->normal, getPosition()) + cameraFrustum->d < -boundingSphere) return false;
         cameraFrustum++;
     }
     return true;

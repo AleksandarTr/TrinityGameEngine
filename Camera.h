@@ -16,8 +16,8 @@ class Shader;
 class Camera : public Movable {
 public:
     struct Plane {
-        glm::vec3 point;
         glm::vec3 normal;
+        float d;
     };
 
 private:

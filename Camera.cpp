@@ -118,18 +118,15 @@ Camera *Camera::getActiveCamera() {
 }
 
 void Camera::calculateCameraFrustum() {
-    frustum[FrustumSide::front] = {.point=getPosition() + nearPlane * orientation, .normal = glm::normalize(orientation)};
-    frustum[FrustumSide::back] = {.point=getPosition() + farPlane * orientation, .normal = -glm::normalize(orientation)};
-
-    const float halfVSide = farPlane * tanf(FOV * .5f);
-    const float halfHSide = halfVSide * width/height;
-    const glm::vec3 frontMultFar = farPlane * orientation;
-    const glm::vec3 right = glm::cross(orientation, up);
-
-    frustum[FrustumSide::left] = {.point=getPosition(), .normal = glm::normalize(glm::cross(up,frontMultFar + right * halfHSide))};
-    frustum[FrustumSide::right] = {.point=getPosition(), .normal = glm::normalize(glm::cross(frontMultFar - right * halfHSide, up))};
-    frustum[FrustumSide::top] = {.point=getPosition(), .normal = glm::normalize(glm::cross(right, frontMultFar - up * halfVSide))};
-    frustum[FrustumSide::bottom] = {.point=getPosition(), .normal = glm::normalize(glm::cross(frontMultFar + up * halfVSide, right))};
+    glm::mat4 &m = cameraMat;
+    frustum[FrustumSide::front] = {.normal = glm::normalize(orientation)};
+    frustum[FrustumSide::front].d = -glm::dot(frustum[FrustumSide::front].normal, getPosition() + nearPlane * orientation);
+    frustum[FrustumSide::back] = {.normal = -frustum[FrustumSide::front].normal};
+    frustum[FrustumSide::back].d = -glm::dot(frustum[FrustumSide::back].normal, getPosition() + farPlane * orientation);
+    frustum[FrustumSide::left] = {.normal = glm::normalize(glm::vec3(m[0][3]+m[0][0], m[1][3]+m[1][0], m[2][3]+m[2][0])), .d = m[3][3]+m[3][0]};
+    frustum[FrustumSide::right] = {.normal = glm::normalize(glm::vec3(m[0][3]-m[0][0], m[1][3]-m[1][0], m[2][3]-m[2][0])), .d = m[3][3]-m[3][0]};
+    frustum[FrustumSide::bottom] = {.normal = glm::normalize(glm::vec3(m[0][3]+m[0][1], m[1][3]+m[1][1], m[2][3]+m[2][1])), .d = m[3][3]+m[3][1]};
+    frustum[FrustumSide::top] = {.normal = glm::normalize(glm::vec3(m[0][3]-m[0][1], m[1][3]-m[1][1], m[2][3]-m[2][1])), .d = m[3][3]-m[3][1]};
 }
 
 Camera::Plane *Camera::getViewFrustum() {

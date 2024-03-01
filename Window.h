@@ -16,9 +16,9 @@ private:
     Shader *drawShader = nullptr;
     Shader *shadowShader = nullptr;
     Shader *textShader = nullptr;
-    const unsigned char DRAW_SHADER_BIT = 0b00000001;
-    const unsigned char SHADOW_SHADER_BIT = 0b0000001;
-    const unsigned char TEXT_SHADER_BIT = 0b000001;
+    const unsigned char DRAW_SHADER_BIT = 0b1;
+    const unsigned char SHADOW_SHADER_BIT = 0b10;
+    const unsigned char TEXT_SHADER_BIT = 0b100;
     unsigned char dynamicShader = 0;
     void loadShader(Shader*&, const std::string&, unsigned char);
     void changeShader(Shader*&, Shader&, unsigned char);
