@@ -479,7 +479,7 @@
 // Clip control, define GLM_FORCE_DEPTH_ZERO_TO_ONE before including GLM
 // to use a clip space between 0 to 1.
 // Coordinate system, define GLM_FORCE_LEFT_HANDED before including GLM
-// to use left handed coordinate system by default.
+// to use FrustumLeft handed coordinate system by default.
 
 #define GLM_CLIP_CONTROL_ZO_BIT		(1 << 0) // ZERO_TO_ONE
 #define GLM_CLIP_CONTROL_NO_BIT		(1 << 1) // NEGATIVE_ONE_TO_ONE
@@ -1126,7 +1126,7 @@ namespace detail
 #	endif
 
 #	if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-#		pragma message("GLM: GLM_FORCE_LEFT_HANDED is defined. Using left handed coordinate system.")
+#		pragma message("GLM: GLM_FORCE_LEFT_HANDED is defined. Using FrustumLeft handed coordinate system.")
 #	else
 #		pragma message("GLM: GLM_FORCE_LEFT_HANDED is undefined. Using right handed coordinate system.")
 #	endif

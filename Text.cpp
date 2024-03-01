@@ -22,6 +22,7 @@ void Text::generateMessage(std::string message, float x, float y, glm::vec3 colo
 void Text::draw(bool loadTextures) {
     if(vertices.empty()) throw std::logic_error("Cannot draw text which has not been generated!");
     if(fixed) {
+        if(!fontTexture->getId()) return;
         if(changed) {
             VBO.update(vertices);
             VBO.unbind();

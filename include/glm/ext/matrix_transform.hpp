@@ -95,7 +95,7 @@ namespace glm
 	GLM_FUNC_DECL mat<4, 4, T, Q> scale(
 		mat<4, 4, T, Q> const& m, vec<3, T, Q> const& v);
 
-	/// Build a right handed look at view matrix.
+	/// Build a FrustumRight handed look at view matrix.
 	///
 	/// @param eye Position of the camera
 	/// @param center Position where the camera is looking at
@@ -104,12 +104,12 @@ namespace glm
 	/// @tparam T A floating-point scalar type
 	/// @tparam Q A value from qualifier enum
 	///
-	/// @see - frustum(T const& left, T const& right, T const& bottom, T const& top, T const& nearVal, T const& farVal) frustum(T const& left, T const& right, T const& bottom, T const& top, T const& nearVal, T const& farVal)
+	/// @see - frustum(T const& FrustumLeft, T const& FrustumRight, T const& FrustumBottom, T const& FrustumTop, T const& nearVal, T const& farVal) frustum(T const& FrustumLeft, T const& FrustumRight, T const& FrustumBottom, T const& FrustumTop, T const& nearVal, T const& farVal)
 	template<typename T, qualifier Q>
 	GLM_FUNC_DECL mat<4, 4, T, Q> lookAtRH(
 		vec<3, T, Q> const& eye, vec<3, T, Q> const& center, vec<3, T, Q> const& up);
 
-	/// Build a left handed look at view matrix.
+	/// Build a FrustumLeft handed look at view matrix.
 	///
 	/// @param eye Position of the camera
 	/// @param center Position where the camera is looking at
@@ -118,7 +118,7 @@ namespace glm
 	/// @tparam T A floating-point scalar type
 	/// @tparam Q A value from qualifier enum
 	///
-	/// @see - frustum(T const& left, T const& right, T const& bottom, T const& top, T const& nearVal, T const& farVal) frustum(T const& left, T const& right, T const& bottom, T const& top, T const& nearVal, T const& farVal)
+	/// @see - frustum(T const& FrustumLeft, T const& FrustumRight, T const& FrustumBottom, T const& FrustumTop, T const& nearVal, T const& farVal) frustum(T const& FrustumLeft, T const& FrustumRight, T const& FrustumBottom, T const& FrustumTop, T const& nearVal, T const& farVal)
 	template<typename T, qualifier Q>
 	GLM_FUNC_DECL mat<4, 4, T, Q> lookAtLH(
 		vec<3, T, Q> const& eye, vec<3, T, Q> const& center, vec<3, T, Q> const& up);
@@ -132,7 +132,7 @@ namespace glm
 	/// @tparam T A floating-point scalar type
 	/// @tparam Q A value from qualifier enum
 	///
-	/// @see - frustum(T const& left, T const& right, T const& bottom, T const& top, T const& nearVal, T const& farVal) frustum(T const& left, T const& right, T const& bottom, T const& top, T const& nearVal, T const& farVal)
+	/// @see - frustum(T const& FrustumLeft, T const& FrustumRight, T const& FrustumBottom, T const& FrustumTop, T const& nearVal, T const& farVal) frustum(T const& FrustumLeft, T const& FrustumRight, T const& FrustumBottom, T const& FrustumTop, T const& nearVal, T const& farVal)
 	/// @see <a href="https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluLookAt.xml">gluLookAt man page</a>
 	template<typename T, qualifier Q>
 	GLM_FUNC_DECL mat<4, 4, T, Q> lookAt(

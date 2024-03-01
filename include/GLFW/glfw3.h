@@ -1240,9 +1240,9 @@ typedef void (* GLFWerrorfun)(int error_code, const char* description);
  *
  *  @param[in] window The window that was moved.
  *  @param[in] xpos The new x-coordinate, in screen coordinates, of the
- *  upper-left corner of the content area of the window.
+ *  upper-FrustumLeft corner of the content area of the window.
  *  @param[in] ypos The new y-coordinate, in screen coordinates, of the
- *  upper-left corner of the content area of the window.
+ *  upper-FrustumLeft corner of the content area of the window.
  *
  *  @sa @ref window_pos
  *  @sa @ref glfwSetWindowPosCallback
@@ -1455,9 +1455,9 @@ typedef void (* GLFWmousebuttonfun)(GLFWwindow* window, int button, int action, 
  *  @endcode
  *
  *  @param[in] window The window that received the event.
- *  @param[in] xpos The new cursor x-coordinate, relative to the left edge of
+ *  @param[in] xpos The new cursor x-coordinate, relative to the FrustumLeft edge of
  *  the content area.
- *  @param[in] ypos The new cursor y-coordinate, relative to the top edge of the
+ *  @param[in] ypos The new cursor y-coordinate, relative to the FrustumTop edge of the
  *  content area.
  *
  *  @sa @ref cursor_pos
@@ -1479,7 +1479,7 @@ typedef void (* GLFWcursorposfun)(GLFWwindow* window, double xpos, double ypos);
  *
  *  @param[in] window The window that received the event.
  *  @param[in] entered `GLFW_TRUE` if the cursor entered the window's content
- *  area, or `GLFW_FALSE` if it left it.
+ *  area, or `GLFW_FALSE` if it FrustumLeft it.
  *
  *  @sa @ref cursor_enter
  *  @sa @ref glfwSetCursorEnterCallback
@@ -1735,7 +1735,7 @@ typedef struct GLFWimage
     /*! The height, in pixels, of this image.
      */
     int height;
-    /*! The pixel data of this image, arranged left-to-right, top-to-bottom.
+    /*! The pixel data of this image, arranged FrustumLeft-to-FrustumRight, FrustumTop-to-FrustumBottom.
      */
     unsigned char* pixels;
 } GLFWimage;
@@ -2062,7 +2062,7 @@ GLFWAPI GLFWmonitor* glfwGetPrimaryMonitor(void);
 
 /*! @brief Returns the position of the monitor's viewport on the virtual screen.
  *
- *  This function returns the position, in screen coordinates, of the upper-left
+ *  This function returns the position, in screen coordinates, of the upper-FrustumLeft
  *  corner of the specified monitor.
  *
  *  Any or all of the position arguments may be `NULL`.  If an error occurs, all
@@ -2087,7 +2087,7 @@ GLFWAPI void glfwGetMonitorPos(GLFWmonitor* monitor, int* xpos, int* ypos);
 
 /*! @brief Retrieves the work area of the monitor.
  *
- *  This function returns the position, in screen coordinates, of the upper-left
+ *  This function returns the position, in screen coordinates, of the upper-FrustumLeft
  *  corner of the work area of the specified monitor along with the work area
  *  size in screen coordinates. The work area is defined as the area of the
  *  monitor not occluded by the operating system task bar where present. If no
@@ -2670,7 +2670,7 @@ GLFWAPI void glfwWindowHintString(int hint, const char* value);
  *  @remark @x11 The class part of the `WM_CLASS` window property will by
  *  default be set to the window title passed to this function.  The instance
  *  part will use the contents of the `RESOURCE_NAME` environment variable, if
- *  present and not empty, or fall back to the window title.  Set the
+ *  present and not empty, or fall FrustumBack to the window title.  Set the
  *  [GLFW_X11_CLASS_NAME](@ref GLFW_X11_CLASS_NAME_hint) and
  *  [GLFW_X11_INSTANCE_NAME](@ref GLFW_X11_INSTANCE_NAME_hint) window hints to
  *  override this.
@@ -2805,7 +2805,7 @@ GLFWAPI void glfwSetWindowTitle(GLFWwindow* window, const char* title);
  *
  *  The pixels are 32-bit, little-endian, non-premultiplied RGBA, i.e. eight
  *  bits per channel with the red channel first.  They are arranged canonically
- *  as packed sequential rows, starting from the top-left corner.
+ *  as packed sequential rows, starting from the FrustumTop-FrustumLeft corner.
  *
  *  The desired image sizes varies depending on platform and system settings.
  *  The selected images will be rescaled as needed.  Good sizes include 16x16,
@@ -2846,15 +2846,15 @@ GLFWAPI void glfwSetWindowIcon(GLFWwindow* window, int count, const GLFWimage* i
 /*! @brief Retrieves the position of the content area of the specified window.
  *
  *  This function retrieves the position, in screen coordinates, of the
- *  upper-left corner of the content area of the specified window.
+ *  upper-FrustumLeft corner of the content area of the specified window.
  *
  *  Any or all of the position arguments may be `NULL`.  If an error occurs, all
  *  non-`NULL` position arguments will be set to zero.
  *
  *  @param[in] window The window to query.
- *  @param[out] xpos Where to store the x-coordinate of the upper-left corner of
+ *  @param[out] xpos Where to store the x-coordinate of the upper-FrustumLeft corner of
  *  the content area, or `NULL`.
- *  @param[out] ypos Where to store the y-coordinate of the upper-left corner of
+ *  @param[out] ypos Where to store the y-coordinate of the upper-FrustumLeft corner of
  *  the content area, or `NULL`.
  *
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
@@ -2877,7 +2877,7 @@ GLFWAPI void glfwGetWindowPos(GLFWwindow* window, int* xpos, int* ypos);
 
 /*! @brief Sets the position of the content area of the specified window.
  *
- *  This function sets the position, in screen coordinates, of the upper-left
+ *  This function sets the position, in screen coordinates, of the upper-FrustumLeft
  *  corner of the content area of the specified windowed mode window.  If the
  *  window is a full screen window, this function does nothing.
  *
@@ -2888,8 +2888,8 @@ GLFWAPI void glfwGetWindowPos(GLFWwindow* window, int* xpos, int* ypos);
  *  cannot and should not override these limits.
  *
  *  @param[in] window The window to query.
- *  @param[in] xpos The x-coordinate of the upper-left corner of the content area.
- *  @param[in] ypos The y-coordinate of the upper-left corner of the content area.
+ *  @param[in] xpos The x-coordinate of the upper-FrustumLeft corner of the content area.
+ *  @param[in] ypos The y-coordinate of the upper-FrustumLeft corner of the content area.
  *
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
  *  GLFW_PLATFORM_ERROR.
@@ -3111,14 +3111,14 @@ GLFWAPI void glfwGetFramebufferSize(GLFWwindow* window, int* width, int* height)
  *  non-`NULL` size arguments will be set to zero.
  *
  *  @param[in] window The window whose frame size to query.
- *  @param[out] left Where to store the size, in screen coordinates, of the left
+ *  @param[out] left Where to store the size, in screen coordinates, of the FrustumLeft
  *  edge of the window frame, or `NULL`.
- *  @param[out] top Where to store the size, in screen coordinates, of the top
+ *  @param[out] top Where to store the size, in screen coordinates, of the FrustumTop
  *  edge of the window frame, or `NULL`.
  *  @param[out] right Where to store the size, in screen coordinates, of the
- *  right edge of the window frame, or `NULL`.
+ *  FrustumRight edge of the window frame, or `NULL`.
  *  @param[out] bottom Where to store the size, in screen coordinates, of the
- *  bottom edge of the window frame, or `NULL`.
+ *  FrustumBottom edge of the window frame, or `NULL`.
  *
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
  *  GLFW_PLATFORM_ERROR.
@@ -3356,9 +3356,9 @@ GLFWAPI void glfwShowWindow(GLFWwindow* window);
  */
 GLFWAPI void glfwHideWindow(GLFWwindow* window);
 
-/*! @brief Brings the specified window to front and sets input focus.
+/*! @brief Brings the specified window to FrustumFront and sets input focus.
  *
- *  This function brings the specified window to front and sets input focus.
+ *  This function brings the specified window to FrustumFront and sets input focus.
  *  The window should already be visible and not iconified.
  *
  *  By default, both windowed and full screen mode windows are focused when
@@ -3382,7 +3382,7 @@ GLFWAPI void glfwHideWindow(GLFWwindow* window);
  *  GLFW_PLATFORM_ERROR.
  *
  *  @remark @wayland It is not possible for an application to bring its windows
- *  to front, this function will always emit @ref GLFW_PLATFORM_ERROR.
+ *  to FrustumFront, this function will always emit @ref GLFW_PLATFORM_ERROR.
  *
  *  @thread_safety This function must only be called from the main thread.
  *
@@ -3466,9 +3466,9 @@ GLFWAPI GLFWmonitor* glfwGetWindowMonitor(GLFWwindow* window);
  *
  *  @param[in] window The window whose monitor, size or video mode to set.
  *  @param[in] monitor The desired monitor, or `NULL` to set windowed mode.
- *  @param[in] xpos The desired x-coordinate of the upper-left corner of the
+ *  @param[in] xpos The desired x-coordinate of the upper-FrustumLeft corner of the
  *  content area.
- *  @param[in] ypos The desired y-coordinate of the upper-left corner of the
+ *  @param[in] ypos The desired y-coordinate of the upper-FrustumLeft corner of the
  *  content area.
  *  @param[in] width The desired with, in screen coordinates, of the content
  *  area or video mode.
@@ -3625,7 +3625,7 @@ GLFWAPI void* glfwGetWindowUserPointer(GLFWwindow* window);
  *
  *  This function sets the position callback of the specified window, which is
  *  called when the window is moved.  The callback is provided with the
- *  position, in screen coordinates, of the upper-left corner of the content
+ *  position, in screen coordinates, of the upper-FrustumLeft corner of the content
  *  area of the window.
  *
  *  @param[in] window The window whose callback to set.
@@ -4358,7 +4358,7 @@ GLFWAPI int glfwGetMouseButton(GLFWwindow* window, int button);
  *  the window.
  *
  *  This function returns the position of the cursor, in screen coordinates,
- *  relative to the upper-left corner of the content area of the specified
+ *  relative to the upper-FrustumLeft corner of the content area of the specified
  *  window.
  *
  *  If the cursor is disabled (with `GLFW_CURSOR_DISABLED`) then the cursor
@@ -4374,9 +4374,9 @@ GLFWAPI int glfwGetMouseButton(GLFWwindow* window, int button);
  *
  *  @param[in] window The desired window.
  *  @param[out] xpos Where to store the cursor x-coordinate, relative to the
- *  left edge of the content area, or `NULL`.
+ *  FrustumLeft edge of the content area, or `NULL`.
  *  @param[out] ypos Where to store the cursor y-coordinate, relative to the to
- *  top edge of the content area, or `NULL`.
+ *  FrustumTop edge of the content area, or `NULL`.
  *
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
  *  GLFW_PLATFORM_ERROR.
@@ -4396,7 +4396,7 @@ GLFWAPI void glfwGetCursorPos(GLFWwindow* window, double* xpos, double* ypos);
  *  window.
  *
  *  This function sets the position, in screen coordinates, of the cursor
- *  relative to the upper-left corner of the content area of the specified
+ *  relative to the upper-FrustumLeft corner of the content area of the specified
  *  window.  The window must have input focus.  If the window does not have
  *  input focus when this function is called, it fails silently.
  *
@@ -4410,9 +4410,9 @@ GLFWAPI void glfwGetCursorPos(GLFWwindow* window, double* xpos, double* ypos);
  *  a `double`.
  *
  *  @param[in] window The desired window.
- *  @param[in] xpos The desired x-coordinate, relative to the left edge of the
+ *  @param[in] xpos The desired x-coordinate, relative to the FrustumLeft edge of the
  *  content area.
- *  @param[in] ypos The desired y-coordinate, relative to the top edge of the
+ *  @param[in] ypos The desired y-coordinate, relative to the FrustumTop edge of the
  *  content area.
  *
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
@@ -4440,11 +4440,11 @@ GLFWAPI void glfwSetCursorPos(GLFWwindow* window, double xpos, double ypos);
  *
  *  The pixels are 32-bit, little-endian, non-premultiplied RGBA, i.e. eight
  *  bits per channel with the red channel first.  They are arranged canonically
- *  as packed sequential rows, starting from the top-left corner.
+ *  as packed sequential rows, starting from the FrustumTop-FrustumLeft corner.
  *
- *  The cursor hotspot is specified in pixels, relative to the upper-left corner
+ *  The cursor hotspot is specified in pixels, relative to the upper-FrustumLeft corner
  *  of the cursor image.  Like all other coordinate systems in GLFW, the X-axis
- *  points to the right and the Y-axis points down.
+ *  points to the FrustumRight and the Y-axis points down.
  *
  *  @param[in] image The desired cursor image.
  *  @param[in] xhot The desired x-coordinate, in pixels, of the cursor hotspot.
@@ -4531,7 +4531,7 @@ GLFWAPI void glfwDestroyCursor(GLFWcursor* cursor);
  *  has input focus.
  *
  *  @param[in] window The window to set the cursor for.
- *  @param[in] cursor The cursor to set, or `NULL` to switch back to the default
+ *  @param[in] cursor The cursor to set, or `NULL` to switch FrustumBack to the default
  *  arrow cursor.
  *
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
@@ -4723,7 +4723,7 @@ GLFWAPI GLFWmousebuttonfun glfwSetMouseButtonCallback(GLFWwindow* window, GLFWmo
  *
  *  This function sets the cursor position callback of the specified window,
  *  which is called when the cursor is moved.  The callback is provided with the
- *  position, in screen coordinates, relative to the upper-left corner of the
+ *  position, in screen coordinates, relative to the upper-FrustumLeft corner of the
  *  content area of the window.
  *
  *  @param[in] window The window whose callback to set.
@@ -4968,14 +4968,14 @@ GLFWAPI const unsigned char* glfwGetJoystickButtons(int jid, int* count);
  *  `GLFW_HAT_LEFT_UP`    | `GLFW_HAT_LEFT` \| `GLFW_HAT_UP`
  *  `GLFW_HAT_LEFT_DOWN`  | `GLFW_HAT_LEFT` \| `GLFW_HAT_DOWN`
  *
- *  The diagonal directions are bitwise combinations of the primary (up, right,
- *  down and left) directions and you can test for these individually by ANDing
+ *  The diagonal directions are bitwise combinations of the primary (up, FrustumRight,
+ *  down and FrustumLeft) directions and you can test for these individually by ANDing
  *  it with the corresponding direction.
  *
  *  @code
  *  if (hats[2] & GLFW_HAT_RIGHT)
  *  {
- *      // State of hat 2 could be right-up, right or right-down
+ *      // State of hat 2 could be FrustumRight-up, FrustumRight or FrustumRight-down
  *  }
  *  @endcode
  *
@@ -5359,7 +5359,7 @@ GLFWAPI const char* glfwGetClipboardString(GLFWwindow* window);
  *  has been set using @ref glfwSetTime it measures time elapsed since GLFW was
  *  initialized.
  *
- *  This function and @ref glfwSetTime are helper functions on top of @ref
+ *  This function and @ref glfwSetTime are helper functions on FrustumTop of @ref
  *  glfwGetTimerFrequency and @ref glfwGetTimerValue.
  *
  *  The resolution of the timer is system dependent, but is usually on the order
@@ -5389,7 +5389,7 @@ GLFWAPI double glfwGetTime(void);
  *  a positive finite number less than or equal to 18446744073.0, which is
  *  approximately 584.5 years.
  *
- *  This function and @ref glfwGetTime are helper functions on top of @ref
+ *  This function and @ref glfwGetTime are helper functions on FrustumTop of @ref
  *  glfwGetTimerFrequency and @ref glfwGetTimerValue.
  *
  *  @param[in] time The new value, in seconds.
@@ -5521,9 +5521,9 @@ GLFWAPI void glfwMakeContextCurrent(GLFWwindow* window);
  */
 GLFWAPI GLFWwindow* glfwGetCurrentContext(void);
 
-/*! @brief Swaps the front and back buffers of the specified window.
+/*! @brief Swaps the FrustumFront and FrustumBack buffers of the specified window.
  *
- *  This function swaps the front and back buffers of the specified window when
+ *  This function swaps the FrustumFront and FrustumBack buffers of the specified window when
  *  rendering with OpenGL or OpenGL ES.  If the swap interval is greater than
  *  zero, the GPU driver waits the specified number of screen updates before
  *  swapping the buffers.

@@ -9,7 +9,7 @@
 #include "Model.h"
 #include "Light.h"
 
-Window::Window(int width, int height) : width(width), height(height), camera(width, height, glm::vec3(0)) {
+Window::Window(int width, int height) : width(width), height(height), camera(width, height) {
     glfwInit();
 
     //Set OpenGL version and profile
@@ -57,22 +57,6 @@ Window::~Window() {
     TextureHandler::killTextureHandler();
     glfwDestroyWindow(window);
     glfwTerminate();
-}
-
-void Window::setFov(float fov) {
-    camera.setFov(fov);
-}
-
-void Window::setNearPlane(float nearPlane) {
-    camera.setNearPlane(nearPlane);
-}
-
-void Window::setFarPlane(float farPlane) {
-    camera.setFarPlane(farPlane);
-}
-
-void Window::setCamera(Camera &camera) {
-    this->camera = camera;
 }
 
 int Window::addText(std::string font, bool fixed) {
@@ -179,7 +163,7 @@ void Window::drawFrame() {
 
         glViewport(0, 0, Light::shadowWidth, Light::shadowHeight);
         for (int i = 0; i < lightCount; i++) {
-            lights[i]->activateCamera();
+            lights[i]->activate();
             lights[i]->drawShadowMap();
             render(false, false);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -195,9 +179,10 @@ void Window::drawFrame() {
     glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    camera.activateCamera();
-    camera.inputs(window);
     camera.update(timeDelta);
+    camera.controls(window);
+    camera.activate();
+    TextureHandler::resetActiveTextures();
 
     drawShader->activate();
     loadLights();
@@ -300,4 +285,12 @@ void Window::sortDrawOrder() {
         for(int j = i; j > lastSuitablePosition; j--) drawOrder.at(j) = drawOrder.at(j-1);
         drawOrder.at(lastSuitablePosition) = &currentMesh;
     }
+}
+
+const Camera &Window::getCamera() const {
+    return camera;
+}
+
+Camera &Window::getCamera() {
+    return camera;
 }

@@ -93,7 +93,7 @@ void Mesh::scale(glm::vec3 scaling) {
 }
 
 bool Mesh::isVisible() {
-    Camera::Plane *cameraFrustum = Camera::getActiveCamera()->getViewFrustum();
+    const View::Plane *cameraFrustum = View::getActiveView()->getViewFrustum();
     for(int i = 0; i < 6; i++) {
         if(glm::dot(cameraFrustum->normal, getPosition()) + cameraFrustum->d < -boundingSphere) return false;
         cameraFrustum++;

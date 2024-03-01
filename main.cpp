@@ -2,7 +2,7 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "Camera.h"
+#include "View.h"
 #include "Structs.h"
 #include "SingleTextureMesh.h"
 #include "gltfReader.h"
@@ -50,11 +50,7 @@ int main() {
     object.setScale(glm::vec3(1, 10, 1));
     scene.scale(glm::vec3(10));
 
-    window.setFov(45);
-    window.setNearPlane(0.1f);
-    window.setFarPlane(100);
-
-    //Camera temp(1280, 720, glm::vec3(0, 1, 0));
+    //View temp(1280, 720, glm::vec3(0, 1, 0));
     //temp.activateCamera();
 
     double timer = 0;

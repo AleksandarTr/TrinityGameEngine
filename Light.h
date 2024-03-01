@@ -3,7 +3,7 @@
 
 #include "SingleTextureMesh.h"
 
-class Light : public Camera {
+class Light : public View {
 private:
     glm::vec3 color;
     LightingType type;

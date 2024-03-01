@@ -59,7 +59,7 @@ namespace detail
 			epsilonNotEqual(LocalMatrix[1][3], static_cast<T>(0), epsilon<T>()) ||
 			epsilonNotEqual(LocalMatrix[2][3], static_cast<T>(0), epsilon<T>()))
 		{
-			// rightHandSide is the right hand side of the equation.
+			// rightHandSide is the FrustumRight hand side of the equation.
 			vec<4, T, Q> RightHandSide;
 			RightHandSide[0] = LocalMatrix[0][3];
 			RightHandSide[1] = LocalMatrix[1][3];

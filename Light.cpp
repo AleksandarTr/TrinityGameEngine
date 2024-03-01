@@ -3,9 +3,10 @@
 
 #include <utility>
 
-Light::Light(glm::vec3 color, glm::vec3 direction, LightingType type) : color(color), type(type), Camera(shadowWidth, shadowHeight, glm::vec3(0)) {
+Light::Light(glm::vec3 color, glm::vec3 direction, LightingType type) : color(color), type(type), View(shadowWidth, shadowHeight, 90.0f, .1f, 100.0f) {
     setOrientation(direction);
-    if(type == LightingType::DirectionalLight) setMode(true);
+    if(type == LightingType::DirectionalLight) setOrthographicBorder(-5.0f, 5.0f, -5.0f, 5.0f);
+    else if(type == LightingType::SpotLight) setFov(10.0f);
 
     glGenFramebuffers(1, &shadowBuffer);
 
@@ -41,8 +42,9 @@ LightingType Light::getType() const {
 
 void Light::setType(LightingType type) {
     Light::type = type;
-    if(type == LightingType::DirectionalLight) setMode(true);
-    else setMode(false);
+    if(type == LightingType::DirectionalLight) setOrthographicBorder(-5.0f, 5.0f, -5.0f, 5.0f);
+    else if(type == LightingType::SpotLight) setFov(10.0f);
+    else setFov(90.0f);
 }
 
 void Light::setType(LightingType type, float nearPlane, float farPlane, float left_fov, float right, float bottom, float top) {
@@ -94,10 +96,7 @@ void Light::setPerspective(float fov, float nearPlane, float farPlane) {
 }
 
 void Light::setOrthographic(float left, float right, float top, float bottom, float nearPlane, float farPlane) {
-    setLeftBorder(left);
-    setRightBorder(right);
-    setTopBorder(top);
-    setBottomBorder(bottom);
+    setOrthographicBorder(left, right, bottom, top);
     setNearPlane(nearPlane);
     setFarPlane(farPlane);
 }

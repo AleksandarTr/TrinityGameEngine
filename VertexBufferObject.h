@@ -13,7 +13,7 @@ private:
 public:
     VertexBufferObject();
 
-    void bind(std::vector<Vertex> &vertices);
+    void bind(std::vector<Vertex> &vertices, bool overwrite = false);
 
     void unbind();
 

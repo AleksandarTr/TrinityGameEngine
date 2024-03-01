@@ -5,9 +5,9 @@ VertexBufferObject::VertexBufferObject() {
     glGenBuffers(1, &VBO);
 }
 
-void VertexBufferObject::bind(std::vector<Vertex> &vertices) {
+void VertexBufferObject::bind(std::vector<Vertex> &vertices, bool overwrite) {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    if(!assigned) {
+    if(!assigned || overwrite) {
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
         assigned = true;
     }

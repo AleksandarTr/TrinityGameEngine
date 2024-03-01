@@ -18,8 +18,8 @@ add_executable(TrinityEngine main.cpp glad.c
         ElementBufferObject.h
         Texture.cpp
         Texture.h
-        Camera.cpp
-        Camera.h
+        View.cpp
+        View.h
         Mesh.h
         Mesh.cpp
         Movable.cpp
@@ -40,6 +40,8 @@ add_executable(TrinityEngine main.cpp glad.c
         TextureHandler.h
         Window.cpp
         Window.h
+        Camera.cpp
+        Camera.h
 )
 
 add_library(glfw STATIC IMPORTED)

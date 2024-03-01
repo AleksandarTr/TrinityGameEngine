@@ -10,7 +10,7 @@
 #include "Texture.h"
 #include <glm/glm.hpp>
 #include <vector>
-#include "Camera.h"
+#include "View.h"
 
 class Mesh : public Movable {
     friend class Model;

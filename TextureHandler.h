@@ -49,6 +49,8 @@ public:
 
     static void bindTexture(Texture &texture, GLenum target = GL_TEXTURE_2D);
 
+    static void resetActiveTextures();
+
     static void loadInMemory();
 
     static void killTextureHandler();

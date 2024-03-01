@@ -118,6 +118,10 @@ void TextureHandler::killTextureHandler() {
     textureThread.join();
 }
 
+void TextureHandler::resetActiveTextures() {
+    for(int i = 0; i < static_cast<int>(TextureType::Count); i++) activeTextures[i] = 0;
+}
+
 bool TextureHandler::higherPriority::operator()(Job &job1, Job &job2) {
     return job1.info.type > job2.info.type || (job1.info.type == job2.info.type && !job2.result);
 }

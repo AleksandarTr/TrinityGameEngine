@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "Text.h"
 #include "gltfReader.h"
+#include "Camera.h"
 
 class Window {
 private:
@@ -58,10 +59,8 @@ public:
     void setTextShader(Shader &shader);
     void setTextShader(const std::string& uri);
 
-    void setFov(float fov);
-    void setNearPlane(float nearPlane);
-    void setFarPlane(float farPlane);
-    void setCamera(Camera& camera);
+    const Camera& getCamera() const;
+    Camera& getCamera();
 
     [[nodiscard]] int addText(std::string font, bool fixed = true);
     Text& getText(int index, bool fixed);
