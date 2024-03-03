@@ -28,21 +28,21 @@ int main() {
     Model &scene = window.getModel(sceneIndex);
     window.unloadGLTF();
     scene.setAngularVelocity(glm::vec3(0, 2, 0));
-    Light& light = window.getLight(window.addLight(glm::vec3(0.5), glm::vec3(0, -1, -3), LightingType::PointLight));
+    Light& light = window.getLight(window.addLight(glm::vec3(0.5), glm::vec3(0, -1, -3), PointLight));
     light.move(glm::vec3(0, 2, 6));
-    light.setPerspective(90, 0.1, 100);
+    light.setFov(90);
 
-    Light& light2 = window.getLight(window.addLight(glm::vec3(1, 0, 0), glm::vec3(1), LightingType::PointLight));
+    Light& light2 = window.getLight(window.addLight(glm::vec3(1, 0, 0), glm::vec3(1), PointLight));
     light2.move(glm::vec3(-10));
-    light2.setPerspective(90, 0.1, 100);
+    light2.setFov(90);
 
-    Light& directionLight = window.getLight(window.addLight(glm::vec3(0.25), glm::vec3(0, -1, -1), LightingType::DirectionalLight));
+    Light& directionLight = window.getLight(window.addLight(glm::vec3(0.25), glm::vec3(0, -1, -1), DirectionalLight));
     directionLight.move(glm::vec3(0, 5, 5));
-    directionLight.setOrthographic(-5, 5, 5, -5, .1, 100);
+    directionLight.setOrthographicBorder(-5, 5, 5, -5);
 
-    Light& spotLight = window.getLight(window.addLight(glm::vec3(0.8), glm::vec3(-1), LightingType::SpotLight));
+    Light& spotLight = window.getLight(window.addLight(glm::vec3(0.8), glm::vec3(-1), SpotLight));
     spotLight.move(glm::vec3(5));
-    spotLight.setPerspective(15, 0.1, 100);
+    spotLight.setFov(15);
 
     object.setAngularVelocity(glm::vec3(0, 3, 0));
     window.setShadowSampleRate(30);

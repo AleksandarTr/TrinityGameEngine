@@ -10,31 +10,26 @@ private:
 
     GLuint shadowBuffer;
     Texture *shadowMap;
+    const unsigned int shadowWidth, shadowHeight;
 
 public:
-    const static unsigned int shadowWidth = 1024, shadowHeight = 1024;
+    Light(glm::vec3 color, glm::vec3 direction, LightingType type, unsigned int shadowWidth = 1024, unsigned int shadowHeight = 1024);
 
-    Light(glm::vec3 color, glm::vec3 direction, LightingType type);
-
-    const glm::vec3 &getColor() const;
-
-    void setColor(const glm::vec3 color);
+    glm::vec3 getColor() const;
+    void setColor(glm::vec3 color);
 
     LightingType getType() const;
-
     void setType(LightingType type);
-
     void setType(LightingType type, float nearPlane, float farPlane, float left_fov, float right = 0, float bottom = 0, float top = 0);
 
     void drawShadowMap();
 
-    Texture& getShadowMap();
+    Texture& getShadowMap() const;
 
     void loadLight(int index);
 
-    void setPerspective(float fov, float nearPlane, float farPlane);
-
-    void setOrthographic(float left, float right, float top, float bottom, float nearPlane, float farPlane);
+    unsigned int getShadowWidth() const;
+    unsigned int getShadowHeight() const;
 };
 
 #endif

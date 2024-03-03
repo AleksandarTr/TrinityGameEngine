@@ -36,7 +36,7 @@ private:
     std::mutex jobMutex;
     std::queue<Job*> awaitingLoading;
     std::mutex loadingMutex;
-    static int activeTextures[static_cast<unsigned long long>(TextureType::Count)];
+    static int activeTextures[TE_TextureTypeCount];
     static volatile bool close;
     static std::thread textureThread;
 

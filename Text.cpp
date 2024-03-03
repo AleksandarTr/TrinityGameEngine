@@ -8,7 +8,7 @@ Text::Text(std::string font, int windowWidth, int windowHeight, bool fixed)
     info.location = font + ".png";
     info.format = "image/png";
     info.wrapS = GL_CLAMP_TO_EDGE;
-    info.type = TextureType::Text;
+    info.type = TextTexture;
     fontTexture = new Texture(info);
     TextureHandler::getTextureHandler().loadTexture(info,  fontTexture);
     readCharInfo(font);

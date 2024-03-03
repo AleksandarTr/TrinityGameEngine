@@ -8,16 +8,16 @@ struct Vertex {
     glm::vec3 position = glm::vec3(0);
     glm::vec3 color = glm::vec3(0);
     glm::vec3 texPosition = glm::vec3(0);
-    glm::vec3 lightNormal = glm::vec3(0);
+    glm::vec3 lightNormal = glm::vec3(1);
     glm::vec3 tangent = glm::vec3(1);
     glm::vec3 bitangent = glm::vec3(1);
 };
 
-enum struct LightingType {PointLight, DirectionalLight, SpotLight};
+enum LightingType {PointLight, DirectionalLight, SpotLight};
 
-enum struct TextureType {None = -1, Text, Diffuse, PBR, Normal, Emissive, Oclussion,
-        ShadowMap0, ShadowMap1, ShadowMap2, ShadowMap3, ShadowMap4, ShadowMap5, ShadowMap6, ShadowMap7,
-        ShadowMap8, ShadowMap9, ShadowMap10, ShadowMap11, ShadowMap12, ShadowMap13, ShadowMap14, ShadowMap15, Count};
+enum TextureType {NoTextureType = -1, TextTexture, DiffuseTexture, PBRTexture, NormalTextre, EmissiveTexture, OcclusionTexture,
+        TE_ShadowMap0, TE_ShadowMap1, TE_ShadowMap2, TE_ShadowMap3, TE_ShadowMap4, TE_ShadowMap5, TE_ShadowMap6, TE_ShadowMap7,
+    TE_ShadowMap8, TE_ShadowMap9, TE_ShadowMap10, TE_ShadowMap11, TE_ShadowMap12, TE_ShadowMap13, TE_ShadowMap14, TE_ShadowMap15, TE_TextureTypeCount};
 
 struct TextureInfo {
     std::string location = "";
@@ -27,7 +27,7 @@ struct TextureInfo {
     int wrapS = GL_REPEAT;
     int wrapT = GL_REPEAT;
     int width, height;
-    TextureType type = TextureType::None;
+    TextureType type = NoTextureType;
 };
 
 #endif

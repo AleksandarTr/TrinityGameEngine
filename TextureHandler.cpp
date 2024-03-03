@@ -4,7 +4,7 @@
 std::thread TextureHandler::textureThread(&TextureHandler::loadInMemory);
 volatile bool TextureHandler::close = false;
 
-int TextureHandler::activeTextures[static_cast<unsigned long long>(TextureType::Count)] = {0};
+int TextureHandler::activeTextures[TE_TextureTypeCount] = {0};
 
 TextureHandler &TextureHandler::getTextureHandler() {
     static TextureHandler textureHandler;
@@ -99,7 +99,7 @@ void TextureHandler::assignTexture() {
 
         job->destination->textureId = job->result->textureId;
         job->info.type = std::max(job->info.type, static_cast<TextureType>(0));
-        job->info.type = std::min(job->info.type, static_cast<TextureType>(static_cast<int>(TextureType::Count) - 1));
+        job->info.type = std::min(job->info.type, static_cast<TextureType>(TE_TextureTypeCount - 1));
         job->destination->info = job->result->info;
         job->data = nullptr;
     }
@@ -119,7 +119,7 @@ void TextureHandler::killTextureHandler() {
 }
 
 void TextureHandler::resetActiveTextures() {
-    for(int i = 0; i < static_cast<int>(TextureType::Count); i++) activeTextures[i] = 0;
+    for(int i = 0; i < TE_TextureTypeCount; i++) activeTextures[i] = 0;
 }
 
 bool TextureHandler::higherPriority::operator()(Job &job1, Job &job2) {

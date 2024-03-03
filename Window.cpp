@@ -161,13 +161,11 @@ void Window::drawFrame() {
         shadowShader->activate();
         glCullFace(GL_FRONT);
 
-        glViewport(0, 0, Light::shadowWidth, Light::shadowHeight);
         for (int i = 0; i < lightCount; i++) {
-            lights[i]->activate();
             lights[i]->drawShadowMap();
             render(false, false);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     glViewport(0, 0, width, height);
@@ -203,7 +201,7 @@ void Window::updateModels(float timeDelta) {
 void Window::loadLights() {
     for(int i = 0; i < lightCount; i++) {
         lights[i]->loadLight(i);
-        lights[i]->getShadowMap().getInfo().type = static_cast<TextureType>(static_cast<int>(TextureType::ShadowMap0) + i);
+        lights[i]->getShadowMap().getInfo().type = static_cast<TextureType>(TE_ShadowMap0 + i);
         TextureHandler::bindTexture(lights[i]->getShadowMap());
     }
     glUniform1i(glGetUniformLocation(drawShader->getProgramID(), "lightNum"), lightCount);
@@ -230,7 +228,7 @@ void Window::changeShader(Shader *&localShader, Shader &externalShader, unsigned
 }
 
 void Window::setShadowSampleRate(int samplesPerSecond) {
-    shadowSampleCount = 1.0 / samplesPerSecond;
+    shadowSampleCount = 1.0f / samplesPerSecond;
 }
 
 void Window::addModelToDrawOrder(Model *newModel) {
@@ -252,7 +250,7 @@ void Window::sortDrawOrder() {
     drawOrderSorted = true;
     int lastSuitablePosition;
     int suitability;
-    static constexpr TextureType textureTypes[] = {TextureType::Diffuse, TextureType::PBR, TextureType::Normal, TextureType::Oclussion};
+    static constexpr TextureType textureTypes[] = {DiffuseTexture, PBRTexture, NormalTextre, OcclusionTexture};
     static constexpr int textureTypeCount = sizeof textureTypes / sizeof textureTypes[0];
 
     for(int i = 0; i < drawOrder.size(); i++)

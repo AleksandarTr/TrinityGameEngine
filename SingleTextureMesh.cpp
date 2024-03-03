@@ -7,25 +7,25 @@ SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<
                                      TextureInfo diffuseTexture, TextureInfo specularTexture, TextureInfo normalTexture, TextureInfo occlusionTexture, std::string name)
 : Mesh(vertices, indices, drawMode), name(std::move(name)) {
     if(!diffuseTexture.location.empty()) {
-        if (diffuseTexture.type == TextureType::None) diffuseTexture.type = TextureType::Diffuse;
+        if (diffuseTexture.type == NoTextureType) diffuseTexture.type = DiffuseTexture;
         this->diffuseTexture = new Texture(diffuseTexture);
         TextureHandler::getTextureHandler().loadTexture(diffuseTexture, this->diffuseTexture);
     }
 
     if(!specularTexture.location.empty()) {
-        if (specularTexture.type == TextureType::None) specularTexture.type = TextureType::PBR;
+        if (specularTexture.type == NoTextureType) specularTexture.type = PBRTexture;
         this->specularTexture = new Texture(specularTexture);
         TextureHandler::getTextureHandler().loadTexture(specularTexture, this->specularTexture);
     }
 
     if(!normalTexture.location.empty()) {
-        if (normalTexture.type == TextureType::None) normalTexture.type = TextureType::Normal;
+        if (normalTexture.type == NoTextureType) normalTexture.type = NormalTextre;
         this->normalTexture = new Texture(normalTexture);
         TextureHandler::getTextureHandler().loadTexture(normalTexture, this->normalTexture);
     }
 
     if(!occlusionTexture.location.empty()) {
-        if (occlusionTexture.type == TextureType::None) occlusionTexture.type = TextureType::Oclussion;
+        if (occlusionTexture.type == NoTextureType) occlusionTexture.type = OcclusionTexture;
         this->occlusionTexture = new Texture(occlusionTexture);
         TextureHandler::getTextureHandler().loadTexture(occlusionTexture, this->occlusionTexture);
     }
@@ -103,13 +103,13 @@ void SingleTextureMesh::setRoughness(float value) {
 
 Texture *SingleTextureMesh::getTexture(TextureType type) {
     switch(type){
-        case TextureType::Diffuse:
+        case DiffuseTexture:
             return diffuseTexture;
-        case TextureType::PBR:
+        case PBRTexture:
             return specularTexture;
-        case TextureType::Normal:
+        case NormalTextre:
             return normalTexture;
-        case TextureType::Oclussion:
+        case OcclusionTexture:
             return occlusionTexture;
         default:
             throw std::out_of_range("There is no texture with given type");

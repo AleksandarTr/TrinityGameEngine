@@ -20,3 +20,7 @@ TextureInfo &Texture::getInfo() {
 }
 
 Texture::Texture(TextureInfo info) : info(std::move(info)) {}
+
+void Texture::setId(GLuint id) {
+    if(!textureId) textureId = id;
+}

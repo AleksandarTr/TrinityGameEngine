@@ -5,10 +5,10 @@
 
 View* View::activeView = nullptr;
 
-View::View(int width, int height, float fov, float nearPlane, float farPlane)
+View::View(unsigned int width, unsigned int height, float fov, float nearPlane, float farPlane)
 : width(width), height(height), fov(fov), nearPlane(nearPlane), farPlane(farPlane), orthographic(false) {}
 
-View::View(int width, int height, float left, float right, float bottom, float top, float nearPlane, float farPlane)
+View::View(unsigned int width, unsigned int height, float left, float right, float bottom, float top, float nearPlane, float farPlane)
         : width(width), height(height), nearPlane(nearPlane), farPlane(farPlane), left(left), right(right), bottom(bottom), top(top), orthographic(true) {}
 
 void View::updateMatrix() {

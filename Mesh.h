@@ -16,24 +16,21 @@ class Mesh : public Movable {
     friend class Model;
 
 protected:
-    VertexArrayObject VAO = VertexArrayObject();
-    VertexBufferObject VBO = VertexBufferObject();
-    ElementBufferObject EBO = ElementBufferObject();
-
     std::vector<Vertex> &vertices;
     std::vector<GLuint> &indices;
     GLenum drawMode = GL_TRIANGLES;
+
+    VertexArrayObject VAO = VertexArrayObject();
+    VertexBufferObject VBO = VertexBufferObject();
+    ElementBufferObject EBO = ElementBufferObject();
 
     glm::mat4 modelTransformation = glm::mat4(1);
     glm::mat4 rotationMatrix = glm::mat4(1);
 
     float boundingSphere;
     void calculateBoundingSphere();
-
-    int textureSlot = -1;
 public:
     Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, GLenum drawMode);
-
     Mesh(const Mesh&);
 
     void updateTransformation();
@@ -46,7 +43,7 @@ public:
 
     virtual void initializeOtherFields();
 
-    void updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indices = nullptr);
+    void updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indices = nullptr, bool newBuffers = false);
 
     void scale(glm::vec3 scaling) override;
 

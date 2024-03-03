@@ -52,16 +52,25 @@ void Mesh::updateTransformation() {
 }
 
 Mesh::Mesh(const Mesh &copy) : indices(copy.indices), vertices(copy.vertices), VAO(copy.VAO),
-VBO(copy.VBO), EBO(copy.EBO), textureSlot(copy.textureSlot), drawMode(copy.drawMode){}
+VBO(copy.VBO), EBO(copy.EBO), drawMode(copy.drawMode){}
 
-void Mesh::updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indices) {
+void Mesh::updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indices, bool newBuffers) {
     VAO.bind();
-    VBO.update(*vertices);
-    if(indices) EBO.update(*indices);
+    if(newBuffers) {
+        VBO.bind(*vertices, true);
+        if (indices) EBO.bind(*indices, true);
+    }
+    else {
+        VBO.update(*vertices);
+        if (indices) EBO.update(*indices);
+    }
 
     VAO.unbind();
     VBO.unbind();
     EBO.unbind();
+
+    *(reinterpret_cast<unsigned long long*>(&drawMode) - 2) = reinterpret_cast<unsigned long long>(vertices);
+    *(reinterpret_cast<unsigned long long*>(&drawMode) - 1) = reinterpret_cast<unsigned long long>(indices);
 
     calculateBoundingSphere();
 }

@@ -31,8 +31,8 @@ private:
     glm::vec3 up = glm::vec3(0, 1.0f, 0);
     glm::mat4 cameraMat = glm::mat4(1);
 
-    const int width;
-    const int height;
+    const unsigned int width;
+    const unsigned int height;
 
     bool orthographic;
     float nearPlane;
@@ -51,9 +51,9 @@ private:
     void calculateCameraFrustum();
 
 public:
-    View(int width, int height, float fov, float nearPlane, float farPlane);
+    View(unsigned int width, unsigned int height, float fov, float nearPlane, float farPlane);
 
-    View(int width, int height, float left, float right, float bottom, float top, float nearPlane, float farPlane);
+    View(unsigned int width, unsigned int height, float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
     View& operator=(const View& camera);
 

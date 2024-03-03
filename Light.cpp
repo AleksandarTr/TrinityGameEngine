@@ -3,16 +3,19 @@
 
 #include <utility>
 
-Light::Light(glm::vec3 color, glm::vec3 direction, LightingType type) : color(color), type(type), View(shadowWidth, shadowHeight, 90.0f, .1f, 100.0f) {
+Light::Light(glm::vec3 color, glm::vec3 direction, LightingType type, unsigned int shadowWidth, unsigned int shadowHeight)
+: color(color), type(type), shadowWidth(shadowWidth), shadowHeight(shadowHeight),
+View(shadowWidth, shadowHeight, 90.0f, .1f, 100.0f) {
     setOrientation(direction);
-    if(type == LightingType::DirectionalLight) setOrthographicBorder(-5.0f, 5.0f, -5.0f, 5.0f);
-    else if(type == LightingType::SpotLight) setFov(10.0f);
+    if(type == DirectionalLight) setOrthographicBorder(-5.0f, 5.0f, -5.0f, 5.0f);
+    else if(type == SpotLight) setFov(10.0f);
 
     glGenFramebuffers(1, &shadowBuffer);
 
     shadowMap = new Texture(TextureInfo());
-    glGenTextures(1, &shadowMap->textureId);
-    glBindTexture(GL_TEXTURE_2D, shadowMap->textureId);
+    GLuint textureId;
+    glGenTextures(1, &textureId);
+    glBindTexture(GL_TEXTURE_2D, textureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowWidth, shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -22,17 +25,18 @@ Light::Light(glm::vec3 color, glm::vec3 direction, LightingType type) : color(co
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
     glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap->textureId, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textureId, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    shadowMap->setId(textureId);
 }
 
-const glm::vec3 &Light::getColor() const {
+glm::vec3 Light::getColor() const {
     return color;
 }
 
-void Light::setColor(const glm::vec3 color) {
+void Light::setColor(glm::vec3 color) {
     Light::color = color;
 }
 
@@ -42,25 +46,40 @@ LightingType Light::getType() const {
 
 void Light::setType(LightingType type) {
     Light::type = type;
-    if(type == LightingType::DirectionalLight) setOrthographicBorder(-5.0f, 5.0f, -5.0f, 5.0f);
-    else if(type == LightingType::SpotLight) setFov(10.0f);
-    else setFov(90.0f);
+    switch(type) {
+        case PointLight:
+            setFov(90.0f);
+            break;
+        case DirectionalLight:
+            setOrthographicBorder(-5.0f, 5.0f, -5.0f, 5.0f);
+            break;
+        case SpotLight:
+            setFov(10.0f);
+            break;
+        default:
+            throw std::invalid_argument("Invalid lighting type given");
+    }
 }
 
 void Light::setType(LightingType type, float nearPlane, float farPlane, float left_fov, float right, float bottom, float top) {
-    setType(type);
+    this->type = type;
+    if(type < PointLight || type > SpotLight) throw std::invalid_argument("Invalid lighting type given");
 
-    if(type == LightingType::DirectionalLight) setOrthographic(left_fov, right, top, bottom, nearPlane, farPlane);
-    else setPerspective(left_fov, nearPlane, farPlane);
+    if(type == DirectionalLight) setOrthographicBorder(left_fov, right, top, bottom);
+    else setFov(left_fov);
+    setNearPlane(nearPlane);
+    setFarPlane(farPlane);
 }
 
 void Light::drawShadowMap() {
+    glViewport(0, 0, shadowWidth, shadowHeight);
+    activate();
     glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
     glClear(GL_DEPTH_BUFFER_BIT);
     glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), "lightMatrix"), 1, false,glm::value_ptr(getCameraMatrix()));
 }
 
-Texture &Light::getShadowMap() {
+Texture &Light::getShadowMap() const {
     return *shadowMap;
 }
 
@@ -74,7 +93,7 @@ void Light::loadLight(int index) {
     glUniform3f(glGetUniformLocation(Shader::getActiveShader(), fieldName), lightSource.x, lightSource.y,lightSource.z);
 
     sprintf(fieldName, "lightingType[%d]", index);
-    glUniform1i(glGetUniformLocation(Shader::getActiveShader(), fieldName),static_cast<GLint>(type));
+    glUniform1i(glGetUniformLocation(Shader::getActiveShader(), fieldName),type);
 
     sprintf(fieldName, "lightDir[%d]", index);
     glUniform3f(glGetUniformLocation(Shader::getActiveShader(), fieldName), lightDir.x, lightDir.y, lightDir.z);
@@ -86,17 +105,13 @@ void Light::loadLight(int index) {
     glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), fieldName), 1, false, glm::value_ptr(getCameraMatrix()));
 
     sprintf(fieldName, "shadowMap[%d]", index);
-    glUniform1i(glGetUniformLocation(Shader::getActiveShader(), fieldName),static_cast<GLint>(shadowMap->getInfo().type));
+    glUniform1i(glGetUniformLocation(Shader::getActiveShader(), fieldName),shadowMap->getInfo().type);
 }
 
-void Light::setPerspective(float fov, float nearPlane, float farPlane) {
-    setFov(fov);
-    setNearPlane(nearPlane);
-    setFarPlane(farPlane);
+unsigned int Light::getShadowWidth() const {
+    return shadowWidth;
 }
 
-void Light::setOrthographic(float left, float right, float top, float bottom, float nearPlane, float farPlane) {
-    setOrthographicBorder(left, right, bottom, top);
-    setNearPlane(nearPlane);
-    setFarPlane(farPlane);
+unsigned int Light::getShadowHeight() const {
+    return shadowHeight;
 }
