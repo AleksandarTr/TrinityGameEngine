@@ -34,11 +34,12 @@ void Mesh::draw(bool loadTextures) {
 
     glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), "model"), 1, GL_FALSE, glm::value_ptr(modelTransformation));
     glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), "rotation"), 1, GL_FALSE, glm::value_ptr(rotationMatrix));
-    initializeOtherFields();
-    if(loadTextures) drawTextures();
-
-    if(doubleSided) glDisable(GL_CULL_FACE);
-    else glEnable(GL_CULL_FACE);
+    if(loadTextures) {
+        initializeOtherFields();
+        drawTextures();
+        if(doubleSided) glDisable(GL_CULL_FACE);
+        else glEnable(GL_CULL_FACE);
+    }
 
     glDrawElements(drawMode, indices.size(), GL_UNSIGNED_INT, 0);
     VAO.unbind();

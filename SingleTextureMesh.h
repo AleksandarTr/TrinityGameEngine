@@ -15,11 +15,13 @@ private:
     Texture* specularTexture = nullptr;
     Texture* normalTexture = nullptr;
     Texture* occlusionTexture = nullptr;
+    Texture* emissionTexture = nullptr;
 
     float metallic = 0;
     float roughness = 0;
     float occlusionStrength = 1.0f;
     float normalScale = 1.0f;
+    glm::vec3 emissionValues = glm::vec3(0);
 
     float alphaCutoff = 0;
     AlphaMode alphaMode = OpaqueTexture;
@@ -28,7 +30,7 @@ private:
 public:
     SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, GLenum drawMode,
     TextureInfo diffuseTexture = TextureInfo(), TextureInfo specularTexture = TextureInfo(), TextureInfo normalTexture = TextureInfo(),
-    TextureInfo occlusionTexture = TextureInfo(), std::string name = "");
+    TextureInfo occlusionTexture = TextureInfo(), TextureInfo emissionTexture = TextureInfo(), std::string name = "");
 
     SingleTextureMesh(const SingleTextureMesh&);
 
@@ -41,6 +43,7 @@ public:
     void setNormalScale(float value);
     void setAlphaMode(AlphaMode value);
     void setAlphaCutoff(float value);
+    void setEmissionValues(glm::vec3 values);
 
     AlphaMode getAlphaMode() const;
     Texture* getTexture(TextureType type);

@@ -14,6 +14,8 @@ uniform sampler2D normalTexture;
 uniform bool applyNormalTexture;
 uniform sampler2D occlusionTexture;
 uniform bool applyOcclusionTexture;
+uniform sampler2D emissionTexture;
+uniform bool applyEmissionTexture;
 
 uniform bool applyColor;
 uniform float metallic;
@@ -21,6 +23,7 @@ uniform float roughness;
 uniform float occlusionStrength;
 uniform float normalScale;
 uniform float alphaCutoff;
+uniform vec3 emissionValues;
 
 #define maxLightCount 16
 uniform vec4 lightColor[maxLightCount];
@@ -248,6 +251,9 @@ void main() {
     resLight *= specularVector.r;
     resLight = resLight / (resLight + vec3(1.0));
     resLight = pow(resLight, vec3(1.0/2.2));
+
+    vec3 emissionVector = applyEmissionTexture ? texture(emissionTexture, vec2(texCoord)).rgb : emissionValues;
+    resLight += emissionVector;
 
     FragColor = vec4(resLight, diffuseTextureVector.a);
     if(applyColor && useTexture) FragColor *= vec4(color, 1);

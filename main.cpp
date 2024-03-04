@@ -46,8 +46,6 @@ int main() {
 
     object.setAngularVelocity(glm::vec3(0, 3, 0));
     window.setShadowSampleRate(30);
-
-    object.setScale(glm::vec3(1, 10, 1));
     scene.scale(glm::vec3(10));
 
     double timer = 0;
@@ -82,8 +80,8 @@ int main() {
         if(blink) blinker += timeDelta;
         if(blinker > 0.1) {
             blinker = 0;
-            //if(isOn) light2.setColor(glm::vec3(0));
-            //else light2.setColor(glm::vec3(1, 0, 0));
+            if(isOn) light2.setColor(glm::vec3(0));
+            else light2.setColor(glm::vec3(1, 0, 0));
             isOn = !isOn;
             if(++blinkCnt > 8) {
                 blinkCnt = 0;

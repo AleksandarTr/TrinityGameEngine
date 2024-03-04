@@ -453,6 +453,7 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         TextureInfo specularTexture;
         TextureInfo normalTexture;
         TextureInfo occlusionTexture;
+        TextureInfo emissionTexture;
 
         if(primitive.material != -1) {
             int diffuseTextureIndex = materials[primitive.material].baseTextureIndex;
@@ -466,10 +467,13 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
 
             int occlusionTextureIndex = materials[primitive.material].occlusionTextureIndex;
             if (occlusionTextureIndex != -1) occlusionTexture = loadTexture(occlusionTextureIndex);
+
+            int emissionTextureIndex = materials[primitive.material].emissiveTextureIndex;
+            if (emissionTextureIndex != -1) emissionTexture = loadTexture(emissionTextureIndex);
         }
 
 
-        ::SingleTextureMesh& mesh = *new SingleTextureMesh(vertices, indices, drawMode, diffuseTexture, specularTexture, normalTexture, occlusionTexture, meshes[index].name);
+        ::SingleTextureMesh& mesh = *new SingleTextureMesh(vertices, indices, drawMode, diffuseTexture, specularTexture, normalTexture, occlusionTexture, emissionTexture, meshes[index].name);
         mesh.bind();
         if(primitive.material != -1) {
             mesh.setMetallic(materials[primitive.material].metallic);
@@ -478,6 +482,7 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
             mesh.setDoubleSided(materials[primitive.material].doubleSided);
             mesh.setOcclusionStrength(materials[primitive.material].occlusionStrength);
             mesh.setNormalScale(materials[primitive.material].normalScale);
+            mesh.setEmissionValues(materials[primitive.material].emissiveFactor);
 
             if(materials[primitive.material].alphaMode == "OPAQUE") mesh.setAlphaMode(SingleTextureMesh::OpaqueTexture);
             else if(materials[primitive.material].alphaMode == "MASK") mesh.setAlphaMode(SingleTextureMesh::MaskedTexture);

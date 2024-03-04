@@ -4,7 +4,8 @@
 #include <iostream>
 
 SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, GLenum drawMode,
-                                     TextureInfo diffuseTexture, TextureInfo specularTexture, TextureInfo normalTexture, TextureInfo occlusionTexture, std::string name)
+                                     TextureInfo diffuseTexture, TextureInfo specularTexture, TextureInfo normalTexture,
+                                     TextureInfo occlusionTexture, TextureInfo emissionTexture, std::string name)
 : Mesh(vertices, indices, drawMode), name(std::move(name)) {
     if(!diffuseTexture.location.empty()) {
         if (diffuseTexture.type == NoTextureType) diffuseTexture.type = DiffuseTexture;
@@ -28,6 +29,12 @@ SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<
         if (occlusionTexture.type == NoTextureType) occlusionTexture.type = OcclusionTexture;
         this->occlusionTexture = new Texture(occlusionTexture);
         TextureHandler::getTextureHandler().loadTexture(occlusionTexture, this->occlusionTexture);
+    }
+
+    if(!emissionTexture.location.empty()) {
+        if (emissionTexture.type == NoTextureType) emissionTexture.type = EmissiveTexture;
+        this->emissionTexture = new Texture(emissionTexture);
+        TextureHandler::getTextureHandler().loadTexture(emissionTexture, this->emissionTexture);
     }
 }
 
@@ -64,6 +71,16 @@ void SingleTextureMesh::drawTextures() {
         glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyOcclusionTexture"), true);
     }
     else glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyOcclusionTexture"), false);
+
+    if(emissionTexture && emissionTexture->getId()) {
+        TextureHandler::bindTexture(*emissionTexture);
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "emissionTexture"), static_cast<int>(emissionTexture->getInfo().type));
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyEmissionTexture"), true);
+    }
+    else {
+        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyEmissionTexture"), false);
+        glUniform3f(glGetUniformLocation(Shader::getActiveShader(), "emissionValues"), emissionValues.r, emissionValues.g, emissionValues.b);
+    }
 
     glUniform1f(glGetUniformLocation(Shader::getActiveShader(), "occlusionStrength"), occlusionStrength);
     glUniform1f(glGetUniformLocation(Shader::getActiveShader(), "normalScale"), normalScale);
@@ -147,4 +164,8 @@ SingleTextureMesh::AlphaMode SingleTextureMesh::getAlphaMode() const {
 void SingleTextureMesh::initializeOtherFields() {
     if(alphaMode == BlendedTexture) glEnable(GL_BLEND);
     else glDisable(GL_BLEND);
+}
+
+void SingleTextureMesh::setEmissionValues(glm::vec3 values) {
+    emissionValues = values;
 }

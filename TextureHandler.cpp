@@ -49,7 +49,12 @@ void TextureHandler::loadInMemory() {
 
         int imgW, imgH, colChNum;
         stbi_set_flip_vertically_on_load(true);
-        unsigned  char* bytes = stbi_load(job.info.location.c_str(), &imgW, &imgH, &colChNum, 0);
+        int desiredChannels;
+        if(job.info.format == "image/jpeg") desiredChannels = STBI_rgb;
+        else if(job.info.format == "image/png") desiredChannels = STBI_rgb_alpha;
+        else desiredChannels = 0;
+
+        unsigned  char* bytes = stbi_load(job.info.location.c_str(), &imgW, &imgH, &colChNum, desiredChannels);
 
         job.data = bytes;
         job.info.width = imgW;
