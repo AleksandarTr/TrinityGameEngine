@@ -32,7 +32,7 @@ private:
     int maxHeight = 0, maxWidth = 0;
 
     TextureInfo info = TextureInfo();
-    Mesh *mesh = nullptr;
+    SingleTextureMesh *mesh = nullptr;
     bool fixed;
     bool changed = false;
 
@@ -52,6 +52,8 @@ public:
     void readCharInfo(std::string file);
 
     Mesh& getMesh();
+
+    void setDoubleSided(bool value);
 
     ~Text();
 };

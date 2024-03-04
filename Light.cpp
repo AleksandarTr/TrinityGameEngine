@@ -55,6 +55,8 @@ void Light::setType(LightingType type) {
             break;
         case SpotLight:
             setFov(10.0f);
+            outerCone = glm::cos(glm::radians(10.0f));
+            innerCone = glm::cos(glm::radians(5.0f));
             break;
         default:
             throw std::invalid_argument("Invalid lighting type given");
@@ -66,7 +68,13 @@ void Light::setType(LightingType type, float nearPlane, float farPlane, float le
     if(type < PointLight || type > SpotLight) throw std::invalid_argument("Invalid lighting type given");
 
     if(type == DirectionalLight) setOrthographicBorder(left_fov, right, top, bottom);
-    else setFov(left_fov);
+    else {
+        setFov(left_fov);
+        if(type == SpotLight) {
+            outerCone = glm::cos(glm::radians(left_fov));
+            innerCone = glm::cos(glm::radians(std::min(left_fov - 5, 0.0f)));
+        }
+    }
     setNearPlane(nearPlane);
     setFarPlane(farPlane);
 }
@@ -106,6 +114,18 @@ void Light::loadLight(int index) {
 
     sprintf(fieldName, "shadowMap[%d]", index);
     glUniform1i(glGetUniformLocation(Shader::getActiveShader(), fieldName),shadowMap->getInfo().type);
+
+    sprintf(fieldName, "lightDropoffA[%d]", index);
+    glUniform1f(glGetUniformLocation(Shader::getActiveShader(), fieldName),a);
+
+    sprintf(fieldName, "lightDropoffB[%d]", index);
+    glUniform1f(glGetUniformLocation(Shader::getActiveShader(), fieldName),b);
+
+    sprintf(fieldName, "spotlightInnerCone[%d]", index);
+    glUniform1f(glGetUniformLocation(Shader::getActiveShader(), fieldName),innerCone);
+
+    sprintf(fieldName, "spotlightOuterCone[%d]", index);
+    glUniform1f(glGetUniformLocation(Shader::getActiveShader(), fieldName),outerCone);
 }
 
 unsigned int Light::getShadowWidth() const {
@@ -114,4 +134,20 @@ unsigned int Light::getShadowWidth() const {
 
 unsigned int Light::getShadowHeight() const {
     return shadowHeight;
+}
+
+void Light::setAttenuationParams(float a, float b) {
+    this->a = a;
+    this->b = b;
+}
+
+void Light::setSpotlightParams(float innerCone, float outerCone) {
+    this->innerCone = glm::cos(glm::radians(innerCone));
+    this->outerCone = glm::cos(glm::radians(outerCone));
+}
+
+void Light::setFov(float value) {
+    View::setFov(value);
+    innerCone = glm::cos(std::max(glm::radians(value - 5), 0.0f));
+    outerCone = glm::cos(glm::radians(value));
 }

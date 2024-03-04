@@ -5,6 +5,11 @@
 #include "Mesh.h"
 
 class SingleTextureMesh : public Mesh {
+public:
+    enum AlphaMode {
+        OpaqueTexture, MaskedTexture, BlendedTexture
+    };
+
 private:
     Texture* diffuseTexture = nullptr;
     Texture* specularTexture = nullptr;
@@ -13,6 +18,11 @@ private:
 
     float metallic = 0;
     float roughness = 0;
+    float occlusionStrength = 1.0f;
+    float normalScale = 1.0f;
+
+    float alphaCutoff = 0;
+    AlphaMode alphaMode = OpaqueTexture;
     std::string name;
 
 public:
@@ -23,14 +33,19 @@ public:
     SingleTextureMesh(const SingleTextureMesh&);
 
     void drawTextures() override;
-
-    ~SingleTextureMesh();
+    void initializeOtherFields() override;
 
     void setMetallic(float value);
-
     void setRoughness(float value);
+    void setOcclusionStrength(float value);
+    void setNormalScale(float value);
+    void setAlphaMode(AlphaMode value);
+    void setAlphaCutoff(float value);
 
+    AlphaMode getAlphaMode() const;
     Texture* getTexture(TextureType type);
+
+    ~SingleTextureMesh();
 };
 
 #endif

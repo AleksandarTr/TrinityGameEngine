@@ -64,6 +64,10 @@ void SingleTextureMesh::drawTextures() {
         glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyOcclusionTexture"), true);
     }
     else glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyOcclusionTexture"), false);
+
+    glUniform1f(glGetUniformLocation(Shader::getActiveShader(), "occlusionStrength"), occlusionStrength);
+    glUniform1f(glGetUniformLocation(Shader::getActiveShader(), "normalScale"), normalScale);
+    glUniform1f(glGetUniformLocation(Shader::getActiveShader(), "alphaCutoff"), alphaCutoff);
 }
 
 SingleTextureMesh::~SingleTextureMesh() {
@@ -114,4 +118,33 @@ Texture *SingleTextureMesh::getTexture(TextureType type) {
         default:
             throw std::out_of_range("There is no texture with given type");
     }
+}
+
+void SingleTextureMesh::setOcclusionStrength(float value) {
+    if(value < 0 || value > 1) throw std::invalid_argument("Occlusion strength must be between 0 and 1");
+    occlusionStrength = value;
+}
+
+void SingleTextureMesh::setNormalScale(float value) {
+    normalScale = value;
+}
+
+void SingleTextureMesh::setAlphaCutoff(float value) {
+    if(alphaMode != MaskedTexture) return;
+    alphaCutoff = value;
+}
+
+void SingleTextureMesh::setAlphaMode(SingleTextureMesh::AlphaMode value) {
+    if(value < OpaqueTexture || value > BlendedTexture) throw std::invalid_argument("Invalid alpha mode given");
+    alphaMode = value;
+    if(alphaMode != MaskedTexture) alphaCutoff = 0;
+}
+
+SingleTextureMesh::AlphaMode SingleTextureMesh::getAlphaMode() const {
+    return alphaMode;
+}
+
+void SingleTextureMesh::initializeOtherFields() {
+    if(alphaMode == BlendedTexture) glEnable(GL_BLEND);
+    else glDisable(GL_BLEND);
 }

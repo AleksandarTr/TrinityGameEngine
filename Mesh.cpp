@@ -37,6 +37,9 @@ void Mesh::draw(bool loadTextures) {
     initializeOtherFields();
     if(loadTextures) drawTextures();
 
+    if(doubleSided) glDisable(GL_CULL_FACE);
+    else glEnable(GL_CULL_FACE);
+
     glDrawElements(drawMode, indices.size(), GL_UNSIGNED_INT, 0);
     VAO.unbind();
 }
@@ -70,7 +73,7 @@ void Mesh::updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indice
     EBO.unbind();
 
     *(reinterpret_cast<unsigned long long*>(&drawMode) - 2) = reinterpret_cast<unsigned long long>(vertices);
-    *(reinterpret_cast<unsigned long long*>(&drawMode) - 1) = reinterpret_cast<unsigned long long>(indices);
+    if(indices) *(reinterpret_cast<unsigned long long*>(&drawMode) - 1) = reinterpret_cast<unsigned long long>(indices);
 
     calculateBoundingSphere();
 }
@@ -108,4 +111,8 @@ bool Mesh::isVisible() {
         cameraFrustum++;
     }
     return true;
+}
+
+void Mesh::setDoubleSided(bool value) {
+    doubleSided = true;
 }

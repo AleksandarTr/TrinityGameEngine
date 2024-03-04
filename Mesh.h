@@ -19,6 +19,7 @@ protected:
     std::vector<Vertex> &vertices;
     std::vector<GLuint> &indices;
     GLenum drawMode = GL_TRIANGLES;
+    bool doubleSided = false;
 
     VertexArrayObject VAO = VertexArrayObject();
     VertexBufferObject VBO = VertexBufferObject();
@@ -50,6 +51,8 @@ public:
     void setScale(glm::vec3 scale) override;
 
     bool isVisible();
+
+    void setDoubleSided(bool value);
 };
 
 #endif

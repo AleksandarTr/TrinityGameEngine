@@ -34,10 +34,7 @@ void Text::draw(bool loadTextures) {
         TextureHandler::bindTexture(*fontTexture);
         glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "font"), static_cast<int>(fontTexture->getInfo().type));
 
-        glDisable(GL_DEPTH_TEST);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        glEnable(GL_DEPTH_TEST);
-
         VAO.unbind();
     }
     else {
@@ -124,6 +121,8 @@ void Text::setLength(int length) {
     else {
         delete mesh;
         mesh = new SingleTextureMesh(vertices, indices, GL_TRIANGLES, info);
+        mesh->setAlphaMode(SingleTextureMesh::MaskedTexture);
+        mesh->setAlphaCutoff(0.1f);
         mesh->bind();
     }
 }
@@ -219,6 +218,10 @@ void Text::generateVertices(int length) {
 
 Text::~Text() {
     delete mesh;
+}
+
+void Text::setDoubleSided(bool value) {
+    if(mesh) mesh->setDoubleSided(value);
 }
 
 

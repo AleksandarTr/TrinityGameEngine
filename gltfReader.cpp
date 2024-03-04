@@ -474,7 +474,17 @@ std::vector<::Mesh *> &gltfReader::getMeshes(int index) {
         if(primitive.material != -1) {
             mesh.setMetallic(materials[primitive.material].metallic);
             mesh.setRoughness(materials[primitive.material].roughness);
+            mesh.setAlphaCutoff(materials[primitive.material].alphaCutoff);
+            mesh.setDoubleSided(materials[primitive.material].doubleSided);
+            mesh.setOcclusionStrength(materials[primitive.material].occlusionStrength);
+            mesh.setNormalScale(materials[primitive.material].normalScale);
+
+            if(materials[primitive.material].alphaMode == "OPAQUE") mesh.setAlphaMode(SingleTextureMesh::OpaqueTexture);
+            else if(materials[primitive.material].alphaMode == "MASK") mesh.setAlphaMode(SingleTextureMesh::MaskedTexture);
+            else if(materials[primitive.material].alphaMode == "BLEND") mesh.setAlphaMode(SingleTextureMesh::BlendedTexture);
+            else throw std::invalid_argument("Invalid mesh alpha mode provided");
         }
+
         result.push_back(&mesh);
     }
 

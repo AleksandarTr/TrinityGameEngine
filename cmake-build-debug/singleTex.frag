@@ -18,13 +18,19 @@ uniform bool applyOcclusionTexture;
 uniform bool applyColor;
 uniform float metallic;
 uniform float roughness;
-float ambientOcclusion = 0.1f;
+uniform float occlusionStrength;
+uniform float normalScale;
+uniform float alphaCutoff;
 
 #define maxLightCount 16
 uniform vec4 lightColor[maxLightCount];
 uniform vec3 lightPos[maxLightCount];
 uniform vec3 lightDir[maxLightCount];
 uniform int lightingType[maxLightCount];
+uniform float lightDropoffA[maxLightCount];
+uniform float lightDropoffB[maxLightCount];
+uniform float spotlightInnerCone[maxLightCount];
+uniform float spotlightOuterCone[maxLightCount];
 uniform int lightNum;
 in vec4 lightFragPos[maxLightCount];
 uniform sampler2D shadowMap[maxLightCount];
@@ -37,11 +43,10 @@ vec3 specularVector;
 const float PI = 3.14159265359f;
 vec3 lighting = vec3(0, 0, 0);
 int lightInd = 0;
-float maxSpec = 1;
 
 float calcDropoff(vec3 lightVec) {
-    float a = 0.01f;
-    float b = 0.005f;
+    float a = lightDropoffA[lightInd];
+    float b = lightDropoffB[lightInd];
     float dist = length(lightVec);
     return 1.0f / (a * dist * dist + b * dist + 1.0f);
 }
@@ -126,8 +131,8 @@ void directionalLight() {
 }
 
 void spotLight() {
-    float outerCone = 0.99f;
-    float innerCone = 0.999f;
+    float outerCone = spotlightOuterCone[lightInd];
+    float innerCone = spotlightInnerCone[lightInd];
     vec3 lightVec = normalize(lightPos[lightInd] - pos);
 
     float angle = dot(normalize(lightDir[lightInd]), - lightVec);
@@ -209,11 +214,12 @@ float calculateShadow(vec4 position) {
 
 void main() {
     vec4 diffuseTextureVector = texture(diffuseTexture, vec2(texCoord));
-    normalCalc = applyNormalTexture ? TBN * (texture(normalTexture, vec2(texCoord)).rgb * 2.0 - 1.0) : normal;
+    normalCalc = applyNormalTexture ? TBN * ((texture(normalTexture, vec2(texCoord)).rgb * 2.0 - 1.0) * vec3(normalScale, normalScale, 1.0f)) : normal;
     diffuseVector = useTexture ? pow(diffuseTextureVector.rgb, vec3(2.2)) : vec3(color);
+    if(useTexture && diffuseTextureVector.a < alphaCutoff) discard;
 
     specularVector = applySpecularTexture ? texture(specularTexture, vec2(texCoord)).rgb : vec3(1.0f, metallic, roughness);
-    specularVector.r = applyOcclusionTexture ? texture(occlusionTexture, vec2(texCoord)).r * 0.5 : ambientOcclusion;
+    specularVector.r = applyOcclusionTexture ? 1.0f + occlusionStrength * (texture(occlusionTexture, vec2(texCoord)).r - 1.0f) : 1.0f;
 
     vec3 resLight = vec3(0, 0, 0);
     for(int i = 0; i < lightNum; i++) {
@@ -239,8 +245,7 @@ void main() {
     resLight.y = min(resLight.y, 1);
     resLight.z = min(resLight.z, 1);
 
-    vec3 ambient = vec3(specularVector.r) * diffuseVector * vec3(0.03);
-    resLight = resLight + ambient;
+    resLight *= specularVector.r;
     resLight = resLight / (resLight + vec3(1.0));
     resLight = pow(resLight, vec3(1.0/2.2));
 

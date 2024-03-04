@@ -155,10 +155,10 @@ void Window::drawFrame() {
     static float shadowCnt = 0;
     shadowCnt += timeDelta;
 
-    glEnable(GL_CULL_FACE);
     if(shadowCnt > shadowSampleCount) {
         shadowCnt = 0;
         shadowShader->activate();
+        glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
 
         for (int i = 0; i < lightCount; i++) {
@@ -171,12 +171,10 @@ void Window::drawFrame() {
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
     glCullFace(GL_BACK);
 
     glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     camera.update(timeDelta);
     camera.controls(window);
     camera.activate();
@@ -187,7 +185,11 @@ void Window::drawFrame() {
     glUniformMatrix4fv(glGetUniformLocation(drawShader->getProgramID(), "camMatrix"), 1, GL_FALSE,glm::value_ptr(camera.getCameraMatrix()));
     render(true, true);
     textShader->activate();
+
+    glDisable(GL_DEPTH_TEST);
     for(Text *text : texts) text->draw(false);
+    glEnable(GL_DEPTH_TEST);
+
 
     glfwSwapBuffers(window);
     glfwPollEvents();

@@ -7,6 +7,8 @@ class Light : public View {
 private:
     glm::vec3 color;
     LightingType type;
+    float a = 1, b = 0;
+    float innerCone = .999, outerCone = .99;
 
     GLuint shadowBuffer;
     Texture *shadowMap;
@@ -30,6 +32,11 @@ public:
 
     unsigned int getShadowWidth() const;
     unsigned int getShadowHeight() const;
+
+    void setAttenuationParams(float a, float b); // Attenuation is calculated as lightLevel / (a * distance ^ 2 + b * distance + 1)
+    void setSpotlightParams(float innerCone, float outerCone);
+
+    void setFov(float value);
 };
 
 #endif

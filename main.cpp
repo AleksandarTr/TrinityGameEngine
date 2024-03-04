@@ -42,16 +42,13 @@ int main() {
 
     Light& spotLight = window.getLight(window.addLight(glm::vec3(0.8), glm::vec3(-1), SpotLight));
     spotLight.move(glm::vec3(5));
-    spotLight.setFov(15);
+    spotLight.setFov(10);
 
     object.setAngularVelocity(glm::vec3(0, 3, 0));
     window.setShadowSampleRate(30);
 
     object.setScale(glm::vec3(1, 10, 1));
     scene.scale(glm::vec3(10));
-
-    //View temp(1280, 720, glm::vec3(0, 1, 0));
-    //temp.activateCamera();
 
     double timer = 0;
     double blinker = 0;
@@ -63,11 +60,11 @@ int main() {
     Text& text = window.getText(textIndex, true);
     text.generateMessage("   ", 5, 5, glm::vec3(0, 1, 1));
 
-    //int text3DIndex = window.addText("Textures/arial", false);
-    //Text& text3D = window.getText(text3DIndex, false);
-    //text3D.generateMessage("Hello world!", 5, 5, glm::vec3(1, 0, 0));
-    //text3D.getMesh().scale(glm::vec3(5));
-    //text3D.getMesh().setAngularVelocity(glm::vec3(0, 5, 0));
+    int text3DIndex = window.addText("Textures/arial", false);
+    Text& text3D = window.getText(text3DIndex, false);
+    text3D.generateMessage("Hello world!", 5, 5, glm::vec3(1, 0, 0));
+    text3D.getMesh().scale(glm::vec3(5));
+    text3D.getMesh().setAngularVelocity(glm::vec3(0, 5, 0));
 
     float fpsTimer = 0;
     int fps = 0;
