@@ -10,7 +10,7 @@ Text::Text(std::string font, int windowWidth, int windowHeight, bool fixed)
     info.wrapS = GL_CLAMP_TO_EDGE;
     info.type = TextTexture;
     fontTexture = new Texture(info);
-    TextureHandler::getTextureHandler().loadTexture(info,  fontTexture);
+    TextureHandler::loadTexture(info,  fontTexture);
     readCharInfo(font);
 }
 
@@ -93,11 +93,16 @@ void Text::readCharInfo(std::string file) {
         charInfo info;
         int ascii;
         reader >> ascii >> info.x >> info.y >> info.width >> info.height >> info.xOffset >> info.yOffset >> info.xAdvance;
-        chars.push_back(info);
+        chars.insert(std::pair(ascii, info));
 
         maxWidth = std::max(maxWidth, info.width);
         maxHeight = std::max(maxHeight, info.height);
     }
+
+    for(auto &ch : chars) {
+        ch.second.yOffset = ch.second.height + ch.second.yOffset - maxHeight;
+    }
+
     reader.close();
 }
 
@@ -131,9 +136,9 @@ void Text::setMessage(std::string message, glm::vec3 color, int left, int top, i
     if(vertices.size() / 4 < message.length()) throw std::invalid_argument("Message cannot fit in this text");
     float x, y;
     float messageWidth = 0;
-    for(char ch : message) messageWidth += chars[ch - firstChar].xAdvance;
-    messageWidth -= chars[message[message.length() - 1] - firstChar].xAdvance;
-    messageWidth += chars[message[message.length() - 1] - firstChar].width;
+    for(char ch : message) messageWidth += chars[ch].xAdvance;
+    messageWidth -= chars[message[message.length() - 1]].xAdvance;
+    messageWidth += chars[message[message.length() - 1]].width;
     float scale = 1.0f * charHeight / maxHeight;
     messageWidth *= scale;
 
@@ -147,17 +152,17 @@ void Text::setMessage(std::string message, glm::vec3 color, int left, int top, i
     }
 
     for(int i = 0; i < message.size(); i++) {
-        charInfo character = chars[message[i] - firstChar];
+        charInfo &ch = chars[message[i]];
         Vertex &v1 = vertices[4 * i];
         Vertex &v2 = vertices[4 * i + 1];
         Vertex &v3 = vertices[4 * i + 2];
         Vertex &v4 = vertices[4 * i + 3];
 
-        v1.position = glm::vec3(x, y, 0);
-        v2.position = glm::vec3(x + character.width * scale / windowWidth, y, 0);
-        v3.position = glm::vec3(x + character.width * scale / windowWidth, y + character.height * scale / windowHeight, 0);
-        v4.position = glm::vec3(x, y + character.height * scale / windowHeight, 0);
-        x += character.xAdvance * scale / windowWidth;
+        v1.position = glm::vec3(x + ch.xOffset * scale / windowWidth, y - ch.yOffset * scale / windowHeight, 0);
+        v2.position = glm::vec3(x + (ch.width + ch.xOffset) * scale / windowWidth, y - ch.yOffset * scale / windowHeight, 0);
+        v3.position = glm::vec3(x + (ch.width + ch.xOffset) * scale / windowWidth, y + (ch.height - ch.yOffset) * scale / windowHeight, 0);
+        v4.position = glm::vec3(x + ch.xOffset * scale / windowWidth, y + (ch.height - ch.yOffset) * scale / windowHeight, 0);
+        x += ch.xAdvance * scale / windowWidth;
 
         v1.color = color;
         v2.color = color;
@@ -165,10 +170,10 @@ void Text::setMessage(std::string message, glm::vec3 color, int left, int top, i
         v4.color = color;
 
         //TODO: Use unused vectors of Vertex to adjust texture position in fragment shader
-        v1.texPosition = glm::vec3(character.x / fontWidth, 1-(character.y + character.height) / fontHeight, 0);
-        v2.texPosition = glm::vec3((character.x + character.width) / fontWidth, 1-(character.y + character.height) / fontHeight, 0);
-        v3.texPosition = glm::vec3((character.x + character.width) / fontWidth, 1-character.y / fontHeight, 0);
-        v4.texPosition = glm::vec3(character.x / fontWidth, 1-character.y / fontHeight, 0);
+        v1.texPosition = glm::vec3(ch.x / fontWidth, 1-(ch.y + ch.height) / fontHeight, 0);
+        v2.texPosition = glm::vec3((ch.x + ch.width) / fontWidth, 1-(ch.y + ch.height) / fontHeight, 0);
+        v3.texPosition = glm::vec3((ch.x + ch.width) / fontWidth, 1-ch.y / fontHeight, 0);
+        v4.texPosition = glm::vec3(ch.x / fontWidth, 1-ch.y / fontHeight, 0);
     }
 
     for(int i = message.size(); i < vertices.size() / 4; i++) {
@@ -223,9 +228,3 @@ Text::~Text() {
 void Text::setDoubleSided(bool value) {
     if(mesh) mesh->setDoubleSided(value);
 }
-
-
-
-
-
-

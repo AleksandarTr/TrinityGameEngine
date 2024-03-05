@@ -39,7 +39,9 @@ private:
     void render(bool loadTextures, bool drawText);
     void updateModels(float timeDelta);
 
-    Light* lights[16];
+    static constexpr int maxLightCount = 16;
+    Light* lights[maxLightCount];
+    unsigned long long lightEnabled = -1;
     int lightCount = 0;
     bool lightsChanged = false;
     void loadLights();
@@ -82,6 +84,10 @@ public:
     void drawFrame();
 
     void setShadowSampleRate(int samplesPerSecond);
+
+    void enableLight(int index);
+    void disableLight(int index);
+    bool isLightActive(int index) const;
 
     ~Window();
 };

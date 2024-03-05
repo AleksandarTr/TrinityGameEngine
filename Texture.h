@@ -8,8 +8,6 @@
 #include "Structs.h"
 
 class Texture {
-    friend class TextureHandler;
-
 private:
     GLuint textureId = 0;
     TextureInfo info;

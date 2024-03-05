@@ -74,12 +74,21 @@ void View::calculateCameraFrustum() {
     glm::mat4 &m = cameraMat;
     frustum[FrustumSide::FrustumFront] = {.normal = glm::normalize(orientation)};
     frustum[FrustumSide::FrustumFront].d = -glm::dot(frustum[FrustumSide::FrustumFront].normal, getPosition() + nearPlane * orientation);
+
     frustum[FrustumSide::FrustumBack] = {.normal = -frustum[FrustumSide::FrustumFront].normal};
     frustum[FrustumSide::FrustumBack].d = -glm::dot(frustum[FrustumSide::FrustumBack].normal, getPosition() + farPlane * orientation);
-    frustum[FrustumSide::FrustumLeft] = {.normal = glm::normalize(glm::vec3(m[0][3] + m[0][0], m[1][3] + m[1][0], m[2][3] + m[2][0])), .d = m[3][3] + m[3][0]};
-    frustum[FrustumSide::FrustumRight] = {.normal = glm::normalize(glm::vec3(m[0][3] - m[0][0], m[1][3] - m[1][0], m[2][3] - m[2][0])), .d = m[3][3] - m[3][0]};
-    frustum[FrustumSide::FrustumBottom] = {.normal = glm::normalize(glm::vec3(m[0][3] + m[0][1], m[1][3] + m[1][1], m[2][3] + m[2][1])), .d = m[3][3] + m[3][1]};
-    frustum[FrustumSide::FrustumTop] = {.normal = glm::normalize(glm::vec3(m[0][3] - m[0][1], m[1][3] - m[1][1], m[2][3] - m[2][1])), .d = m[3][3] - m[3][1]};
+
+    frustum[FrustumSide::FrustumLeft] = {.normal = glm::normalize(glm::vec3(m[0][3] + m[0][0], m[1][3] + m[1][0], m[2][3] + m[2][0]))};
+    frustum[FrustumSide::FrustumLeft].d = -glm::dot(frustum[FrustumSide::FrustumLeft].normal, getPosition());
+
+    frustum[FrustumSide::FrustumRight] = {.normal = glm::normalize(glm::vec3(m[0][3] - m[0][0], m[1][3] - m[1][0], m[2][3] - m[2][0]))};
+    frustum[FrustumSide::FrustumRight].d = -glm::dot(frustum[FrustumSide::FrustumRight].normal, getPosition());
+
+    frustum[FrustumSide::FrustumBottom] = {.normal = glm::normalize(glm::vec3(m[0][3] + m[0][1], m[1][3] + m[1][1], m[2][3] + m[2][1]))};
+    frustum[FrustumSide::FrustumBottom].d = -glm::dot(frustum[FrustumSide::FrustumBottom].normal, getPosition());
+
+    frustum[FrustumSide::FrustumTop] = {.normal = glm::normalize(glm::vec3(m[0][3] - m[0][1], m[1][3] - m[1][1], m[2][3] - m[2][1]))};
+    frustum[FrustumSide::FrustumTop].d = -glm::dot(frustum[FrustumSide::FrustumTop].normal, getPosition());
 }
 
 const View::Plane *View::getViewFrustum() const {

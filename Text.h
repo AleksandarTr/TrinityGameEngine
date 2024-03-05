@@ -1,6 +1,7 @@
 #ifndef TRINITYENGINE_TEXT_H
 #define TRINITYENGINE_TEXT_H
 
+#include <unordered_map>
 #include "VertexArrayObject.h"
 #include "VertexBufferObject.h"
 #include "ElementBufferObject.h"
@@ -24,8 +25,7 @@ private:
     Texture *fontTexture = nullptr;
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
-    std::vector<charInfo> chars;
-    int firstChar = 32;
+    std::unordered_map<int, charInfo> chars;
 
     float windowWidth, windowHeight;
     float fontWidth, fontHeight;
@@ -38,18 +38,16 @@ private:
 
     void generateVertices(int length);
 
+    void readCharInfo(std::string file);
+
 public:
     Text(std::string font, int windowWidth, int windowHeight, bool fixed = true);
 
     void setLength(int length);
-
     void setMessage(std::string message, glm::vec3 color, int x, int y, int charHeight);
-
     void generateMessage(std::string message, float x, float y, glm::vec3 color);
 
     void draw(bool loadTextures = true);
-
-    void readCharInfo(std::string file);
 
     Mesh& getMesh();
 

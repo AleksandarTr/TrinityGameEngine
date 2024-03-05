@@ -147,7 +147,7 @@ void Window::render(bool loadTextures, bool drawText) {
 void Window::drawFrame() {
     if(!drawOrderSorted) sortDrawOrder();
 
-    TextureHandler::getTextureHandler().assignTexture();
+    TextureHandler::assignTexture();
     float currentTime = glfwGetTime();
     timeDelta = currentTime - previousTime;
     previousTime = currentTime;
@@ -161,7 +161,14 @@ void Window::drawFrame() {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
 
+        unsigned long long check = 1;
         for (int i = 0; i < lightCount; i++) {
+            if(!(lightEnabled & check)) {
+                check <<= 1;
+                continue;
+            }
+            check <<= 1;
+
             lights[i]->drawShadowMap();
             render(false, false);
         }
@@ -201,12 +208,22 @@ void Window::updateModels(float timeDelta) {
 }
 
 void Window::loadLights() {
+    int offset = 0;
+    unsigned long long check = 1;
     for(int i = 0; i < lightCount; i++) {
-        lights[i]->loadLight(i);
-        lights[i]->getShadowMap().getInfo().type = static_cast<TextureType>(TE_ShadowMap0 + i);
+        if(!(lightEnabled & check)) {
+            check <<= 1;
+            offset++;
+            continue;
+        }
+        check <<= 1;
+
+        lights[i]->loadLight(i - offset);
+        lights[i]->getShadowMap().getInfo().type = static_cast<TextureType>(TE_ShadowMap0 + i - offset);
         TextureHandler::bindTexture(lights[i]->getShadowMap());
     }
-    glUniform1i(glGetUniformLocation(drawShader->getProgramID(), "lightNum"), lightCount);
+
+    glUniform1i(glGetUniformLocation(drawShader->getProgramID(), "lightNum"), lightCount - offset);
     lightsChanged = false;
 }
 
@@ -293,4 +310,19 @@ const Camera &Window::getCamera() const {
 
 Camera &Window::getCamera() {
     return camera;
+}
+
+void Window::enableLight(int index) {
+    if(index < 0 || index > maxLightCount) return;
+    lightEnabled |= 1 << index;
+}
+
+void Window::disableLight(int index) {
+    if(index < 0 || index > maxLightCount) return;
+    lightEnabled &= ~(1 << index);
+}
+
+bool Window::isLightActive(int index) const {
+    if(index < 0 || index > maxLightCount) return false;
+    return lightEnabled & 1 << index;
 }

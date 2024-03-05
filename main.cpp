@@ -23,6 +23,10 @@ int main() {
     Model &object = window.getModel(objectScene)[0];
     object.move(glm::vec3(-2));
 
+    window.loadGLTF("Textures/EmissiveStrengthTest.gltf");
+    Model &emissionTest = window.getModel(window.getScene(0));
+    emissionTest.move(glm::vec3(0, 0, -20));
+
     window.loadGLTF("test/ABeautifulGame.gltf");
     int sceneIndex = window.getScene(0);
     Model &scene = window.getModel(sceneIndex);
@@ -32,7 +36,8 @@ int main() {
     light.move(glm::vec3(0, 2, 6));
     light.setFov(90);
 
-    Light& light2 = window.getLight(window.addLight(glm::vec3(1, 0, 0), glm::vec3(1), PointLight));
+    int light2Index = window.addLight(glm::vec3(1, 0, 0), glm::vec3(1), PointLight);
+    Light& light2 = window.getLight(light2Index);
     light2.move(glm::vec3(-10));
     light2.setFov(90);
 
@@ -60,9 +65,10 @@ int main() {
 
     int text3DIndex = window.addText("Textures/arial", false);
     Text& text3D = window.getText(text3DIndex, false);
-    text3D.generateMessage("Hello world!", 5, 5, glm::vec3(1, 0, 0));
+    text3D.generateMessage("great Success, jes!", 5, 5, glm::vec3(1, 0, 0));
     text3D.getMesh().scale(glm::vec3(5));
     text3D.getMesh().setAngularVelocity(glm::vec3(0, 5, 0));
+    text3D.getMesh().move(glm::vec3(0, 1, 0));
 
     float fpsTimer = 0;
     int fps = 0;
@@ -80,8 +86,8 @@ int main() {
         if(blink) blinker += timeDelta;
         if(blinker > 0.1) {
             blinker = 0;
-            if(isOn) light2.setColor(glm::vec3(0));
-            else light2.setColor(glm::vec3(1, 0, 0));
+            if(isOn) window.disableLight(light2Index);
+            else window.enableLight(light2Index);
             isOn = !isOn;
             if(++blinkCnt > 8) {
                 blinkCnt = 0;

@@ -73,8 +73,8 @@ void Mesh::updateMesh(std::vector<Vertex> *vertices, std::vector<GLuint> *indice
     VBO.unbind();
     EBO.unbind();
 
-    *(reinterpret_cast<unsigned long long*>(&drawMode) - 2) = reinterpret_cast<unsigned long long>(vertices);
-    if(indices) *(reinterpret_cast<unsigned long long*>(&drawMode) - 1) = reinterpret_cast<unsigned long long>(indices);
+    *(reinterpret_cast<void**>(&drawMode) - 2) = reinterpret_cast<void*>(vertices);
+    if(indices) *(reinterpret_cast<void**>(&drawMode) - 1) = reinterpret_cast<void*>(indices);
 
     calculateBoundingSphere();
 }

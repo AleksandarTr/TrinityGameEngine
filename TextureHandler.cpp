@@ -1,15 +1,14 @@
 #include <iostream>
 #include "TextureHandler.h"
 
-std::thread TextureHandler::textureThread(&TextureHandler::loadInMemory);
-volatile bool TextureHandler::close = false;
-
+TextureHandler::Node* TextureHandler::loadedTextures = nullptr;
+std::priority_queue<TextureHandler::Job, std::vector<TextureHandler::Job>, TextureHandler::higherPriority> TextureHandler::jobs;
+std::mutex TextureHandler::jobMutex;
+std::queue<TextureHandler::Job*> TextureHandler::awaitingLoading;
+std::mutex TextureHandler::loadingMutex;
 int TextureHandler::activeTextures[TE_TextureTypeCount] = {0};
-
-TextureHandler &TextureHandler::getTextureHandler() {
-    static TextureHandler textureHandler;
-    return textureHandler;
-}
+volatile bool TextureHandler::close = false;
+std::thread TextureHandler::textureThread(&TextureHandler::loadInMemory);
 
 void TextureHandler::loadTexture(TextureInfo info, Texture *destination) {
     Job job = {.info = std::move(info), .destination = destination};
@@ -21,24 +20,24 @@ void TextureHandler::loadTexture(TextureInfo info, Texture *destination) {
 
 void TextureHandler::loadInMemory() {
     while(!close) {
-        if(getTextureHandler().jobs.empty()) continue;
+        if(jobs.empty()) continue;
         Job job;
         {
-            std::scoped_lock<std::mutex> lock(getTextureHandler().jobMutex);
-            job = getTextureHandler().jobs.top();
-            getTextureHandler().jobs.pop();
+            std::scoped_lock<std::mutex> lock(jobMutex);
+            job = jobs.top();
+            jobs.pop();
         }
 
         bool found = false;
-        Node *itr = getTextureHandler().loadedTextures;
+        Node *itr = loadedTextures;
         while(itr) {
             if (job.info.location == itr->job.info.location) {
                 while (itr->job.data);
                 itr->job.data = reinterpret_cast<unsigned char *>(1);
                 itr->job.destination = job.destination;
                 {
-                    std::scoped_lock<std::mutex> lock(getTextureHandler().loadingMutex);
-                    getTextureHandler().awaitingLoading.push(&itr->job);
+                    std::scoped_lock<std::mutex> lock(loadingMutex);
+                    awaitingLoading.push(&itr->job);
                 }
                 found = true;
                 break;
@@ -61,11 +60,11 @@ void TextureHandler::loadInMemory() {
         job.info.height = imgH;
 
         Node *texture = new Node(job);
-        texture->next = getTextureHandler().loadedTextures;
-        getTextureHandler().loadedTextures = texture;
+        texture->next = loadedTextures;
+        loadedTextures = texture;
 
-        std::scoped_lock<std::mutex> lock(getTextureHandler().loadingMutex);
-        getTextureHandler().awaitingLoading.push(&getTextureHandler().loadedTextures->job);
+        std::scoped_lock<std::mutex> lock(loadingMutex);
+        awaitingLoading.push(&loadedTextures->job);
     }
 }
 
@@ -80,7 +79,9 @@ void TextureHandler::assignTexture() {
 
         if(!job->result) {
             job->result = job->destination;
-            glGenTextures(1, &job->result->textureId);
+            GLuint textureId;
+            glGenTextures(1, &textureId);
+            job->destination->setId(textureId);
             glBindTexture(GL_TEXTURE_2D, job->result->getId());
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, job->info.minFilter);
@@ -97,23 +98,23 @@ void TextureHandler::assignTexture() {
             glTexImage2D(GL_TEXTURE_2D, 0, format, job->info.width, job->info.height, 0, format, GL_UNSIGNED_BYTE, job->data);
             glGenerateMipmap(GL_TEXTURE_2D);
             job->result->unbind();
-            job->result->info = job->info;
+            job->result->getInfo() = job->info;
 
             stbi_image_free(job->data);
         }
 
-        job->destination->textureId = job->result->textureId;
+        job->destination->setId(job->result->getId());
         job->info.type = std::max(job->info.type, static_cast<TextureType>(0));
         job->info.type = std::min(job->info.type, static_cast<TextureType>(TE_TextureTypeCount - 1));
-        job->destination->info = job->result->info;
+        job->destination->getInfo() = job->result->getInfo();
         job->data = nullptr;
     }
 }
 
 void TextureHandler::bindTexture(Texture &texture, GLenum target) {
-    if(activeTextures[static_cast<int>(texture.info.type)] != texture.textureId) {
-        activeTextures[static_cast<int>(texture.info.type)] = texture.textureId;
-        glActiveTexture(GL_TEXTURE0 + static_cast<int>(texture.info.type));
+    if(activeTextures[static_cast<int>(texture.getInfo().type)] != texture.getId()) {
+        activeTextures[static_cast<int>(texture.getInfo().type)] = texture.getId();
+        glActiveTexture(GL_TEXTURE0 + static_cast<int>(texture.getInfo().type));
         texture.bind(target);
     }
 }

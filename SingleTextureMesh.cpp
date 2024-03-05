@@ -10,31 +10,31 @@ SingleTextureMesh::SingleTextureMesh(std::vector<Vertex> &vertices, std::vector<
     if(!diffuseTexture.location.empty()) {
         if (diffuseTexture.type == NoTextureType) diffuseTexture.type = DiffuseTexture;
         this->diffuseTexture = new Texture(diffuseTexture);
-        TextureHandler::getTextureHandler().loadTexture(diffuseTexture, this->diffuseTexture);
+        TextureHandler::loadTexture(diffuseTexture, this->diffuseTexture);
     }
 
     if(!specularTexture.location.empty()) {
         if (specularTexture.type == NoTextureType) specularTexture.type = PBRTexture;
         this->specularTexture = new Texture(specularTexture);
-        TextureHandler::getTextureHandler().loadTexture(specularTexture, this->specularTexture);
+        TextureHandler::loadTexture(specularTexture, this->specularTexture);
     }
 
     if(!normalTexture.location.empty()) {
         if (normalTexture.type == NoTextureType) normalTexture.type = NormalTextre;
         this->normalTexture = new Texture(normalTexture);
-        TextureHandler::getTextureHandler().loadTexture(normalTexture, this->normalTexture);
+        TextureHandler::loadTexture(normalTexture, this->normalTexture);
     }
 
     if(!occlusionTexture.location.empty()) {
         if (occlusionTexture.type == NoTextureType) occlusionTexture.type = OcclusionTexture;
         this->occlusionTexture = new Texture(occlusionTexture);
-        TextureHandler::getTextureHandler().loadTexture(occlusionTexture, this->occlusionTexture);
+        TextureHandler::loadTexture(occlusionTexture, this->occlusionTexture);
     }
 
     if(!emissionTexture.location.empty()) {
         if (emissionTexture.type == NoTextureType) emissionTexture.type = EmissiveTexture;
         this->emissionTexture = new Texture(emissionTexture);
-        TextureHandler::getTextureHandler().loadTexture(emissionTexture, this->emissionTexture);
+        TextureHandler::loadTexture(emissionTexture, this->emissionTexture);
     }
 }
 
@@ -95,22 +95,22 @@ SingleTextureMesh::~SingleTextureMesh() {
 SingleTextureMesh::SingleTextureMesh(const SingleTextureMesh &mesh) : Mesh(mesh), name(mesh.name) {
     if(mesh.diffuseTexture) {
         diffuseTexture = new Texture(mesh.diffuseTexture->getInfo());
-        TextureHandler::getTextureHandler().loadTexture(mesh.diffuseTexture->getInfo(), diffuseTexture);
+        TextureHandler::loadTexture(mesh.diffuseTexture->getInfo(), diffuseTexture);
     }
 
     if(mesh.specularTexture) {
         specularTexture = new Texture(mesh.specularTexture->getInfo());
-        TextureHandler::getTextureHandler().loadTexture(mesh.specularTexture->getInfo(), specularTexture);
+        TextureHandler::loadTexture(mesh.specularTexture->getInfo(), specularTexture);
     }
 
     if(mesh.normalTexture) {
         normalTexture = new Texture(mesh.normalTexture->getInfo());
-        TextureHandler::getTextureHandler().loadTexture(mesh.normalTexture->getInfo(), normalTexture);
+        TextureHandler::loadTexture(mesh.normalTexture->getInfo(), normalTexture);
     }
 
     if(mesh.occlusionTexture) {
         occlusionTexture = new Texture(mesh.occlusionTexture->getInfo());
-        TextureHandler::getTextureHandler().loadTexture(mesh.occlusionTexture->getInfo(), occlusionTexture);
+        TextureHandler::loadTexture(mesh.occlusionTexture->getInfo(), occlusionTexture);
     }
 }
 

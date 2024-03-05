@@ -30,22 +30,20 @@ private:
         Node(Job job) : job(std::move(job)) {}
     };
 
-    Node* loadedTextures = nullptr;
+    static Node* loadedTextures;
 
-    std::priority_queue<Job, std::vector<Job>, higherPriority> jobs;
-    std::mutex jobMutex;
-    std::queue<Job*> awaitingLoading;
-    std::mutex loadingMutex;
+    static std::priority_queue<Job, std::vector<Job>, higherPriority> jobs;
+    static std::mutex jobMutex;
+    static std::queue<Job*> awaitingLoading;
+    static std::mutex loadingMutex;
     static int activeTextures[TE_TextureTypeCount];
     static volatile bool close;
     static std::thread textureThread;
 
 public:
-    static TextureHandler& getTextureHandler();
+    static void loadTexture(TextureInfo info, Texture *destination);
 
-    void loadTexture(TextureInfo info, Texture *destination);
-
-    void assignTexture();
+    static void assignTexture();
 
     static void bindTexture(Texture &texture, GLenum target = GL_TEXTURE_2D);
 
