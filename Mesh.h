@@ -21,14 +21,15 @@ protected:
     GLenum drawMode = GL_TRIANGLES;
     bool doubleSided = false;
 
+    //Mesh buffers
     VertexArrayObject VAO = VertexArrayObject();
     VertexBufferObject VBO = VertexBufferObject();
     ElementBufferObject EBO = ElementBufferObject();
 
     glm::mat4 modelTransformation = glm::mat4(1);
-    glm::mat4 rotationMatrix = glm::mat4(1);
+    glm::mat4 rotationMatrix = glm::mat4(1); //Needed to adjust the normal vectors
 
-    float boundingSphere;
+    float boundingSphere; //Outermost point of the mesh, updated based on scale
     void calculateBoundingSphere();
 public:
     Mesh(std::vector<Vertex> &vertices, std::vector<GLuint> &indices, GLenum drawMode);

@@ -5,6 +5,8 @@
 
 Text::Text(std::string font, int windowWidth, int windowHeight, bool fixed)
 : windowWidth(windowWidth), windowHeight(windowHeight), fixed(fixed) {
+    //Set optimal texture info for displaying text
+    TextureInfo info;
     info.location = font + ".png";
     info.format = "image/png";
     info.wrapS = GL_CLAMP_TO_EDGE;
@@ -15,6 +17,7 @@ Text::Text(std::string font, int windowWidth, int windowHeight, bool fixed)
 }
 
 void Text::generateMessage(std::string message, float x, float y, glm::vec3 color) {
+    //Change message length if necessary
     if(vertices.empty() || vertices.size() / 4 != message.length()) setLength(message.length());
     setMessage(message, color, x, y, 50);
 }
@@ -58,18 +61,21 @@ void bigToLittleEndian(char *integer) {
 }
 
 void Text::readCharInfo(std::string file) {
+    //Read dimensions directly from the png file
     std::ifstream dimensionReader(file + ".png", std::ios::binary);
     if(!dimensionReader.is_open()) throw std::invalid_argument(file + ".png not found.");
     bool flip = !isBigEndian();
     char buffer[4];
     int temp;
 
+    //Read image width
     dimensionReader.seekg(16);
     dimensionReader.read(buffer, 4);
     if(flip) bigToLittleEndian(buffer);
     memcpy(&temp, buffer, 4);
     fontWidth = temp;
 
+    //Read image height
     dimensionReader.read(buffer, 4);
     if(flip) bigToLittleEndian(buffer);
     memcpy(&temp, buffer, 4);
@@ -77,9 +83,11 @@ void Text::readCharInfo(std::string file) {
 
     dimensionReader.close();
 
+    //Character info is stored in an sfl file, until font reading from ttf files is implemented
     std::ifstream reader(file + ".sfl");
     if(!reader.is_open()) throw std::invalid_argument(file + ".sfl not found.");
 
+    //Read some unused values
     std::string name;
     reader >> name;
     int fontSize, charHeight;
@@ -100,6 +108,7 @@ void Text::readCharInfo(std::string file) {
     }
 
     for(auto &ch : chars) {
+        //Adjust character yOffset to be the offset from the bottom and not the top
         ch.second.yOffset = ch.second.height + ch.second.yOffset - maxHeight;
     }
 
@@ -108,7 +117,9 @@ void Text::readCharInfo(std::string file) {
 
 void Text::setLength(int length) {
     if(vertices.size() / 4 == length) return;
-    if(length <= 0) std::invalid_argument("Text length cannot be less than 1");
+    if(length <= 0) throw std::invalid_argument("Text length cannot be less than 1");
+    vertices.clear();
+    indices.clear();
     generateVertices(length);
 
     if(fixed) {
@@ -125,7 +136,7 @@ void Text::setLength(int length) {
     }
     else {
         delete mesh;
-        mesh = new SingleTextureMesh(vertices, indices, GL_TRIANGLES, info);
+        mesh = new SingleTextureMesh(vertices, indices, GL_TRIANGLES, fontTexture->getInfo());
         mesh->setAlphaMode(SingleTextureMesh::MaskedTexture);
         mesh->setAlphaCutoff(0.1f);
         mesh->bind();
@@ -152,7 +163,7 @@ void Text::setMessage(std::string message, glm::vec3 color, int left, int top, i
     }
 
     for(int i = 0; i < message.size(); i++) {
-        charInfo &ch = chars[message[i]];
+        charInfo &ch = chars.at(message[i]);
         Vertex &v1 = vertices[4 * i];
         Vertex &v2 = vertices[4 * i + 1];
         Vertex &v3 = vertices[4 * i + 2];

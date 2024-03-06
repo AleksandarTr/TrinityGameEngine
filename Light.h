@@ -7,8 +7,8 @@ class Light : public View {
 private:
     glm::vec3 color;
     LightingType type;
-    float a = 1, b = 0;
-    float innerCone = .999, outerCone = .99;
+    float a = 1, b = 0; // Parameters used in the formula lightLevel / (a * distance^2 + b * distance + 1) used for calculating attenuation
+    float innerCone = .999, outerCone = .99; // Parameters for spotlights to determine the circle they will light up
 
     GLuint shadowBuffer;
     Texture *shadowMap;
@@ -28,7 +28,7 @@ public:
 
     Texture& getShadowMap() const;
 
-    void loadLight(int index);
+    void loadLight(int index); //Initialize all light parameters for light for rendering
 
     unsigned int getShadowWidth() const;
     unsigned int getShadowHeight() const;

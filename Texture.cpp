@@ -1,5 +1,5 @@
 #include "Texture.h"
-void Texture::bind(GLenum target) {
+void Texture::bind(GLenum target) const {
     glBindTexture(target, textureId);
 }
 
@@ -7,7 +7,7 @@ Texture::~Texture() {
     glDeleteTextures(1, &textureId);
 }
 
-GLuint Texture::getId() {
+GLuint Texture::getId() const {
     return textureId;
 }
 

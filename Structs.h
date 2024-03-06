@@ -20,14 +20,15 @@ enum TextureType {NoTextureType = -1, TextTexture, DiffuseTexture, PBRTexture, N
     TE_ShadowMap8, TE_ShadowMap9, TE_ShadowMap10, TE_ShadowMap11, TE_ShadowMap12, TE_ShadowMap13, TE_ShadowMap14, TE_ShadowMap15, TE_TextureTypeCount};
 
 struct TextureInfo {
-    std::string location = "";
-    std::string format = "image/jpeg";
+    std::string location = ""; //Location of the file, which includes its extension
+    std::string format = "image/jpeg"; //Format of the image (there is support for jpegs and pngs)
+    //OpenGL texture parameters
     int magFilter = GL_NEAREST;
     int minFilter = GL_NEAREST;
     int wrapS = GL_REPEAT;
     int wrapT = GL_REPEAT;
-    int width, height;
-    TextureType type = NoTextureType;
+    int width, height; //width and height of the image file
+    TextureType type = NoTextureType; //Number which decides which slot the image will be bound to
 };
 
 #endif

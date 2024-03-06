@@ -132,6 +132,8 @@ Texture *SingleTextureMesh::getTexture(TextureType type) {
             return normalTexture;
         case OcclusionTexture:
             return occlusionTexture;
+        case EmissiveTexture:
+            return emissionTexture;
         default:
             throw std::out_of_range("There is no texture with given type");
     }

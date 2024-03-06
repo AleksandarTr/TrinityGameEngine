@@ -132,9 +132,9 @@ Light &Window::getLight(int index) {
     return *lights[index];
 }
 
-int Window::addLight(glm::vec3 color, glm::vec3 direction, LightingType type) {
+int Window::addLight(glm::vec3 color, glm::vec3 direction, LightingType type, unsigned int shadowWidth, unsigned int shadowHeight) {
     if(lightCount >= 16) throw std::out_of_range("Only 16 lights are allowed at any time");
-    lights[lightCount] = new Light(color, direction, type);
+    lights[lightCount] = new Light(color, direction, type, shadowWidth, shadowHeight);
     lightsChanged = true;
     return lightCount++;
 }
@@ -269,7 +269,7 @@ void Window::sortDrawOrder() {
     drawOrderSorted = true;
     int lastSuitablePosition;
     int suitability;
-    static constexpr TextureType textureTypes[] = {DiffuseTexture, PBRTexture, NormalTextre, OcclusionTexture};
+    static constexpr TextureType textureTypes[] = {DiffuseTexture, PBRTexture, NormalTextre, OcclusionTexture, EmissiveTexture};
     static constexpr int textureTypeCount = sizeof textureTypes / sizeof textureTypes[0];
 
     for(int i = 0; i < drawOrder.size(); i++)

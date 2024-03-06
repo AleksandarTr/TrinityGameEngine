@@ -76,7 +76,7 @@ public:
     Model& getModel(int index);
     [[nodiscard]] int copyModel(int index);
 
-    [[nodiscard]] int addLight(glm::vec3 color, glm::vec3 direction, LightingType type);
+    [[nodiscard]] int addLight(glm::vec3 color, glm::vec3 direction, LightingType type, unsigned int shadowWidth = 1024, unsigned int shadowHeight = 1024);
     Light& getLight(int index);
 
     float getTimeDelta();

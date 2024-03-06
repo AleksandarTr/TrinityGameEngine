@@ -8,8 +8,8 @@
 
 class ElementBufferObject {
 private:
-    GLuint EBO = 0;
-    bool assigned = false;
+    GLuint EBO = 0; //Index of the index buffer
+    bool assigned = false; //Flag to check if the buffer has been assigned when copying the index buffer to another mesh
 
 public:
     ElementBufferObject();

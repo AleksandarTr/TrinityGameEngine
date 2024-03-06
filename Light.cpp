@@ -7,11 +7,13 @@ Light::Light(glm::vec3 color, glm::vec3 direction, LightingType type, unsigned i
 : color(color), type(type), shadowWidth(shadowWidth), shadowHeight(shadowHeight),
 View(shadowWidth, shadowHeight, 90.0f, .1f, 100.0f) {
     setOrientation(direction);
+    //Set default parameters based on type
     if(type == DirectionalLight) setOrthographicBorder(-5.0f, 5.0f, -5.0f, 5.0f);
     else if(type == SpotLight) setFov(10.0f);
 
     glGenFramebuffers(1, &shadowBuffer);
 
+    //Initialize texture for the shadow map
     shadowMap = new Texture(TextureInfo());
     GLuint textureId;
     glGenTextures(1, &textureId);
@@ -24,6 +26,7 @@ View(shadowWidth, shadowHeight, 90.0f, .1f, 100.0f) {
     GLfloat borderColor[] = {1, 1, 1, 1};
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
+    //Bind texture to the framebuffer and disable color rendering
     glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textureId, 0);
     glDrawBuffer(GL_NONE);
@@ -46,6 +49,7 @@ LightingType Light::getType() const {
 
 void Light::setType(LightingType type) {
     Light::type = type;
+    //Set default parameters based on type
     switch(type) {
         case PointLight:
             setFov(90.0f);
@@ -81,7 +85,7 @@ void Light::setType(LightingType type, float nearPlane, float farPlane, float le
 
 void Light::drawShadowMap() {
     glViewport(0, 0, shadowWidth, shadowHeight);
-    activate();
+    activate(); // Update view matrix and set view of the light as the active one
     glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
     glClear(GL_DEPTH_BUFFER_BIT);
     glUniformMatrix4fv(glGetUniformLocation(Shader::getActiveShader(), "lightMatrix"), 1, false,glm::value_ptr(getCameraMatrix()));

@@ -15,7 +15,7 @@ private:
 public:
     Texture(TextureInfo info);
 
-    void bind(GLenum target = GL_TEXTURE_2D);
+    void bind(GLenum target = GL_TEXTURE_2D) const;
 
     ~Texture();
 
@@ -23,7 +23,7 @@ public:
 
     TextureInfo& getInfo();
 
-    GLuint getId();
+    GLuint getId() const;
     void setId(GLuint id);
 };
 
