@@ -11,8 +11,11 @@ Text::Text(std::string font, int windowWidth, int windowHeight, bool fixed)
     info.format = "image/png";
     info.wrapS = GL_CLAMP_TO_EDGE;
     info.type = TextTexture;
-    fontTexture = new Texture(info);
-    TextureHandler::loadTexture(info,  fontTexture);
+
+    mesh = new SingleTextureMesh(vertices, indices, GL_TRIANGLES, info);
+    mesh->setAlphaMode(SingleTextureMesh::MaskedTexture);
+    mesh->setAlphaCutoff(0.1f);
+
     readCharInfo(font);
 }
 
@@ -24,35 +27,20 @@ void Text::generateMessage(std::string message, float x, float y, glm::vec3 colo
 
 void Text::draw(bool loadTextures) {
     if(vertices.empty()) throw std::logic_error("Cannot draw text which has not been generated!");
-    if(fixed) {
-        //Don't draw anything if the texture has not been loaded yet
-        if(!fontTexture->getId()) return;
-        //Update vertices if something changed
-        if(changed) {
-            VBO.update(vertices);
-            VBO.unbind();
-            changed = false;
+    //Update vertices if something changed
+    if(changed) {
+        if(meshBound) mesh->updateMesh(&vertices);
+        else {
+            mesh->bind();
+            meshBound = true;
         }
-
-        VAO.bind();
-        TextureHandler::bindTexture(*fontTexture);
-        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "font"), static_cast<int>(fontTexture->getInfo().type));
-
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        VAO.unbind();
+        changed = false;
     }
-    else {
-        //Update vertices if something changed
-        if(changed) {
-            mesh->updateMesh(&vertices);
-            changed = false;
-        }
 
-        //Apply a solid color onto the text
-        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyColor"), true);
-        mesh->draw(loadTextures);
-        glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyColor"), false);
-    }
+    //Apply a solid color onto the text
+    glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyColor"), true);
+    mesh->draw(loadTextures);
+    glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyColor"), false);
 }
 
 bool isBigEndian();
@@ -125,27 +113,9 @@ void Text::setLength(int length) {
     if(length <= 0) throw std::invalid_argument("Text length cannot be less than 1");
     vertices.clear();
     indices.clear();
+
     generateVertices(length);
-
-    if(fixed) {
-        VAO.bind();
-        VBO.bind(vertices);
-        VAO.linkVBO(0, 3, GL_FLOAT, sizeof(Vertex), 0);
-        VAO.linkVBO(1, 3, GL_FLOAT, sizeof(Vertex), sizeof(Vertex::position));
-        VAO.linkVBO(2, 3, GL_FLOAT, sizeof(Vertex), sizeof(Vertex::position) + sizeof(Vertex::color));
-        EBO.bind(indices);
-
-        VAO.unbind();
-        VBO.unbind();
-        EBO.unbind();
-    }
-    else {
-        delete mesh;
-        mesh = new SingleTextureMesh(vertices, indices, GL_TRIANGLES, fontTexture->getInfo());
-        mesh->setAlphaMode(SingleTextureMesh::MaskedTexture);
-        mesh->setAlphaCutoff(0.1f);
-        mesh->bind();
-    }
+    changed = true;
 }
 
 void Text::setMessage(std::string message, glm::vec3 color, int left, int top, int charHeight) {

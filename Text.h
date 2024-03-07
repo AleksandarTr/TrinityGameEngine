@@ -18,12 +18,6 @@ private:
         int xAdvance; //how much to move to the right to display the next character
     };
 
-    //TODO: Remove buffers from text
-    VertexArrayObject VAO = VertexArrayObject();
-    VertexBufferObject VBO = VertexBufferObject();
-    ElementBufferObject EBO = ElementBufferObject();
-
-    Texture *fontTexture = nullptr;
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
     std::unordered_map<int, charInfo> chars; //Hash map to get info for each character if not all characters are present
@@ -33,6 +27,7 @@ private:
     int maxHeight = 0, maxWidth = 0;
 
     SingleTextureMesh *mesh = nullptr;
+    bool meshBound = false;
     bool fixed; // If true, the text will be fixed to the screen, aka 2D, otherwise it will be in 3D space
     bool changed = false; //Bool used to delay vertex updates until the last possible moment
 
