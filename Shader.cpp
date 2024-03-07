@@ -73,6 +73,7 @@ void Shader::activate() {
 void Shader::unloadFiles() {
     glDeleteShader(fragmentShader);
     glDeleteShader(vertexShader);
+    if(geometryShader) glDeleteShader(geometryShader);
 }
 
 Shader::~Shader() {

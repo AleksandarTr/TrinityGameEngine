@@ -14,10 +14,10 @@ public:
 
     virtual void controls(GLFWwindow* window); //Function for receiving keyboard and mouse inputs and moving the camera accordingly
 
-    void setSensitivity(float value);
+    void setSensitivity(float value); //Set sensitivity without any checks
     float getSensitivity() const;
 
-    void setSpeed(float value);
+    void setSpeed(float value); //Set camera movement speed without checks
     float getSpeed() const;
 };
 

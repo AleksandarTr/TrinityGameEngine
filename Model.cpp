@@ -11,7 +11,7 @@ Model &Model::operator[](int index) {
 }
 
 Model &Model::at(int index) {
-    if(models.size() > index) return *models[index];
+    if(models.size() > index || index < 0) return *models[index];
     else throw std::out_of_range("Index of model is out of range of existing models in this scene.");
 }
 
@@ -26,8 +26,8 @@ void Model::removeModel(Model &model) {
 }
 
 void Model::removeModel(int index) {
-    if(models.empty() || models.size() > index) return;
-    if(index == -1) models.pop_back();
+    if(models.size() > index || index < -1) return;
+    if(index == -1) models.pop_back(); //Remove last element if the function is called without arguments
     else models.erase(models.begin() + index);
 }
 
@@ -42,6 +42,8 @@ void Model::operator-=(Model &model) {
 void Model::transform(glm::mat4 transform) {
     transformationMatrix *= transform;
 
+    //transformations in the meshes are stored separately as translation, rotation and scale,
+    // so the final transformation matrix has to be decomposed into them
     glm::vec3 position;
     glm::quat rotation;
     glm::vec3 scale;
@@ -64,11 +66,13 @@ void Model::transform(glm::mat4 transform) {
 Model::Model(std::vector<Mesh*> &meshes) : meshes(meshes) {}
 
 void Model::draw(bool loadTextures) {
+    //Recursively call all the child models, until all of them have been drawn
     for(auto model : models) model->draw(loadTextures);
     for(auto mesh : meshes) mesh->draw(loadTextures);
 }
 
 void Model::move(glm::vec3 direction) {
+    //Translation does not change the local position within the predecessor models
     Movable::move(direction);
 
     for(auto model : models) model->move(direction);
@@ -77,6 +81,7 @@ void Model::move(glm::vec3 direction) {
 
 void Model::rotate(glm::vec3 direction) {
     Movable::rotate(direction);
+    //All the local positions within the predecessor models have to be rotated
     glm::vec3 newPos = glm::eulerAngleXYZ(direction.x, direction.y, direction.z) * glm::vec4(localPosition, 1.0f);
     Movable::setPosition(getPosition() - localPosition + newPos);
     localPosition = newPos;
@@ -90,6 +95,7 @@ void Model::rotate(glm::vec3 direction) {
 
 void Model::rotate(glm::quat direction) {
     Movable::rotate(direction);
+    //All the local positions within the predecessor models have to be rotated
     glm::vec3 newPos = glm::toMat4(direction) * glm::vec4(localPosition, 1.0f);
     Movable::setPosition(getPosition() - localPosition + newPos);
     localPosition = newPos;
@@ -103,6 +109,7 @@ void Model::rotate(glm::quat direction) {
 
 void Model::scale(glm::vec3 scaling) {
     Movable::scale(scaling);
+    //All the local positions within the predecessor models have to be scaled
     glm::vec3 newPos = localPosition * scaling;
     Movable::setPosition(getPosition() - localPosition + newPos);
     localPosition = newPos;
@@ -115,16 +122,19 @@ void Model::scale(glm::vec3 scaling) {
 }
 
 void Model::setLocalPosition() {
+    //Used to sed the local position when the final local transformation of the model has been loaded
     localPosition = getPosition();
     for(auto model : models) model->setLocalPosition();
 }
 
 Model::Model(const Model &copy) {
+    //Copy all child models
     for(Model* model : copy.models) {
         Model &modelCopy = *new Model(*model);
         addModel(modelCopy);
     }
 
+    //Copy all meshes
     for(Mesh* mesh : copy.meshes) {
         Mesh *meshCopy = new SingleTextureMesh(*dynamic_cast<SingleTextureMesh*>(mesh));
         meshes.push_back(meshCopy);
@@ -133,7 +143,9 @@ Model::Model(const Model &copy) {
 }
 
 Model::~Model() {
-    if(erased) return;
+    if(erased) return; //Prevent the model from getting deleted multiple times
+    //The root of the model tree must be called for deleting the whole tree
+    //If destructor is called on some child node, the whole tree will not be able to be deleted
     std::set<std::vector<Vertex>*> vertexVectors;
     std::set<std::vector<GLuint>*> indexVectors;
 

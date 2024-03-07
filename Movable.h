@@ -20,43 +20,43 @@ protected:
     bool movedFlag = false;
 
 public:
-    glm::vec3 getPosition();
+    glm::vec3 getPosition(); //Get the global position of an object
 
-    glm::quat getRotation();
+    glm::quat getRotation(); //Get the global rotation of an object
 
-    virtual void rotate(glm::vec3 direction);
+    virtual void rotate(glm::vec3 direction); //Change the global rotation of an object by given amounts
 
-    virtual void rotate(glm::quat direction);
+    virtual void rotate(glm::quat direction); //Rotate the present rotation by given amount
 
-    virtual void move(glm::vec3 direction);
+    virtual void move(glm::vec3 direction); //Translate the global position of an object
 
-    void update(double timeDelta);
+    void update(double timeDelta); //Update all the parameters in the object based on time passed
 
-    void setVelocity(glm::vec3 velocity);
+    void setVelocity(glm::vec3 velocity); //Set the velocity of the object, which is applied with void update(double timeDelta)
 
-    void setAcceleration(glm::vec3 acceleration);
+    void setAcceleration(glm::vec3 acceleration); //Set the acceleration of the object, which is applied with void update(double timeDelta)
 
-    void incVelocity(glm::vec3 increment);
+    void increaseVelocity(glm::vec3 increment); //Increase the velocity of the object, which is applied with void update(double timeDelta)
 
-    void incAcceleration(glm::vec3 increment);
+    void increaseAcceleration(glm::vec3 increment); //Increase the acceleration of the object, which is applied with void update(double timeDelta)
 
-    void setAngularVelocity(glm::vec3 velocity);
+    void setAngularVelocity(glm::vec3 velocity); //Set the angular velocity of the object, which is applied with void update(double timeDelta)
 
-    void setAngularAcceleration(glm::vec3 acceleration);
+    void setAngularAcceleration(glm::vec3 acceleration); //Set the angular acceleration of the object, which is applied with void update(double timeDelta)
 
-    void incAngularVelocity(glm::vec3 increment);
+    void increaseAngularVelocity(glm::vec3 increment); //Increase the angular velocity of the object, which is applied with void update(double timeDelta)
 
-    void incAngularAcceleration(glm::vec3 increment);
+    void increaseAngularAcceleration(glm::vec3 increment); //Increase the angular acceleration of the object, which is applied with void update(double timeDelta)
 
-    void setPosition(glm::vec3 position);
+    void setPosition(glm::vec3 position); //Set the global position of an object
 
-    void setRotation(glm::quat rotation);
+    void setRotation(glm::quat rotation); //Set the global rotation of an object
 
-    virtual void setScale(glm::vec3 scale);
+    virtual void setScale(glm::vec3 scale); //Set the absolute global scale of an object
 
-    virtual void scale(glm::vec3 scaling);
+    virtual void scale(glm::vec3 scaling); //Apply scaling to an object
 
-    glm::vec3 getScale();
+    glm::vec3 getScale(); //Get the global scale of an object
 };
 
 #endif

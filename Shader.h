@@ -18,15 +18,15 @@ private:
 public:
     Shader(std::string fragmentShaderSource, std::string vertexShaderSource, std::string geometryShaderSource = "");
 
-    GLuint getProgramID();
+    GLuint getProgramID(); //Get id of the program storing all the separate shaders
 
-    void activate();
+    void activate(); //Set this shader as active, used for rending meshes
 
-    void unloadFiles();
+    void unloadFiles(); //Unload buffers storing the individual shaders
 
     ~Shader();
 
-    static GLuint getActiveShader();
+    static GLuint getActiveShader(); //Get the currently active shader
 };
 
 #endif

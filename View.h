@@ -51,44 +51,44 @@ private:
     void calculateCameraFrustum();
 
 public:
-    View(unsigned int width, unsigned int height, float fov, float nearPlane, float farPlane);
+    View(unsigned int width, unsigned int height, float fov, float nearPlane, float farPlane); //Initialize view with perspective projection with the given parameters
 
-    View(unsigned int width, unsigned int height, float left, float right, float bottom, float top, float nearPlane, float farPlane);
+    View(unsigned int width, unsigned int height, float left, float right, float bottom, float top, float nearPlane, float farPlane); //Initialize view with orthogonal projection with given parameters
 
-    View& operator=(const View& camera);
+    View& operator=(const View& camera); //Copy view
 
-    void updateMatrix();
+    void updateMatrix(); //Update projection and view matrix product
 
-    void setFov(float fov);
-    float getFov() const;
+    void setFov(float fov); //Set fov and implicitly change the view to perspective projection
+    float getFov() const; //Get fov regardless of projection type
 
-    void setNearPlane(float nearPlane);
-    float getNearPlane() const;
+    void setNearPlane(float nearPlane); //Set near plane value (the closest an object can be to the view to be visible)
+    float getNearPlane() const; //Get the near plane value
 
-    void setFarPlane(float farPlane);
-    float getFarPlane() const;
+    void setFarPlane(float farPlane); //Set far plane value (the farthest an object can be from the view to be visible)
+    float getFarPlane() const; //Get the far plane value
 
-    void setLeftBorder(float value);
-    void setRightBorder(float value);
-    void setBottomBorder(float value);
-    void setTopBorder(float value);
-    void setOrthographicBorder(float left, float right, float bottom, float top);
+    void setLeftBorder(float value); //Set left border and implicitly change the view to orthogonal projection
+    void setRightBorder(float value); //Set right border and implicitly change the view to orthogonal projection
+    void setBottomBorder(float value); //Set bottom border and implicitly change the view to orthogonal projection
+    void setTopBorder(float value); //Set top border and implicitly change the view to orthogonal projection
+    void setOrthographicBorder(float left, float right, float bottom, float top); //Set all borders and implicitly change the view to orthogonal projection
 
-    glm::mat4 getCameraMatrix() const;
+    glm::mat4 getCameraMatrix() const; //Get the calculated view matrix
 
-    void activate();
-    static View* getActiveView();
+    void activate(); //Set this view as the active one when rendering
+    static View* getActiveView(); //Get the current active view
 
-    const Plane* getViewFrustum() const;
+    const Plane* getViewFrustum() const; //Get a pointer to the view frustum
 
-    void setOrientation(glm::vec3 orientation);
-    glm::vec3 getOrientation() const;
+    void setOrientation(glm::vec3 orientation); //Set where the view is pointing towards
+    glm::vec3 getOrientation() const; //Get where the view is pointing towards
 
-    void setUp(glm::vec3 value);
-    glm::vec3 getUp() const;
+    void setUp(glm::vec3 value); //Set where up is
+    glm::vec3 getUp() const; //Get where up is
 
-    float getWidth() const;
-    float getHeight() const;
+    float getWidth() const; //Get width of the view
+    float getHeight() const; //Get height of the view
 };
 
 #endif

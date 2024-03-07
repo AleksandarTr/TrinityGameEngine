@@ -25,7 +25,9 @@ void Text::generateMessage(std::string message, float x, float y, glm::vec3 colo
 void Text::draw(bool loadTextures) {
     if(vertices.empty()) throw std::logic_error("Cannot draw text which has not been generated!");
     if(fixed) {
+        //Don't draw anything if the texture has not been loaded yet
         if(!fontTexture->getId()) return;
+        //Update vertices if something changed
         if(changed) {
             VBO.update(vertices);
             VBO.unbind();
@@ -33,7 +35,6 @@ void Text::draw(bool loadTextures) {
         }
 
         VAO.bind();
-
         TextureHandler::bindTexture(*fontTexture);
         glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "font"), static_cast<int>(fontTexture->getInfo().type));
 
@@ -41,11 +42,13 @@ void Text::draw(bool loadTextures) {
         VAO.unbind();
     }
     else {
+        //Update vertices if something changed
         if(changed) {
             mesh->updateMesh(&vertices);
             changed = false;
         }
 
+        //Apply a solid color onto the text
         glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyColor"), true);
         mesh->draw(loadTextures);
         glUniform1i(glGetUniformLocation(Shader::getActiveShader(), "applyColor"), false);
@@ -98,6 +101,7 @@ void Text::readCharInfo(std::string file) {
     reader >> charCount;
 
     for(int i = 0; i < charCount; i++) {
+        //Load character info stored in specified order in the sfl file
         charInfo info;
         int ascii;
         reader >> ascii >> info.x >> info.y >> info.width >> info.height >> info.xOffset >> info.yOffset >> info.xAdvance;
@@ -116,6 +120,7 @@ void Text::readCharInfo(std::string file) {
 }
 
 void Text::setLength(int length) {
+    //Check if its necessary to change the length
     if(vertices.size() / 4 == length) return;
     if(length <= 0) throw std::invalid_argument("Text length cannot be less than 1");
     vertices.clear();
@@ -144,25 +149,33 @@ void Text::setLength(int length) {
 }
 
 void Text::setMessage(std::string message, glm::vec3 color, int left, int top, int charHeight) {
+    //Check if there are enough quads to display the message
     if(vertices.size() / 4 < message.length()) throw std::invalid_argument("Message cannot fit in this text");
+    //Floats which keep track of the x and y position of the bottom left of the current character
     float x, y;
+    //Total message width used to make the coordinate (0,0) the center of the text mesh
     float messageWidth = 0;
     for(char ch : message) messageWidth += chars[ch].xAdvance;
+    //Last advance is unnecessary since there will be no other characters, but we need to add the width of the last character
     messageWidth -= chars[message[message.length() - 1]].xAdvance;
     messageWidth += chars[message[message.length() - 1]].width;
+    //Scaling factor to transform dimensions expressed in pixels to values between -1 to 1
     float scale = 1.0f * charHeight / maxHeight;
     messageWidth *= scale;
 
     if(fixed) {
+        //Set x and y to the position specified by top and left which are measured in pixels from the window border
         x = -1 + left / windowWidth;
         y = 1 - (top + charHeight) / windowHeight;
     }
     else {
+        //Set x and y to make sure the center of the mesh is at (0,0)
         x = -messageWidth / windowWidth / 2;
         y = charHeight / windowHeight / 2;
     }
 
     for(int i = 0; i < message.size(); i++) {
+        //Load character info about each character and get its respective quad
         charInfo &ch = chars.at(message[i]);
         Vertex &v1 = vertices[4 * i];
         Vertex &v2 = vertices[4 * i + 1];
@@ -180,13 +193,15 @@ void Text::setMessage(std::string message, glm::vec3 color, int left, int top, i
         v3.color = color;
         v4.color = color;
 
-        //TODO: Use unused vectors of Vertex to adjust texture position in fragment shader
-        v1.texPosition = glm::vec3(ch.x / fontWidth, 1-(ch.y + ch.height) / fontHeight, 0);
-        v2.texPosition = glm::vec3((ch.x + ch.width) / fontWidth, 1-(ch.y + ch.height) / fontHeight, 0);
-        v3.texPosition = glm::vec3((ch.x + ch.width) / fontWidth, 1-ch.y / fontHeight, 0);
-        v4.texPosition = glm::vec3(ch.x / fontWidth, 1-ch.y / fontHeight, 0);
+        //Setting x and y position based on the coordinates of the character specified in the sfl file
+        //where the y coordinate has to be subtracted from 1, because y coordinate is given from the top
+        v1.texPosition = glm::vec3(ch.x / fontWidth, 1 - (ch.y + ch.height) / fontHeight, 0);
+        v2.texPosition = glm::vec3((ch.x + ch.width) / fontWidth, 1 - (ch.y + ch.height) / fontHeight, 0);
+        v3.texPosition = glm::vec3((ch.x + ch.width) / fontWidth, 1 - ch.y / fontHeight, 0);
+        v4.texPosition = glm::vec3(ch.x / fontWidth, 1 - ch.y / fontHeight, 0);
     }
 
+    //Erasing any empty quads
     for(int i = message.size(); i < vertices.size() / 4; i++) {
         Vertex &v1 = vertices[4 * i];
         Vertex &v2 = vertices[4 * i + 1];
@@ -234,8 +249,4 @@ void Text::generateVertices(int length) {
 
 Text::~Text() {
     delete mesh;
-}
-
-void Text::setDoubleSided(bool value) {
-    if(mesh) mesh->setDoubleSided(value);
 }

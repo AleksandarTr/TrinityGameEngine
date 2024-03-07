@@ -11,6 +11,7 @@ volatile bool TextureHandler::close = false;
 std::thread TextureHandler::textureThread(&TextureHandler::loadInMemory);
 
 void TextureHandler::loadTexture(TextureInfo info, Texture *destination) {
+    //Put the job into a priority queue
     Job job = {.info = std::move(info), .destination = destination};
     {
         std::scoped_lock<std::mutex> lock(jobMutex);
@@ -30,12 +31,16 @@ void TextureHandler::loadInMemory() {
 
         bool found = false;
         Node *itr = loadedTextures;
+        //Check if the texture has already been loaded before
         while(itr) {
             if (job.info.location == itr->job.info.location) {
+                //If it has, wait for its previous usage to be assigned
                 while (itr->job.data);
+                //Set data to something different from 0 to signify the that it has not been assigned to a texture
                 itr->job.data = reinterpret_cast<unsigned char *>(1);
                 itr->job.destination = job.destination;
                 {
+                    //Insert it into the queue to be loaded
                     std::scoped_lock<std::mutex> lock(loadingMutex);
                     awaitingLoading.push(&itr->job);
                 }
@@ -46,6 +51,7 @@ void TextureHandler::loadInMemory() {
         }
         if(found) continue;
 
+        //Load all the image data
         int imgW, imgH, colChNum;
         stbi_set_flip_vertically_on_load(true);
         int desiredChannels;
@@ -78,6 +84,7 @@ void TextureHandler::assignTexture() {
         }
 
         if(!job->result) {
+            //Set up the texture
             job->result = job->destination;
             GLuint textureId;
             glGenTextures(1, &textureId);
@@ -103,6 +110,7 @@ void TextureHandler::assignTexture() {
             stbi_image_free(job->data);
         }
 
+        //If the texture has already been loaded, just copy values from it to a new destination
         job->destination->setId(job->result->getId());
         job->info.type = std::max(job->info.type, static_cast<TextureType>(0));
         job->info.type = std::min(job->info.type, static_cast<TextureType>(TE_TextureTypeCount - 1));
@@ -112,6 +120,7 @@ void TextureHandler::assignTexture() {
 }
 
 void TextureHandler::bindTexture(Texture &texture, GLenum target) {
+    //Check if the texture is already the active one in the given slot, if not bind it and activate it
     if(activeTextures[static_cast<int>(texture.getInfo().type)] != texture.getId()) {
         activeTextures[static_cast<int>(texture.getInfo().type)] = texture.getId();
         glActiveTexture(GL_TEXTURE0 + static_cast<int>(texture.getInfo().type));
@@ -120,8 +129,17 @@ void TextureHandler::bindTexture(Texture &texture, GLenum target) {
 }
 
 void TextureHandler::killTextureHandler() {
+    //Kill texture handler thread
     close = true;
     textureThread.join();
+
+    //Free dynamically allocated memory
+    Node* itr = loadedTextures;
+    while(itr) {
+        Node *prev = itr;
+        itr = itr->next;
+        delete prev;
+    }
 }
 
 void TextureHandler::resetActiveTextures() {
@@ -129,5 +147,7 @@ void TextureHandler::resetActiveTextures() {
 }
 
 bool TextureHandler::higherPriority::operator()(Job &job1, Job &job2) {
+    //Jobs with lower type value have a higher priority,
+    //if the types are the same, already loaded jobs have priority, because they can be loaded basically instantly
     return job1.info.type > job2.info.type || (job1.info.type == job2.info.type && !job2.result);
 }

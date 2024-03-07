@@ -258,11 +258,11 @@ private:
     TextureInfo loadTexture(int textureId);
 
 public:
-    gltfReader(std::string uri);
+    gltfReader(std::string uri); //Load the content of a gltf file in json format
 
-    [[nodiscard]] ::Model& getScene(int index);
+    [[nodiscard]] ::Model& getScene(int index); //Get the scene specified by the index
 
-    int getSceneCount();
+    int getSceneCount(); //Get the number of scenes given in the gltf file
 
     ~gltfReader();
 };

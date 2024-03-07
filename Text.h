@@ -41,17 +41,20 @@ private:
     void readCharInfo(std::string file);
 
 public:
-    Text(std::string font, int windowWidth, int windowHeight, bool fixed = true); //Font location should NOT include the extension
+    Text(std::string font, int windowWidth, int windowHeight, bool fixed = true); /*Text object, where
+    *font is the font location which should NOT include the extension(eg .png)
+    *only pngs are supported
+    *windowWidth and windowHeight are the dimensions of the window in which the text is displayed
+    *fixed determines if the text will be fixed to the screen(true) or will be rendered in the 3D world(false)*/
 
-    void setLength(int length);
-    void setMessage(std::string message, glm::vec3 color, int x, int y, int charHeight);
-    void generateMessage(std::string message, float x, float y, glm::vec3 color);
+    void setLength(int length); //Set the maximum length of a message which can be stored in given text
+    void setMessage(std::string message, glm::vec3 color, int x, int y, int charHeight); /*Set the message which the text will display,
+ *where the length of the text which was previously set must be equal to or greater than the message length */
+    void generateMessage(std::string message, float x, float y, glm::vec3 color); //Set the message which the text will display
 
-    void draw(bool loadTextures = true);
+    void draw(bool loadTextures = true); //Render the text
 
-    Mesh& getMesh();
-
-    void setDoubleSided(bool value);
+    Mesh& getMesh(); //Get the mesh which the text contains if its 3D
 
     ~Text();
 };

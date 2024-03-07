@@ -43,11 +43,11 @@ void Movable::setAcceleration(glm::vec3 acceleration) {
     this->acceleration = acceleration;
 }
 
-void Movable::incVelocity(glm::vec3 increment) {
+void Movable::increaseVelocity(glm::vec3 increment) {
     velocity += increment;
 }
 
-void Movable::incAcceleration(glm::vec3 increment) {
+void Movable::increaseAcceleration(glm::vec3 increment) {
     acceleration += increment;
 }
 
@@ -59,11 +59,11 @@ void Movable::setAngularAcceleration(glm::vec3 acceleration) {
     angularAcceleration = acceleration;
 }
 
-void Movable::incAngularVelocity(glm::vec3 increment) {
+void Movable::increaseAngularVelocity(glm::vec3 increment) {
     angularVelocity += increment;
 }
 
-void Movable::incAngularAcceleration(glm::vec3 increment) {
+void Movable::increaseAngularAcceleration(glm::vec3 increment) {
     angularAcceleration += increment;
 }
 

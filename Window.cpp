@@ -17,7 +17,7 @@ Window::Window(int width, int height) : width(width), height(height), camera(wid
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    //Initalize window and handle case where it doesn't open
+    //Initialize window and handle case where it doesn't open
     window = glfwCreateWindow(width, height, "Test", NULL, NULL);
     if(window == NULL) {
         std::cout << "Failed to create window" << std::endl;
@@ -145,36 +145,40 @@ void Window::render(bool loadTextures, bool drawText) {
 }
 
 void Window::drawFrame() {
-    if(!drawOrderSorted) sortDrawOrder();
+    if(!drawOrderSorted) sortDrawOrder(); //Sort draw order if any meshes were added
 
-    TextureHandler::assignTexture();
+    TextureHandler::assignTexture(); //Assign any unassigned textures
     float currentTime = glfwGetTime();
     timeDelta = currentTime - previousTime;
     previousTime = currentTime;
-    updateModels(timeDelta);
+    updateModels(timeDelta); //Update transformation of all models
     static float shadowCnt = 0;
-    shadowCnt += timeDelta;
+    shadowCnt += timeDelta; //timer to check if shadows should be updated
 
     if(shadowCnt > shadowSampleCount) {
         shadowCnt = 0;
         shadowShader->activate();
+        //Set front culling to avoid shadow pimples
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
 
         unsigned long long check = 1;
         for (int i = 0; i < lightCount; i++) {
+            //Check if light is enabled
             if(!(lightEnabled & check)) {
                 check <<= 1;
                 continue;
             }
             check <<= 1;
 
+            //Set up frame buffer and render shadow map
             lights[i]->drawShadowMap();
             render(false, false);
         }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0); //Unbind all frame buffers
     }
 
+    //Set up window for normal rendering
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -182,21 +186,23 @@ void Window::drawFrame() {
 
     glClearColor(0.65f, 0.47f, 0.34f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //Update camera
     camera.update(timeDelta);
     camera.controls(window);
     camera.activate();
-    TextureHandler::resetActiveTextures();
+    TextureHandler::resetActiveTextures(); //Reset active textures buffer
 
+    //Render 3D meshes
     drawShader->activate();
     loadLights();
     glUniformMatrix4fv(glGetUniformLocation(drawShader->getProgramID(), "camMatrix"), 1, GL_FALSE,glm::value_ptr(camera.getCameraMatrix()));
     render(true, true);
-    textShader->activate();
 
+    //Render 2D meshes(GUI)
+    textShader->activate();
     glDisable(GL_DEPTH_TEST);
     for(Text *text : texts) text->draw(false);
     glEnable(GL_DEPTH_TEST);
-
 
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -208,9 +214,11 @@ void Window::updateModels(float timeDelta) {
 }
 
 void Window::loadLights() {
+    //Load lights if they are enabled
     int offset = 0;
     unsigned long long check = 1;
     for(int i = 0; i < lightCount; i++) {
+        //Check if light is enabled
         if(!(lightEnabled & check)) {
             check <<= 1;
             offset++;
@@ -218,17 +226,22 @@ void Window::loadLights() {
         }
         check <<= 1;
 
+        //Load light and set its texture slot
         lights[i]->loadLight(i - offset);
         lights[i]->getShadowMap().getInfo().type = static_cast<TextureType>(TE_ShadowMap0 + i - offset);
         TextureHandler::bindTexture(lights[i]->getShadowMap());
     }
 
+    //Set number of active lights
     glUniform1i(glGetUniformLocation(drawShader->getProgramID(), "lightNum"), lightCount - offset);
     lightsChanged = false;
 }
 
 void Window::loadShader(Shader *&shader, const std::string &uri, unsigned char shaderBit) {
+    //Delete previous shader if it was dynamically allocated
     if(dynamicShader & shaderBit) delete shader;
+
+    //Check if geometry shader is present
     bool geometryShader = false;
     if(FILE *check = fopen(std::string(uri + ".geom").c_str(), "r")) {
         geometryShader = true;
@@ -237,23 +250,28 @@ void Window::loadShader(Shader *&shader, const std::string &uri, unsigned char s
 
     shader = new Shader(uri + ".frag", uri + ".vert", geometryShader ? uri + ".geom" : "");
     shader->unloadFiles();
+    //Signal that the given shader is dynamically allocated
     dynamicShader |= shaderBit;
 }
 
 void Window::changeShader(Shader *&localShader, Shader &externalShader, unsigned char shaderBit) {
+    //Delete previous shader if it was dynamically allocated
     if(dynamicShader & shaderBit) delete localShader;
     localShader = &externalShader;
+    //Signal that the given shader is not dynamically allocated
     dynamicShader &= ~shaderBit;
 }
 
-void Window::setShadowSampleRate(int samplesPerSecond) {
-    shadowSampleCount = 1.0f / samplesPerSecond;
+void Window::setShadowSampleRate(unsigned int samplesPerSecond) {
+    if(samplesPerSecond == 0) shadowSampleCount = 0;
+    else shadowSampleCount = 1.0f / samplesPerSecond;
 }
 
 void Window::addModelToDrawOrder(Model *newModel) {
     std::stack<Model*> s;
     s.push(newModel);
 
+    //Add all meshes of a model tree to the draw order
     while(!s.empty()) {
         Model *model = s.top();
         s.pop();
@@ -267,20 +285,22 @@ void Window::addModelToDrawOrder(Model *newModel) {
 
 void Window::sortDrawOrder() {
     drawOrderSorted = true;
-    int lastSuitablePosition;
-    int suitability;
+    int lastSuitablePosition; //The most right position with the highest suitability for current mesh
+    int suitability; //Highest suitability of the current mesh found
     static constexpr TextureType textureTypes[] = {DiffuseTexture, PBRTexture, NormalTextre, OcclusionTexture, EmissiveTexture};
     static constexpr int textureTypeCount = sizeof textureTypes / sizeof textureTypes[0];
 
     for(int i = 0; i < drawOrder.size(); i++)
     {
+        //If no suitable location is found, the mesh should not be moved
         lastSuitablePosition = i;
         suitability = 0;
-        auto &currentMesh = dynamic_cast<SingleTextureMesh&>(*drawOrder.at(i));
+        auto &currentMesh = dynamic_cast<SingleTextureMesh &>(*drawOrder.at(i));
         for(int j =  i - 1; j >= 0; j--) {
             auto &prevMesh = dynamic_cast<SingleTextureMesh&>(*drawOrder.at(j));
             int currentSuitability = 0;
 
+            //Suitably is based on how many textures between neighboring meshes match
             for(auto textureType : textureTypes) {
                 if(!currentMesh.getTexture(textureType)) {
                     if(!prevMesh.getTexture(textureType)) currentSuitability++;
