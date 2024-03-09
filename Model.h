@@ -11,8 +11,7 @@ private:
     std::vector<Mesh*> meshes = std::vector<Mesh*>();
     glm::mat4 transformationMatrix = glm::mat4(1);
 
-    //TODO: Make transformations on each depth of the model tree, eg. scene[0] should rotate around its own axis
-    glm::vec3 localPosition = glm::vec3(0);
+    std::vector<glm::vec3> localPositions;
     bool erased = false; //Variable used to signal to its parent that the data from this model has already been erased
 
     friend class gltfReader;
@@ -56,7 +55,11 @@ public:
 
     void scale(glm::vec3 scaling) override; //Recursive function which scales all child models and meshes and the given model
 
+    void setScale(glm::vec3 scale) override;
+
     void draw(bool loadTextures = true); //Recursive function which draws all child models and meshes and the given model
+
+    void update(double timeDelta) override;
 
     ~Model();
 };

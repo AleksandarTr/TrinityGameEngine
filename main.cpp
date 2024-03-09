@@ -31,7 +31,10 @@ int main() {
     int sceneIndex = window.getScene(0);
     Model &scene = window.getModel(sceneIndex);
     window.unloadGLTF();
-    scene.setAngularVelocity(glm::vec3(0, 2, 0));
+    scene.setAngularVelocity(glm::vec3(0, 0, 1));
+    scene[8].setAngularVelocity(glm::vec3(0, -1, 0));
+    scene.scale(glm::vec3(5));
+
     Light& light = window.getLight(window.addLight(glm::vec3(0.5), glm::vec3(0, -1, -3), PointLight));
     light.move(glm::vec3(0, 2, 6));
     light.setFov(90);
@@ -49,9 +52,8 @@ int main() {
     spotLight.move(glm::vec3(5));
     spotLight.setFov(10);
 
-    object.setAngularVelocity(glm::vec3(0, 3, 0));
+    //object.setAngularVelocity(glm::vec3(0, 3, 0));
     window.setShadowSampleRate(30);
-    scene.scale(glm::vec3(10));
 
     double timer = 0;
     double blinker = 0;

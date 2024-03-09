@@ -30,7 +30,7 @@ public:
 
     virtual void move(glm::vec3 direction); //Translate the global position of an object
 
-    void update(double timeDelta); //Update all the parameters in the object based on time passed
+    virtual void update(double timeDelta); //Update all the parameters in the object based on time passed
 
     void setVelocity(glm::vec3 velocity); //Set the velocity of the object, which is applied with void update(double timeDelta)
 

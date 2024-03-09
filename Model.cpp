@@ -5,6 +5,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <set>
 #include <stack>
+#include <iostream>
 
 Model &Model::operator[](int index) {
     return *models[index];
@@ -52,13 +53,13 @@ void Model::transform(glm::mat4 transform) {
     glm::decompose(transformationMatrix, scale, rotation, position, skew, perspective);
 
     setPosition(position);
-    setRotation(rotation);
+    setRotation(glm::eulerAngles(rotation));
     setScale(scale);
 
     for(auto model : models) model->transform(transform);
     for(auto mesh : meshes) {
         mesh->setPosition(position);
-        mesh->setRotation(rotation);
+        mesh->setRotation(glm::eulerAngles(rotation));
         mesh->setScale(scale);
     }
 }
@@ -67,64 +68,138 @@ Model::Model(std::vector<Mesh*> &meshes) : meshes(meshes) {}
 
 void Model::draw(bool loadTextures) {
     //Recursively call all the child models, until all of them have been drawn
-    for(auto model : models) model->draw(loadTextures);
-    for(auto mesh : meshes) mesh->draw(loadTextures);
+    std::stack<Model*> stack;
+    stack.push(this);
+
+    while(!stack.empty()) {
+        Model *currentModel = stack.top();
+        stack.pop();
+
+        for (auto model: currentModel->models) stack.push(model);
+        for (auto mesh: currentModel->meshes) mesh->draw(loadTextures);
+    }
 }
 
 void Model::move(glm::vec3 direction) {
     //Translation does not change the local position within the predecessor models
-    Movable::move(direction);
+    std::stack<Model*> stack;
+    stack.push(this);
 
-    for(auto model : models) model->move(direction);
-    for(auto mesh : meshes) mesh->setPosition(getPosition());
+    while(!stack.empty()) {
+        Model* currentModel = stack.top();
+        stack.pop();
+
+        currentModel->Movable::move(direction);
+        for (auto model: currentModel->models) stack.push(model);
+        for (auto mesh: currentModel->meshes) mesh->setPosition(currentModel->getPosition());
+    }
 }
 
 void Model::rotate(glm::vec3 direction) {
-    Movable::rotate(direction);
-    //All the local positions within the predecessor models have to be rotated
-    glm::vec3 newPos = glm::eulerAngleXYZ(direction.x, direction.y, direction.z) * glm::vec4(localPosition, 1.0f);
-    Movable::setPosition(getPosition() - localPosition + newPos);
-    localPosition = newPos;
+    struct StackElement {
+        Model* model;
+        int depth;
+    };
 
-    for(auto model : models) model->rotate(direction);
-    for(auto mesh : meshes) {
-        mesh->setRotation(getRotation());
-        mesh->setPosition(getPosition());
+    std::stack<StackElement> stack;
+    stack.push({this, 0});
+    glm::mat4 rotationMatrix = glm::eulerAngleXYZ(direction.x, direction.y, direction.z);
+
+    while(!stack.empty()) {
+        Model *currentModel = stack.top().model;
+        int currentDepth = stack.top().depth;
+        stack.pop();
+
+        currentModel->Movable::rotate(direction);
+        //All the local positions within the predecessor models have to be rotated
+        for(int i = 0; i < currentDepth; i++) {
+            glm::vec3 newPos = rotationMatrix * glm::vec4(currentModel->localPositions[i], 1.0f);
+            currentModel->Movable::move(newPos - currentModel->localPositions[i]);
+            currentModel->localPositions[i] = newPos;
+        }
+
+        currentDepth++;
+        for (auto model: currentModel->models) stack.push({model, currentDepth});
+        for (auto mesh: currentModel->meshes) {
+            mesh->setRotation(glm::eulerAngles(currentModel->getRotation()));
+            mesh->setPosition(currentModel->getPosition());
+        }
     }
 }
 
 void Model::rotate(glm::quat direction) {
-    Movable::rotate(direction);
-    //All the local positions within the predecessor models have to be rotated
-    glm::vec3 newPos = glm::toMat4(direction) * glm::vec4(localPosition, 1.0f);
-    Movable::setPosition(getPosition() - localPosition + newPos);
-    localPosition = newPos;
+    struct StackElement {
+        Model* model;
+        int depth;
+    };
 
-    for(auto model : models) model->rotate(direction);
-    for(auto mesh : meshes) {
-        mesh->setRotation(getRotation());
-        mesh->setPosition(getPosition());
+    std::stack<StackElement> stack;
+    stack.push({this, 0});
+    glm::mat4 rotationMatrix = glm::toMat4(direction);
+
+    while(!stack.empty()) {
+        Model *currentModel = stack.top().model;
+        int currentDepth = stack.top().depth;
+        stack.pop();
+
+        currentModel->Movable::rotate(direction);
+        //All the local positions within the predecessor models have to be rotated
+        for(int i = 0; i < currentDepth; i++) {
+            glm::vec3 newPos = rotationMatrix * glm::vec4(currentModel->localPositions[i], 1.0f);
+            currentModel->Movable::move(newPos - currentModel->localPositions[i]);
+            currentModel->localPositions[i] = newPos;
+        }
+
+        currentDepth++;
+        for (auto model: currentModel->models) stack.push({model, currentDepth});
+        for (auto mesh: currentModel->meshes) {
+            mesh->setRotation(currentModel->getRotation());
+            mesh->setPosition(currentModel->getPosition());
+        }
     }
 }
 
 void Model::scale(glm::vec3 scaling) {
-    Movable::scale(scaling);
-    //All the local positions within the predecessor models have to be scaled
-    glm::vec3 newPos = localPosition * scaling;
-    Movable::setPosition(getPosition() - localPosition + newPos);
-    localPosition = newPos;
+    struct StackElement {
+        Model *model;
+        int depth;
+    };
 
-    for(auto model : models) model->scale(scaling);
-    for(auto mesh : meshes) {
-        mesh->setScale(getScale());
-        mesh->setPosition(getPosition());
+    std::stack<StackElement> stack;
+    stack.push({this, 0});
+
+    while(!stack.empty()) {
+        Model *currentModel = stack.top().model;
+        int currentDepth = stack.top().depth;
+        stack.pop();
+
+        currentModel->Movable::scale(scaling);
+        //All the local positions within the predecessor models have to be scaled
+        for(int i = 0; i < currentDepth; i++) {
+            glm::vec3 newPos = currentModel->localPositions[i] * scaling;
+            currentModel->Movable::setPosition(currentModel->getPosition() - currentModel->localPositions[i] + newPos);
+            currentModel->localPositions[i] = newPos;
+        }
+
+        currentDepth++;
+        for (auto model: currentModel->models) stack.push({model, currentDepth});
+        for (auto mesh: currentModel->meshes) {
+            mesh->setScale(currentModel->getScale());
+            mesh->setPosition(currentModel->getPosition());
+        }
     }
 }
 
 void Model::setLocalPosition() {
-    //Used to sed the local position when the final local transformation of the model has been loaded
-    localPosition = getPosition();
-    for(auto model : models) model->setLocalPosition();
+    //Used to send the local position when the final local transformation of the model has been loaded
+    std::stack<Model*> stack;
+    stack.push(this);
+    while(!stack.empty()) {
+        Model* currentModel = stack.top();
+        stack.pop();
+        currentModel->localPositions.push_back(getPosition());
+        for (auto model: currentModel->models) stack.push(model);
+    }
 }
 
 Model::Model(const Model &copy) {
@@ -183,4 +258,18 @@ int Model::getModelCount() {
     return models.size();
 }
 
+void Model::update(double timeDelta) {
+    std::stack<Model*> stack;
+    stack.push(this);
 
+    while(!stack.empty()) {
+        Model *currentModel = stack.top();
+        stack.pop();
+        currentModel->Movable::update(timeDelta);
+        for(Model *model : currentModel->models) stack.push(model);
+    }
+}
+
+void Model::setScale(glm::vec3 scale) {
+    this->scale(scale / getScale());
+}

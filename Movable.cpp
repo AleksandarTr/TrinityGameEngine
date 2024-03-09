@@ -21,7 +21,10 @@ glm::quat Movable::getRotation() {
 void Movable::update(double timeDelta) {
     if(angularVelocity != glm::vec3(0) || position != glm::vec3(0)) {
         glm::vec3 angles = float(timeDelta) * angularVelocity + float(timeDelta * timeDelta / 2) * angularAcceleration;
-        rotate(angles);
+        angles *= 0.5;
+        float l = glm::length(angles);
+        if(l > 0) angles *= std::sin(l) / l;
+        rotate(glm::quat(std::cos(l), angles));
         angularVelocity += float(timeDelta) * angularAcceleration;
 
         movedFlag = true;
@@ -69,6 +72,7 @@ void Movable::increaseAngularAcceleration(glm::vec3 increment) {
 
 void Movable::rotate(glm::quat direction) {
     rotation = direction * rotation;
+    rotation = glm::normalize(rotation);
     if(direction != glm::quat(1, 0, 0, 0)) movedFlag = true;
 }
 
